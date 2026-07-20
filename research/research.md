@@ -2,11 +2,12 @@
 
 Competitive teardowns and prior-art notes. Screenshots live in [`screens/`](./screens/) and are referenced from here.
 
-**Status:** desk research done, hands-on teardowns outstanding.
+**Status:** desk research done, five-axis comparison done, parser bake-off outstanding.
 
 ## Contents
 
 - [**Competitive landscape**](./competitive-landscape.md) — 15 products across hard / soft / aspirational tiers, with the findings that were folded into the brief on 20 July 2026 and the six still open. Desk research only; the parser bake-off and hands-on teardowns are still to do.
+- [**Comparison**](./comparison.md) — the same 15 products compared on audience · product base · key mechanism · trust · monetization, one table per tier, with screenshots in [`screens/`](./screens/). Ends with five market patterns, five differences, five open questions for PM, and **three corrections to the landscape doc**.
 
 ## What's worth looking at
 

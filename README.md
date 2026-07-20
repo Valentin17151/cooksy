@@ -23,9 +23,11 @@ This table is the index — update the status column as work lands.
 | Path | What lives here | Status |
 |---|---|---|
 | [`CLAUDE.md`](./CLAUDE.md) | The product brief — source of truth for scope, features and locked decisions | ✅ Written |
-| [`research/`](./research/) | Competitive teardowns and prior-art notes | ⬜ Empty |
+| [`research/`](./research/) | Competitive teardowns and prior-art notes | 🟡 In progress |
 | [`research/research.md`](./research/research.md) | Written findings, and what they imply for Cooksy | 🟡 Stub |
-| [`research/screens/`](./research/screens/) | Screenshots from other products, referenced by `research.md` | ⬜ Empty |
+| [`research/competitive-landscape.md`](./research/competitive-landscape.md) | 15 products across three tiers; what was folded into the brief, what's still open | ✅ Written |
+| [`research/comparison.md`](./research/comparison.md) | The 15 compared on audience · product base · key mechanism · trust · monetization | ✅ Written |
+| [`research/screens/`](./research/screens/) | Screenshots from other products, referenced by `comparison.md` | ✅ 20 captured |
 | [`wireframes/`](./wireframes/) | Low-fidelity layouts for the seven screens | ⬜ Empty |
 | [`concept/`](./concept/) | Visual direction — moodboards, type and colour, a rendered screen or two | ⬜ Empty |
 | [`tokens/`](./tokens/) | Design tokens: colour, type scale, spacing, radii, elevation | ⬜ Empty |
