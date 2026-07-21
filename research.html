@@ -182,6 +182,44 @@
   }
   .rule-note p { font-size: 1.02rem; }
 
+  /* ── section 0: the product ─────────────────────── */
+
+  /* the loop is a genuine sequence, so it is numbered */
+  .loop {
+    display: grid; gap: 1.7rem 2.2rem;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+    padding-block: 1.6rem;
+    border-block: 1px solid var(--rule);
+  }
+  .loop-step { display: flex; flex-direction: column; gap: .35rem; }
+  .loop-step .n {
+    font-family: var(--mono); font-size: .66rem; font-weight: 600;
+    letter-spacing: .14em; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .loop-step .t {
+    font-family: var(--mono); font-size: .85rem; font-weight: 600;
+    letter-spacing: -.015em; color: var(--ink);
+  }
+  .loop-step p { font-size: .93rem; color: var(--ink-2); }
+
+  .features {
+    display: grid; gap: 1.5rem 2.2rem;
+    grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr));
+  }
+  .feature {
+    display: flex; flex-direction: column; gap: .3rem;
+    padding-top: .85rem; border-top: 1px solid var(--rule-soft);
+  }
+  .feature h4 { color: var(--accent); }
+  .feature p { font-size: .95rem; color: var(--ink-2); }
+
+  .two-up {
+    display: grid; gap: 1.7rem 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  }
+  .out-of-scope { color: var(--ink-3); font-size: .95rem; }
+
   /* ── section scaffolding ────────────────────────── */
 
   .sec { padding-top: clamp(3.4rem, 7vw, 5rem); }
@@ -366,11 +404,11 @@
 <nav class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="#top">Cooksy · Research</a>
+    <a href="#product">0 · The product</a>
     <a href="#competitors">1 · Competitors</a>
     <a href="#benchmark">2 · Benchmark</a>
     <a href="#patterns">3 · Patterns</a>
     <a href="#conclusions">4 · Conclusions</a>
-    <a href="#unverified">5 · Unverified</a>
   </div>
 </nav>
 
@@ -388,9 +426,110 @@
   </div>
   <div class="rule-note">
     <span class="lbl">Sourcing rule</span>
-    <p>Every fact carries a link or a screenshot. Where there is no source, it says so: <span class="nd">unverified</span>. Nothing is invented. The consolidated list is in <a href="#unverified">section 5</a>.</p>
+    <p>Every fact carries a link or a screenshot. Where there is no source, it says so: <span class="nd">unverified</span>. Nothing is invented. The consolidated list of everything unsourced is in <a href="research/summary.md">summary.md §5</a>.</p>
   </div>
 </header>
+
+<!-- ══════════════ 0 ══════════════ -->
+<section class="sec wrap" id="product">
+  <div class="sec-head">
+    <span class="num">Section 0</span>
+    <h2>What we're building</h2>
+    <p class="lead prose">Cooksy is a digital recipe book that turns what you want to cook into exactly what you need to buy. Everything in the product either serves one loop, or is cut.</p>
+  </div>
+
+  <div class="sub">
+    <h3>The loop</h3>
+    <div class="loop">
+      <div class="loop-step">
+        <span class="n">01</span>
+        <span class="t">Save a recipe</span>
+        <p>Paste a blob of text or a URL. It parses into structured rows, and you confirm every amount before anything is stored.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">02</span>
+        <span class="t">Set the portions</span>
+        <p>A servings stepper pinned to the top of the recipe. The entire ingredient list reflows live as it moves.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">03</span>
+        <span class="t">Plan a few meals</span>
+        <p>Seven days, three slots each, with a portion size in grams per slot and who is actually eating it.</p>
+      </div>
+      <div class="loop-step">
+        <span class="n">04</span>
+        <span class="t">Get one shopping list</span>
+        <p>Every planned recipe merged into a single list — deduplicated, quantity-summed, aisle-grouped, minus what's already in the cupboard.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Who it's for</h3>
+    <p class="prose">Cooking lovers who are also optimisers. People who genuinely enjoy cooking but resent the overhead around it: retyping recipes, doing portion maths in their head, walking the supermarket three times because onions were written on three different lines. They are not looking for inspiration or a feed — they already know what they want to cook, and want the logistics to disappear.</p>
+    <p class="prose">Two things follow. <strong>The user is the source of recipes, not the app</strong> — no content library, no editorial, no discovery. And <strong>precision earns trust</strong>: an optimiser abandons the product the moment the maths is wrong, which makes quantity handling the feature rather than a detail.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Key features</h3>
+    <div class="features">
+      <div class="feature">
+        <h4>Metric only</h4>
+        <p><span class="ref">g</span> · <span class="ref">ml</span> · <span class="ref">pcs</span> in every ingredient row, and nothing else. Cups and spoons are converted at import and never stored — a cup of flour and a cup of sugar are not the same weight.</p>
+      </div>
+      <div class="feature">
+        <h4>Capture, then review</h4>
+        <p>Paste and URL import both land on the same editable screen. Nothing saves silently; anything low-confidence is flagged and sorted to the top.</p>
+      </div>
+      <div class="feature">
+        <h4>Live portion scaling</h4>
+        <p>Rounded by magnitude, lumpy counts flagged — <span class="ref">4–5 pcs</span>, never half an egg — and non-scalable rows like <em>salt to taste</em> passed through untouched.</p>
+      </div>
+      <div class="feature">
+        <h4>The weight model</h4>
+        <p>A recipe has a total weight, and everything derives from it: kcal per 100 g, which is scale-invariant and honest, plus kcal per portion at whatever portion size you choose.</p>
+      </div>
+      <div class="feature">
+        <h4>Canonical ingredients</h4>
+        <p>One record that <em>onion</em>, <em>onions</em> and <em>2 large yellow onions</em> all resolve to, carrying aisle, kcal, density and unit weight. Four features join on it.</p>
+      </div>
+      <div class="feature">
+        <h4>Merged grocery list</h4>
+        <p>Aisle-grouped in one walking order, every line openable to see which recipes produced it. Generating a new list never destroys one already in progress.</p>
+      </div>
+      <div class="feature">
+        <h4>Pantry, two tiers</h4>
+        <p>Zero-maintenance staples plus opt-in tracked quantities, subtracted <em>visibly</em>. It never blocks anything, and an ingredient never vanishes without a trace.</p>
+      </div>
+      <div class="feature">
+        <h4>Search that answers with amounts</h4>
+        <p>By name, tag, ingredient and method step. You never type a quantity; every result row shows one, along with what matched and where.</p>
+      </div>
+      <div class="feature">
+        <h4>Household sharing</h4>
+        <p>One library, one plan, one live grocery list, flat permissions. Entirely invisible until a household exists — solo use must not pay for shared use.</p>
+      </div>
+      <div class="feature">
+        <h4>Offline-first</h4>
+        <p>The recipe and the list are fully usable with no connection. Writes queue and merge on reconnect. A list that needs a network to be ticked off is not a list.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <div class="two-up">
+      <div class="kv">
+        <span class="lbl">Platform and constraints</span>
+        <p><strong>A PWA</strong> — one installable web app across mobile and desktop, no App Store, no native shells. <strong>Zero budget</strong>: free-tier hosting only, no monetisation. Mobile-first, because the kitchen and the shop are where it gets used; desktop is where it gets administered.</p>
+      </div>
+      <div class="kv">
+        <span class="lbl">Deliberately not built</span>
+        <p class="out-of-scope">Recipe discovery or a public feed · social features and ratings · macro tracking and diet goals · price lookup and online ordering · OCR import of physical cookbooks · cooking mode of any kind · user-editable aisle order · video recipe import · saved searches and query syntax · pantry-filtered search · monetisation.</p>
+      </div>
+    </div>
+    <p class="prose" style="padding-top:.6rem">Everything below is the research behind that product: what fifteen competitors do, how retrieval scores against the best products outside the category, and which organising principle the brief had already committed to without naming it.</p>
+  </div>
+</section>
 
 <!-- ══════════════ 1 ══════════════ -->
 <section class="sec wrap" id="competitors">
@@ -1003,41 +1142,6 @@
       </div>
     </div>
   </div>
-</section>
-
-<!-- ══════════════ 5 ══════════════ -->
-<section class="sec wrap" id="unverified">
-  <div class="sec-head">
-    <span class="num">Section 5</span>
-    <h2>Unverified</h2>
-    <p class="lead prose">Everything in this synthesis with no source, or only a weak one. None of it is invented.</p>
-  </div>
-
-  <div class="sub">
-    <h3>On competitors</h3>
-    <ol class="numlist">
-      <li><p><strong>Fond</strong> — offline, export and permissions are not stated anywhere on the site; the product reads as pre-launch. The <em>owner / editor / viewer</em> roles model from an early draft has been <strong>withdrawn as unverified</strong>, and <span class="ref">§5.10</span> no longer rests on it.</p></li>
-      <li><p><strong>Samsung Food</strong> — $59.99/yr is carried over from prior desk research and not re-verified: the site returns 403 to server-side fetchers.</p></li>
-      <li><p><strong>Plan to Eat</strong> — offline, export and privacy are absent from the site.</p></li>
-      <li><p><strong>AnyList</strong> — offline, export and privacy are not addressed on the site.</p></li>
-      <li><p><strong>Prices are not rendered publicly</strong> by Fond, NYT Cooking, Things or Todoist — those cells say so rather than guess.</p></li>
-      <li><p><strong>Tandoor</strong> — trigram search (<span class="ref">chkn</span> → chicken) is confirmed by a secondary source only; the official search documentation page returns 404.</p></li>
-      <li><p><strong>Apple Notes as the most common place recipes are stored</strong> — plausible, but it is our own assumption with no data behind it.</p></li>
-      <li><p><strong>Four screenshots sit behind logins</strong> and are watermarked ACCESS RESTRICTED rather than faked: Tandoor app · Apple Notes · Google Keep · NYT Recipe Box. Instagram's personal saves collection is unreachable without an account; the public <span class="ref">#recipe</span> tag page was captured instead, which is where the 114M figure comes from.</p></li>
-    </ol>
-  </div>
-
-  <div class="sub">
-    <h3>On method generally</h3>
-    <ol class="numlist" start="9">
-      <li><p><strong>This is not observed user pain.</strong> The entire picture is inferred from vendor marketing, App Store copy, and what fifteen products chose to build or omit. <strong>No teardowns, no interviews.</strong> Absence in marketing is real signal, and convergence across three independent tiers is worth something, but it is an assertion, not a measurement.</p></li>
-      <li><p><strong>The benchmark scores</strong> are an assessment of a <em>specification</em> against documentation, not a measurement of a working product. 23/40 and the projected 30/40 carry that same status.</p></li>
-      <li><p><strong>Parser quality</strong> is an assertion. The bake-off has not been run, even though mandatory review was reaffirmed on reasoning alone.</p></li>
-      <li><p><strong>Aisle order</strong> is unvalidated against a European supermarket.</p></li>
-      <li><p><strong>The P1–P5 pattern classification</strong> is this research's own analytical frame; it has no external source.</p></li>
-    </ol>
-  </div>
-
   <div class="sub">
     <h3>What to do next</h3>
     <p class="prose">One item closes three gaps at once. The <strong>parser bake-off</strong> (10 real URLs × 3 products) measures <a href="#g1">G-1</a> (capture speed), <a href="#g4">G-4</a> (the cost of three units) and <a href="#g5">G-5</a> (ingredient database coverage) in a single pass — and it targets exactly the surface <a href="#patterns">section 3</a> independently identifies as MVP's riskiest.</p>
@@ -1050,6 +1154,7 @@
     <p>Cooksy · research synthesis · 21 July 2026</p>
     <p>Sources: research/competitive-landscape.md · comparison.md · benchmark-retrieval.md · ux-patterns.md · summary.md</p>
     <p><span class="ref">§</span> references point at CLAUDE.md. Screens live in research/screens/ and are clickable to full size.</p>
+    <p>Claims marked <span class="nd">unverified</span> are listed in full in research/summary.md §5.</p>
   </div>
 </footer>
 
