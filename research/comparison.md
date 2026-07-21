@@ -63,29 +63,37 @@ The craft bar.
 
 ## Key differences
 
-1. **Monetization shape predicts architecture, reliably.** One-time (Paprika $4.99, Mela $6.99, Things) → local-first, offline, no server, no sharing. Subscription (Plan to Eat $5.95/mo, Fond, Samsung, NYT) → server-side, sync, sharing, AI. Free/ad or OSS (Instagram, Keep, Tandoor self-host) → you're either the product or the sysadmin. **Cooksy wants the offline guarantees of column one with the sharing and server-side import of column two** — the expensive corner of the matrix, and §8 rules out revenue.
+1. **Monetization shape predicts architecture, reliably.** One-time (Paprika $4.99, Mela $6.99, Things) → local-first, offline, no server, no sharing. Subscription (Plan to Eat $5.95/mo, Fond, Samsung, NYT) → server-side, sync, sharing, AI. Free/ad or OSS (Instagram, Keep, Tandoor self-host) → you're either the product or the sysadmin. **Cooksy wants the offline guarantees of column one with the sharing and server-side import of column two** — the expensive corner of the matrix, and §8 rules out revenue. *(Resolved 21 July: a PWA on zero budget. The client side of that corner is now free — service worker plus local storage is the local-first model, not an imitation of it — and the server side is capped at what free-tier hosting can carry. See "Questions for PM" #2.)*
 2. **Data ownership spans the full range.** Mela ("does not collect any data", no third-party services) and Tandoor (GDPR, self-host, 90-day export) at one pole; Instagram/TikTok saves at the other, where you own and can export nothing. Paprika sits oddly between: local storage and no subscription, but email and user content linked to identity.
 3. **Centre of gravity differs wildly** — library (Paprika, Mela, Crouton), planner (Plan to Eat), list (AnyList), content (Samsung, Cookpad, NYT), **ingredient database (Tandoor alone)**. Only Tandoor shares Cooksy's ingredient-first centre, and it is comfortably the least approachable product in the set. That correlation is worth staring at: the correct model has historically shipped inside the worst interface.
 4. **Cook-time interaction is the whole aspirational differentiator, and the hard tier ignores it completely.** Crouton's tap-an-ingredient-inside-a-step and hands-free advance, Mela's large-type cook mode — no hard competitor markets any of it. §8's blanket rejection of "cooking mode with timers" currently discards this entire axis along with the timers.
 5. **Everyone converts units; nobody constrains them.** Crouton advertises metric/imperial conversion *as a feature* — i.e. it deliberately preserves both. Tandoor makes conversions user-editable. Cooksy's strict three-unit rule (`g`/`ml`/`pcs`) is genuinely unique across all 15 products, and is validated by no one's shipped behaviour.
 
+## Questions for PM — answered 21 July 2026
+
+All five were put to the PM and closed. Answers below, with what each one costs.
+
+1. **Is "review every parse" a feature or a tax?** → **A feature. Review stays mandatory on every path.** Cooksy keeps the contrarian position: no competitor ships a forced correction step, and this one does. The cost is unchanged and unhedged — the bet still rests on conviction, and **the parser bake-off in *Gaps* is now the single most valuable outstanding item**, because MVP ships without share-sheet capture (below), which makes paste-then-review the main road into the product rather than a fallback.
+2. **Does the architecture assume a budget the product has ruled out?** → **Zero budget, now written into §4 as a locked constraint** rather than left implicit. Half the tension dissolved with the stack decision: **Cooksy is a PWA**, so the client half of the expensive corner — local-first, offline, one codebase on three platforms — costs nothing but engineering. The server half doesn't dissolve: URL import, the read-only recipe link and live household sync all still need a backend, and free-tier hosting is now a stated design constraint on each.
+3. **The flat-permissions decision rests on an unverified claim.** → **Justification dropped, decision kept.** §5.10 no longer cites Fond. The unverified roles claim has been withdrawn from `competitive-landscape.md`, and verifying it has been struck from *Gaps* — nothing depends on it any more.
+4. **Video recipes can no longer be deferred.** → **Deferred anyway: out, for now.** The argument in this document was accepted and overruled on scope. Video is a whole capture pipeline and MVP has not yet proved the text one. Now recorded explicitly in §8 rather than lingering as "Open", which was the actual ask.
+5. **Does metric-only survive contact with a non-metric user?** → **Metric only, for MVP.** Answered as a deliberate narrowing, not an unexamined default — §4 now says so, and marks it revisitable only when there is a non-metric user to revisit it for. The adoption risk this document raised is accepted, not disputed.
+
+**A sixth question this document didn't ask, created by the answer to #2.** The stack decision quietly broke a locked feature. §5.2 called OS share-sheet capture "the primary path" and "a launch requirement, not an enhancement" — but a PWA can register as a share target on **Android Chrome** (Web Share Target API) and **not on iOS Safari**, which doesn't implement it and offers no substitute. Share-sheet capture is now **deferred to post-MVP**. This is the most consequential thing to come out of the pass, and it lands squarely on the finding this research pushed hardest: capture speed. Paste has to carry MVP alone, so it has to be genuinely fast.
+
 ## Open questions for PM
 
-1. **Is "review every parse" a feature or a tax?** No competitor ships a mandatory correction step, and the soft tier beats everyone on capture speed by having no structure at all. Fond's answer is to make AI good enough that review is unnecessary — and to charge for that. Cooksy bets the exact opposite. That bet needs the parser bake-off already listed in *Gaps*, not conviction.
-2. **Does the architecture assume a budget the product has ruled out?** Local-first + offline + live household sync + server-side URL fetch is a subscription-shaped cost base, chosen in §5.12/§11.0, while §8 rejects monetisation. Fine for a portfolio piece — but it should be an acknowledged subsidy, not an oversight.
-3. **The flat-permissions decision rests on an unverified claim.** `competitive-landscape.md` attributes an owner/editor/viewer model to Fond; **nothing on Fond's site corroborates it**, and the product reads as pre-launch (waitlist, "Coming soon"). §5.10 currently justifies itself against a competitor behaviour I could not confirm. Verify it or drop the justification and stand on the reasoning alone.
-4. **Video recipes can no longer be deferred.** Mela — a one-person shop — already imports from YouTube, TikTok and Instagram video descriptions, so "too hard" is not the reason to exclude it. Instagram's `#recipe` tag alone shows **114M reels**. This is now the largest capture surface in the market and a craft-tier competitor has shipped against it, while the brief still lists it as merely "Open".
-5. **Does metric-only survive contact with a non-metric user?** Every one of the 15 preserves both systems. The constraint is simultaneously Cooksy's sharpest idea and its largest adoption risk: it makes the product work-as-intended impossible for US users, who are most of this category's paying base. Is that a deliberate EU-first narrowing, or an unexamined default?
+None. The next batch will come from the parser bake-off and the hands-on teardowns in [`competitive-landscape.md`](./competitive-landscape.md#gaps-in-this-research).
 
 ---
 
-## Corrections to `competitive-landscape.md`
+## Corrections to `competitive-landscape.md` — all applied 21 July 2026
 
-Three claims in the existing desk research did not survive this pass:
+Three claims in the desk research did not survive this pass. All three have now been corrected at source:
 
-- **"No offline capability mentioned" / Paprika.** The App Store listing states the opposite: "all of your data is stored locally", with explicit offline access. Paprika is local-first *and* one-time-purchase — a closer precedent for §5.12 than the doc implies.
-- **"Aisle organisation is limited" / Paprika.** The listing advertises **custom aisle organisation**. This weakens the framing of the open *user-editable aisle order* finding: it isn't only Plan to Eat and AnyList that ship reordering, it's the category default, including the incumbent.
-- **Fond's roles model.** Recorded as "owner / editor / viewer" and used as the foil for §5.10. Unsupported by anything on their site; treat as unverified.
+- **"No offline capability mentioned" / Paprika.** The App Store listing states the opposite: "all of your data is stored locally", with explicit offline access. Paprika is local-first *and* one-time-purchase — a closer precedent for §5.12 than the doc implied. ✅ *Applied.*
+- **"Aisle organisation is limited" / Paprika.** The listing advertises **custom aisle organisation**. It isn't only Plan to Eat and AnyList that ship reordering, it's the category default, including the incumbent. ✅ *Applied — and note this strengthened the aisle-order finding right before the PM rejected it. The rejection was made against the corrected evidence, not the stale version.*
+- **Fond's roles model.** Recorded as "owner / editor / viewer" and used as the foil for §5.10. Unsupported by anything on their site. ✅ *Withdrawn from the landscape doc, and the §5.10 justification it supported was dropped rather than repaired.*
 
 ## Method notes
 

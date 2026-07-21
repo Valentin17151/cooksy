@@ -2,9 +2,9 @@
 
 > A digital recipe book that turns what you want to cook into exactly what you need to buy.
 
-**Status:** brief only. Nothing is built yet. No tech stack has been chosen — that decision is deliberately deferred until the product is settled.
+**Status:** design phase. Nothing is built yet. **The stack is decided: Cooksy is a PWA** — one installable web app, no native shells. See §3.
 
-**Scope note:** what were previously staged as v1 and v2 are now a single combined scope. URL import, pantry tracking and household sharing are in. See §11 for the build order, which still matters even though the scope doesn't phase.
+**Scope note:** URL import, pantry tracking and household sharing are all in. There is now an **MVP boundary**, but it is a thin one — it defers three things rather than staging the product into halves: full library export, OS share-sheet capture, and any revisit of metric-only. Everything else in this brief is MVP. See §11 for the build order and the post-MVP shelf at its foot.
 
 ---
 
@@ -30,16 +30,30 @@ Two things follow from this:
 
 ## 3. Platform
 
-Mobile-first, desktop adapted later.
+**Cooksy is a PWA** — an installable web app, one codebase, no App Store, no native shells. Mobile-first, desktop adapted later.
 
 Mobile is where the product is *used* — in the kitchen with the recipe open, in the shop with the list open. Desktop is where it's *administered* — bulk-adding recipes, planning the week. Design mobile properly first; the desktop layout is a later adaptation of the same product, not a separate one.
+
+**What the PWA choice gives, free.** Everything §5.12 asks for. A service worker plus local storage on the device is the local-first model, not an approximation of it; installed to the home screen the app opens offline and reads instantly. One codebase across iOS, Android and desktop with no store review, which is the only way a zero-budget project (§4) ships to three platforms at once.
+
+**What it costs, and where.** Two places, both already visible in this brief:
+
+- **Share-sheet capture.** Android Chrome supports the Web Share Target API — an installed PWA does appear in the system share sheet. **iOS Safari does not support it at all**, and no workaround exists inside the web platform. This is why §5.2's share sheet is deferred rather than a launch requirement.
+- **Anything needing a server** — URL import (§5.2), the read-only recipe link (§5.11), live household sync (§5.10). The PWA still needs a backend for these; being a web app removes the client cost, not the server one, and §4's zero budget caps what that backend can be.
+
+Nothing else in the brief is constrained by it. Scaling, the weight model, the grocery list, the pantry and the planner are arithmetic over local data and care nothing about the runtime.
 
 ## 4. Locked decisions
 
 | Question | Decision |
 |---|---|
-| Units | **Metric only in the ingredient list — grams, millilitres, pieces. Nothing else.** |
-| Recipe input | Paste text → auto-parse, **import from URL**, **and capture from the OS share sheet**. All three land on the same editable review screen. |
+| Tech stack | **PWA** — installable web app, one codebase, no native shells |
+| Budget | **Zero.** Free-tier hosting only, no paid infrastructure, no monetisation (§8) |
+| Units | **Metric only in the ingredient list — grams, millilitres, pieces. Nothing else.** Locked for MVP; not revisited until there is a non-metric user to revisit it for. |
+| Recipe input | Paste text → auto-parse, **and import from URL**. Both land on the same editable review screen. Share-sheet capture is deferred — see §5.2. |
+| Review step | **Mandatory on every path.** Nothing saves silently, including a clean URL import. |
+| Search | By recipe name **and by ingredient** — "what can I make with the aubergine" |
+| Sub-recipes | A recipe can **link to another recipe**. Links only: no nested scaling, no merged ingredients. |
 | Data & accounts | Cloud accounts from day one, synced across devices |
 | Offline | **The recipe and the grocery list are fully usable with no connection.** Local-first: reads always work, writes queue and merge on reconnect. |
 | Grocery list | Merge duplicate ingredients, group by store aisle, subtract pantry staples visibly |
@@ -74,19 +88,21 @@ Free-text method steps are exempt — "stir in a spoonful of mustard" is fine in
 
 **`pcs` survives the purge deliberately.** "3 eggs" is how people cook and how eggs are sold; forcing it to "150 g" would be worse on every screen. Each canonical ingredient carries an average unit weight so `pcs` can still be converted to grams for the internal weight and calorie maths.
 
-### 5.2 Recipe capture — share sheet, paste and URL import
+### 5.2 Recipe capture — paste and URL import
 
-Three entry paths, converging on one screen.
+Two entry paths for MVP, converging on one screen. A third — the OS share sheet — is specified here but deferred.
 
-**Share sheet — the primary path.** Cooksy registers as a share target on iOS and Android, accepting a URL or a block of text from any app: the browser, Instagram, a messenger, a note. The user is reading a recipe, hits share, picks Cooksy, and lands directly on the review screen. No app switch, no copy-paste, no hunting for a field.
-
-This is how recipes are actually captured. A URL field inside the app asks the user to leave where they are, open Cooksy, find the right screen and paste — four steps for what should be one, and the reason so many recipes never get saved at all. Everything downstream is worthless if capture is slower than screenshotting the page, so **the share extension is a launch requirement, not an enhancement.** It runs the same parse and the same review screen as every other path; only the entry point differs.
-
-**Paste.** The user pastes a raw recipe blob from anywhere — a blog, a message, a note. Cooksy parses it into structure. This remains the fallback when the share sheet isn't available (desktop, unusual apps) and the path for recipes that exist only on paper or in someone's head.
+**Paste.** The user pastes a raw recipe blob from anywhere — a blog, a message, a note. Cooksy parses it into structure. This is the universal path: it works on every platform, and it is the only path for recipes that exist on paper or in someone's head.
 
 **Import from URL.** The user pastes a link. A server-side fetcher retrieves the page and reads its `schema.org/Recipe` markup, which most food sites publish and which already gives clean ingredients, steps, servings and often a photo. When markup is absent or broken, Cooksy extracts the page's readable text and falls back to the paste parser rather than failing outright. The fetch is server-side because the browser can't do it — and since accounts already require a backend, it has somewhere to live.
 
 URL import is the higher-quality path but not the safer one: structured markup is frequently in cups and ounces, so §5.1 conversion applies identically. Cleaner input, same density problem.
+
+**Share sheet — deferred, and the reasoning is preserved because the debt is real.** Registering as an OS share target is how recipes are actually captured. A URL field inside the app asks the user to leave where they are, open Cooksy, find the right screen and paste — four steps for what should be one, and the reason so many recipes never get saved at all. Capture that is slower than screenshotting the page makes everything downstream worthless, and that argument has not weakened.
+
+What changed is §3. As a PWA, Cooksy can register as a share target on **Android Chrome** via the Web Share Target API, but **not on iOS Safari**, which does not implement it and offers no web-platform substitute. Shipping it would buy the fast path on one platform and leave the other on paste — so it is out of MVP, not out of the product.
+
+**The consequence to design around:** paste is not a fallback in MVP, it is the main road. It has to be genuinely fast — a single obvious box on the Library screen, tolerant of any blob, no field-hunting — because for now it is what stands between a recipe and the review screen. When the share sheet does land it changes the entry point and nothing else: same parse, same review screen.
 
 **Parser must handle:**
 - Quantities as decimals, fractions and unicode fractions — `1.5`, `1/2`, `½`
@@ -118,6 +134,23 @@ A large share of real recipes arrange their ingredients under headings: *for the
 **The grocery list never shows them.** The list is aggregated by aisle across every planned recipe (§5.9); "for the sauce" is meaningless once four recipes are merged and you're standing in the produce section. The connection back to structure is the existing audit trail: tapping a grocery line reveals which recipes it came from, and in what amounts. That is the switch from aggregated view to recipe view — one already-specified interaction, not a second mode.
 
 The rule in one line: **grouped inside the recipe, flat inside the list.**
+
+### 5.2.2 Sub-recipes — a link, not a container
+
+Real cooking reuses components. A base tomato sauce feeds three dishes; a pizza dough is its own recipe that four others depend on. Cooksy supports this in the cheapest form that works: **a recipe can link to another recipe in the library.**
+
+**What a link is.** A named reference, added by the user on the recipe screen or at review, rendered as a tappable line — *"uses: Basic tomato sauce"* — that opens the linked recipe. Sitting in a step (*"pour over the sauce"*) it earns its place exactly where the cook needs it.
+
+**What a link is not, deliberately.** It does not pull the linked recipe's ingredients into this one. Nothing about the link touches the weight model (§5.3), scaling (§5.4), calories (§5.6) or the grocery merge (§5.9). The sauce's 400 g of tomatoes appear in the sauce's totals and nowhere else.
+
+**Why stop there.** Nesting ingredients would make every number in §5.3 recursive: total weight, kcal/100 g and the aisle merge would each have to walk a graph the user can edit into a cycle. That is a large amount of machinery, and a large amount of new silent-wrongness surface (§7.3), bought for a case that already has an honest answer — **if you want the sauce in your shopping list, plan the sauce.** Add both recipes to the week or the list and §5.9 merges their ingredients correctly, because they are two recipes, which is what they are.
+
+**Rules:**
+- Links point at recipes in the same library, and are many-to-many — a recipe can link out to several and be linked to by several
+- A link to a deleted recipe degrades to plain text with a quiet note, never a dead tap
+- Links are display and navigation only; they carry no quantity and no portion count
+- **Search may *read* a link** to place a recipe in its *Used in* results (§5.13). Reading is not traversing: nothing crosses the link — no ingredients, no quantities, no portions — and §5.3, §5.4, §5.6 and §5.9 are untouched. A recipe that links to *Basic tomato sauce* is factually a dish where tomato sauce is part of the process, and saying so costs one lookup.
+- No depth limit is needed, because nothing *follows* them but the user. Search reads one hop and stops.
 
 ### 5.3 The weight model
 
@@ -289,20 +322,60 @@ This is not a technical nicety. §7.4 already names the shop and the kitchen as 
 
 Because this shapes the storage layer, sync protocol and every write path, it has to be settled before the data model does — see §11.
 
+### 5.13 Search
+
+Search covers **recipe names, tags, and ingredients**. The third is the one that matters.
+
+**Search by ingredient answers the question the audience actually asks:** *there is an aubergine in the fridge and it turns tomorrow — what can I make?* That is an optimiser's question, it is about using what exists rather than shopping for what doesn't, and it is the counterweight to a product otherwise entirely oriented around buying things.
+
+It costs almost nothing, because §5.5 already did the work. Every ingredient row is matched to a canonical ingredient, so searching resolves through the same aliases: typing `aubergine` finds the recipe that said `eggplant`, and typing `onion` finds the one that said `2 large yellow onions`. Without normalisation this would be a string match that fails on every synonym; with it, it is a lookup.
+
+**One rule governs the whole screen:**
+
+> **The user never types an amount. Cooksy always shows one.**
+
+Quantities are output, never input. You search with names; every row answers with the amount that recipe needs. This is not a preference — it is the only honest arrangement, because Cooksy knows exactly what a recipe requires and knows almost nothing about what is in your kitchen. §5.8's staples carry no quantities at all and its tracked tier is opt-in and expected to drift. Asking for an amount on the input side would ask the user for the one number the app cannot verify.
+
+**Consequently the pantry does not feed search, deliberately.** Ranking recipes by what you have in stock would make retrieval depend on an inventory the product refuses to demand — and would hide recipes on the basis of it, which is §5.8's forbidden failure (an ingredient never vanishes without a trace) committed one level up and less recoverably. You cannot tap *"actually, I'm out"* on a result you were never shown.
+
+**What search matches:** recipe names, tags, ingredients, and **method steps**.
+
+**Multi-ingredient search is presence-based and ranked, never all-or-nothing.** Type `chicken lemon rice` — names only. Recipes containing all three rank first, then two of three, then one. **Partial matches are ranked, never discarded**, which is also what the screen shows instead of an empty state: *nothing matches all three; here are eleven that match two of them.*
+
+**Every result splits into two tiers, on every search:**
+
+| Tier | What lands in it | Matched against |
+|---|---|---|
+| **Dishes** | The recipe *is* the thing | title, tags |
+| **Used in** | The thing happens inside the recipe | ingredient rows, method steps, linked sub-recipes (§5.2.2) |
+
+The tiers are never merged into one ranked list, because the distinction is the answer — *am I looking for the fried chicken, or for what to do with it.* This is also the concrete form of the name-match-versus-ingredient-match distinction, so it is one mechanism rather than two.
+
+**Every row states its evidence**, in three parts: what matched, the amount that recipe needs at **base servings** (labelled — a search result has no serving context yet, and §5.4 keeps scaling a view that never mutates the recipe), and the ingredient group where the recipe has one (§5.2.1's rule holds: no group shown where no group exists). A row reads `matched: aubergine · 400 g · in "For the sauce"`, and that last field tells the cook whether the aubergine is the dish or a component of it. This is §7.2's auditability applied one step upstream of the grocery line.
+
+**Searching by preparation, not just by ingredient.** `fried chicken` returns the dishes that *are* fried chicken, then every meal where frying chicken is part of the process. This resolves through canonical ingredients (§5.5) plus a **preparation vocabulary** — see §10 for where that comes from, and note that it must resolve locally at query time whatever its source.
+
+**The default order, before anything is typed, is frecency of *cooking*** — a blend of how often and how recently a recipe was actually cooked, not saved. The planner (§5.7) and list history (§5.9) already date every cook, so this costs a sort key. §5.7 observes that households rotate through the same fifteen dishes; those fifteen belong at the top of the Library, unasked. The ordering is resettable, so the learning is never a trap.
+
+**Rules:**
+- Search runs against local data and returns as you type — no spinner, no network, per §5.12 rule 2. **This holds for every path above, including preparation search.**
+- Tag filters compose with search rather than replacing it
+- **No saved searches, no filter chips, no query syntax** (§8). Frecency ordering substitutes for them at this library size.
+
 ---
 
 ## 6. Screens (mobile)
 
 **Three primary tabs**, because three things are used daily:
 
-1. **Library** — recipe grid/list, search, tag filters, prominent add button. The home screen.
+1. **Library** — recipe grid/list, search across names, tags and ingredients (§5.13), tag filters, and a prominent paste-and-add box. The home screen, and in MVP the front door for capture (§5.2).
 2. **Week plan** — seven days, meal slots with per-slot portion size and member assignment, per-day calories, weekly average, generate-list action. Swipe or step back and forward through past and future weeks; duplicate a past week forward.
 3. **Grocery list** — aisle-grouped merged list, checkoff, "assumed you have" section, add manual item, export. Past lists reachable from the header, each dated and linked to the week that produced it.
 
 **Reached contextually, not from the tab bar:**
 
-4. **Recipe** — photo, servings stepper pinned at top, live-scaling ingredients grouped where the recipe has groups, steps, kcal/100 g and kcal/portion, actions (add to plan, add to list, share).
-5. **Add recipe** — **arrived at from the share sheet**, or from a paste box *or* URL field inside the app → parse → **review & fix** → save. Manual entry as a fallback path. Neither URL import nor share-sheet capture adds a screen: all three are inputs to the same flow, and the share sheet simply skips straight to review.
+4. **Recipe** — photo, servings stepper pinned at top, live-scaling ingredients grouped where the recipe has groups, steps, any sub-recipe links (§5.2.2), kcal/100 g and kcal/portion, actions (add to plan, add to list, share).
+5. **Add recipe** — from a paste box *or* URL field → parse → **review & fix** → save. Manual entry as a fallback path. URL import adds no screen: both are inputs to the same flow. When the share sheet lands (§5.2) it adds no screen either — it skips straight to review.
 6. **Pantry** — staples list and tracked quantities. Entered from the "assumed you have" section of the grocery list, where the user is already thinking about it, and from settings.
 7. **Settings** — account, household members and invites, units, export.
 
@@ -321,9 +394,25 @@ Pantry is deliberately kept out of the tab bar: it's configured once and touched
 
 These are not deferred — they're rejected, because they'd make Cooksy a different product:
 
-Recipe discovery or a public feed · social features, ratings, comments · macro and micronutrient tracking or diet goals · supermarket price lookup and online ordering · photo/OCR import of physical cookbooks · package-size reconciliation (telling the user that 250 ml cream means buying a 500 ml carton — country-specific product data for marginal gain) · cooking mode with timers · monetisation.
+Recipe discovery or a public feed · social features, ratings, comments · macro and micronutrient tracking or diet goals · supermarket price lookup and online ordering · photo/OCR import of physical cookbooks · package-size reconciliation (telling the user that 250 ml cream means buying a 500 ml carton — country-specific product data for marginal gain) · **cooking mode of any kind**, timers included · **user-editable aisle order** · **video recipe import** · **saved searches, filter chips and query syntax** · **pantry-filtered search** · monetisation.
 
 The first four would pull Cooksy toward being a social network, a diet tracker, or a shopping service. It is a tool for people who already know what they want to cook.
+
+Five of these were argued for during competitive research and rejected anyway. The reasoning is recorded so it isn't relitigated:
+
+- **Cooking mode.** Mela, Crouton and Paprika all ship one, and it is the aspirational tier's whole differentiator. Cooksy still doesn't: the recipe screen (§6.4) is already designed for §7.4's wet hands and bad light, and a second reading mode is a second thing to design and maintain for a marginal gain over a screen that already works. Note for the record that the PWA is not what blocks this — the Screen Wake Lock API is available on both platforms, and tap-to-strike is trivial. It is a scope decision, not a technical one, and can be revisited on those terms.
+- **User-editable aisle order.** The default walking order stays fixed. It is store-specific and every serious competitor ships reordering, so this is a knowing bet that one sensible order is good enough — and the cheapest thing on this list to reverse if a real shop proves it wrong.
+- **Video recipes.** Reels and TikToks are where a growing share of this audience finds recipes, and Mela already imports from video descriptions. Out for now regardless: it is a whole capture pipeline, and MVP has not yet proved the text one.
+- **Saved searches and query syntax.** Todoist is the benchmark and its filter language is genuinely the best of the fifteen products compared — but it needs one, because a task list holds thousands of items and dozens of legitimate slices. A household with sixty recipes and fifteen live ones does not need a filter language; it needs the fifteen at the top, which is what §5.13's frecency ordering delivers for the cost of a sort key. Operators are also a keyboard-and-desk interaction and §7.4 specifies wet hands and one thumb.
+- **Pantry-filtered search.** SuperCook's *"only shows you recipes that require the ingredients you already have"* is the most attractive mechanism in the retrieval benchmark and the highest-scoring product in it. Rejected on three compounding grounds: it hides recipes on the basis of an inventory §5.8 refuses to keep accurate, which is silent wrongness (§7.3) on the screen where it is hardest to notice; it puts quantities back on the input side, where the user cannot supply them honestly; and the economics are inverted — SuperCook filters 11 million recipes you don't own, where hiding is what makes the set usable, while Cooksy searches sixty you chose yourself, where a filter that removes results removes the thing you were looking for. **Rank by coverage never, count the terms the user typed instead.**
+
+### 8.1 Deferred, not rejected
+
+Distinct from the list above — these are wanted, and out of MVP only:
+
+- **OS share-sheet capture** (§5.2) — blocked on iOS by the web platform, worth shipping on Android when the parser is proven
+- **Full library export** — an optimiser asks "can I get my data out" before typing in sixty recipes, and Paprika's users tolerate an ageing app largely because the answer is yes. §5.11 currently exports one list and one recipe; exporting *everything* is a post-MVP obligation, not a feature.
+- **Revisiting metric-only** (§5.1) — locked for MVP, reopened only if there is a non-metric user to reopen it for
 
 ## 9. What good looks like
 
@@ -348,7 +437,59 @@ Candidate approaches, unresolved:
 
 Whatever the source, the fallback path is fixed: **an unmatched ingredient never blocks saving a recipe.** It appears flagged in review, the user can fill in what they know, and the calorie estimate reports its own coverage honestly.
 
+**It does not block the current phase.** The question is about a data source, not about product shape — nothing in the wireframes, tokens or component work waits on the answer, because the fallback above is what the review screen has to handle either way. It must be settled before §11.1, and not before.
+
+**Cooksy now needs two datasets. Only the first is unresolved.**
+
+**The second: the preparation vocabulary.** §5.13's preparation search needs whatever lets `fried` reach *fry*, *frying*, *pan-fried* — and ideally *confit*, *blackened*, *velveted*, which nobody would think to enumerate. Nothing else in the product needs it. Decided 21 July 2026: **it is generated by a model, not written by hand.**
+
+That answer has three possible shapes, and only two are compatible with the rest of the brief:
+
+1. **At authoring time — adopted.** A model produces the vocabulary once, it is reviewed by hand, and it ships as static local data. Zero runtime cost, zero network, nothing to pay for. The model is a tool for building the dataset, not a dependency of the product.
+2. **At import time — permitted, and probably the better half.** When a recipe is saved, a model tags it with its preparation concepts and those tags are stored locally beside the recipe. This catches vocabulary no list anticipated. The cost is bounded — once per recipe, not once per query — and it already has somewhere to live, since URL import (§5.2) needs a server regardless. It must degrade per §5.12: the save completes locally and immediately, tagging queues and lands on reconnect, and a recipe that is never tagged remains fully searchable by name, ingredient and step text.
+3. **At query time — ruled out.** Sending the query itself to a model breaks three locked decisions at once. §4, because per-query inference is the one cost that scales with use and there is no budget for it. §5.12 and §5.13, because search must run against local data with no spinner and no network — the shop and the kitchen are where this screen gets used and neither has signal. And it would cost the thing §5.13 was rebuilt to gain: **a model cannot state why it matched, and every result row is now required to.** Apple Photos is best-in-class at finding and worst-in-class at explaining for precisely this reason.
+
+**The rule that survives all three shapes: whatever produces the vocabulary, resolution happens locally at query time.** A model may write the data, or enrich a recipe as it is saved. It is never in the path between a keystroke and a result.
+
+### 10.1 Resolved — 21 July 2026
+
+Eleven questions were raised across the competitive research and closed in one pass. Recorded here so they aren't reopened by accident:
+
+| Question | Decision | Landed in |
+|---|---|---|
+| User-editable aisle order | **No.** One sensible walking order, fixed | §8 |
+| Full library export | **After MVP** | §8.1 |
+| Minimal cook mode | **No** — scope decision, not a technical one | §8 |
+| Video recipe import | **No, for now** | §8 |
+| Search depth | **Yes** — by recipe name and by ingredient | §4, new §5.13 |
+| Sub-recipes | **Yes, as links** to other recipes. No nested scaling or merging. | §4, new §5.2.2 |
+| Is mandatory review a feature or a tax? | **A feature.** Unchanged, mandatory on every path. | §4, §5.2 |
+| Does the architecture assume a budget §8 ruled out? | **Zero budget**, acknowledged as a constraint rather than discovered later | §3, §4 |
+| Flat household permissions | **Kept**, and the competitor justification dropped — it stands on its own reasoning | §5.10 |
+| Metric-only vs non-metric users | **Metric only for MVP** | §4, §5.1 |
+| Tech stack | **PWA** | §3, §4 |
+
+Two consequences fell out of the stack decision rather than being asked directly: **share-sheet capture moved to deferred** (§5.2), because iOS Safari cannot implement it, and **cook mode's rejection was re-grounded in scope**, because the PWA can in fact do it.
+
 *Resolved earlier:* recipes with a yield rather than portions (a loaf, a jar of sauce) needed no special handling — the weight model in §5.3 covers them natively, since an 800 g jar of sauce at 50 g portions is the same arithmetic as a stew at 350 g portions.
+
+### 10.2 Resolved — 21 July 2026, retrieval pass
+
+The retrieval benchmark ([`research/benchmark-retrieval.md`](./research/benchmark-retrieval.md)) scored §5.13 as previously written at **23 of 40 — below Tandoor, and at the category floor** on the pain the research names first. Six decisions followed, in two rounds on the same day.
+
+| Question | Decision | Landed in |
+|---|---|---|
+| Should search rank recipes by what the pantry holds? | **No.** Match on ingredient *identity*, count the terms the user typed. The pantry never feeds search. | §5.13, §8 |
+| Are quantities ever an input to search? | **No.** *The user never types an amount; Cooksy always shows one.* | §5.13 |
+| What happens when not every typed ingredient matches? | **Partial matches are ranked, never discarded** — which is also what replaces the empty state | §5.13 |
+| What does a result row show? | What matched · the amount needed at base servings · the ingredient group where one exists | §5.13 |
+| What is the Library's order before anything is typed? | **Frecency of cooking**, resettable. Not frecency of saving. | §5.13 |
+| Can search read sub-recipe links? | **Yes** — reading is not traversing. One hop, no ingredients or quantities cross the link. | §5.2.2, §5.13 |
+| Does the Dishes / Used in split apply to every search? | **Yes, universal.** It is also the concrete form of the name-vs-ingredient distinction, so it is one mechanism rather than two. | §5.13 |
+| Saved searches, filter chips, query syntax? | **No.** Frecency ordering substitutes at sixty recipes. | §8 |
+| Where does the preparation vocabulary come from? | **Generated by a model**, at authoring or import time — never at query time | §10 |
+
+**One thing did *not* change, and that is the point of recording it:** R2 — the ability to build a query out of stored state — stays at its floor **by decision**. It was raised as the single largest gap in the section and closed as a deliberate refusal. The benchmark's projected outcome fell from ~32 to **30 of 40** as a result, and the lower number is the better one: the earlier version was bought with a pantry join that made retrieval depend on an inventory §5.8 refuses to keep accurate.
 
 ## 11. Build order
 
@@ -360,8 +501,12 @@ Scope is combined, but the work still has a required sequence — three features
 3. **Portion scaling and calories.** The hero interaction, and it's cheap once §5.3 exists.
 4. **Grocery list — merge and aisle grouping.** This closes the core loop. **Cook a real week off it before going further.**
 5. **Weekly planner.** Depends on a working list to be worth anything. History (§5.7, §5.9) comes free if weeks and lists are dated records from the start — so make them dated records from the start.
-6. **URL import, then the share sheet.** Both are additive to a flow that already works. Import first because the share extension hands its payload to the same parser; ship the extension as soon as that parser is real, since it is what makes capture fast enough to use daily.
+6. **URL import.** Additive to a flow that already works, and the second input to a parser that step 2 already proved.
 7. **Pantry.** Modifies the list, so the list must be trusted before it starts subtracting from it.
 8. **Household sharing.** Touches the data model everywhere and is the only piece requiring live sync — worth doing last, when the shape of the data has stopped moving. Step 0 is what makes it tractable rather than a rewrite.
 
 Steps 1–4 are the product. Steps 5–8 make it better and are, individually, each smaller than what precedes them. If attention runs out, it should run out at the bottom of this list, not the middle.
+
+**Two features have no step of their own, deliberately.** Search (§5.13) is a screen over step 1's normalisation — build it when the library is big enough to need it, which is somewhere around step 4. Sub-recipe links (§5.2.2) are a field and a tap target; they can land any time after step 2, and cost nothing to defer because nothing depends on them.
+
+**Post-MVP shelf:** share-sheet capture on Android (§5.2), full library export (§8.1). Neither blocks anything above.

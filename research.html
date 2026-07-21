@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — зведення досліджень</title>
+<style>
+  :root {
+    --paper:        #F5F2F6;
+    --paper-sunk:   #EDE8EF;
+    --paper-raised: #FCFAFD;
+    --ink:          #1D181F;
+    --ink-2:        #4A4350;
+    --ink-3:        #6E6574;
+    --rule:         #DBD3DF;
+    --rule-soft:    #E6E0EA;
+    --accent:       #6B2E5B;
+    --accent-soft:  #EBDDE9;
+    --ok:           #3F6238;
+    --warn:         #8A5612;
+    --no:           #96382C;
+
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Liberation Mono", monospace;
+    --serif: "Iowan Old Style", Charter, "Bitstream Charter", "Source Serif 4", Cambria, Georgia, serif;
+
+    --page: 1180px;
+    --measure: 70ch;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #16131A;
+      --paper-sunk:  #1D1922;
+      --paper-raised:#1B1721;
+      --ink:         #EDE7F0;
+      --ink-2:       #B5ACBB;
+      --ink-3:       #8B8291;
+      --rule:        #322B39;
+      --rule-soft:   #26212C;
+      --accent:      #CB8CBA;
+      --accent-soft: #2A1E2A;
+      --ok:          #93BC82;
+      --warn:        #D9A44F;
+      --no:          #E2897A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#16131A; --paper-sunk:#1D1922; --paper-raised:#1B1721;
+    --ink:#EDE7F0; --ink-2:#B5ACBB; --ink-3:#8B8291;
+    --rule:#322B39; --rule-soft:#26212C;
+    --accent:#CB8CBA; --accent-soft:#2A1E2A;
+    --ok:#93BC82; --warn:#D9A44F; --no:#E2897A;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --paper:#F5F2F6; --paper-sunk:#EDE8EF; --paper-raised:#FCFAFD;
+    --ink:#1D181F; --ink-2:#4A4350; --ink-3:#6E6574;
+    --rule:#DBD3DF; --rule-soft:#E6E0EA;
+    --accent:#6B2E5B; --accent-soft:#EBDDE9;
+    --ok:#3F6238; --warn:#8A5612; --no:#96382C;
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  h1,h2,h3,h4,h5,p,ul,ol,table,figure,figcaption,blockquote,dl,dd {
+    margin: 0; padding-left: 0;
+  }
+  ul, ol { list-style: none; }
+  img { display: block; max-width: 100%; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    margin: 0;
+    padding: 0 0 6rem;
+  }
+
+  .wrap { width: 100%; max-width: var(--page); margin-inline: auto; padding-inline: clamp(1.1rem, 4vw, 2.5rem); }
+  .prose { max-width: var(--measure); }
+
+  /* ── type roles ─────────────────────────────────── */
+
+  .eyebrow {
+    font-family: var(--mono); font-size: .67rem; font-weight: 500;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3);
+  }
+  h1 {
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(1.95rem, 5vw, 2.9rem); line-height: 1.05;
+    letter-spacing: -.035em; text-wrap: balance;
+  }
+  h2 {
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(1.4rem, 3.2vw, 1.85rem); line-height: 1.12;
+    letter-spacing: -.028em; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(1.08rem, 2.2vw, 1.22rem); line-height: 1.25;
+    letter-spacing: -.02em; text-wrap: balance;
+  }
+  h4 {
+    font-family: var(--mono); font-size: .67rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3);
+  }
+  p { text-wrap: pretty; }
+  strong { font-weight: 600; color: var(--ink); }
+  .lead { font-size: 1.16rem; line-height: 1.5; color: var(--ink-2); }
+  .deck { font-size: clamp(1.08rem, 2.4vw, 1.28rem); line-height: 1.48; color: var(--ink-2); text-wrap: pretty; }
+
+  .ref { font-family: var(--mono); font-size: .86em; color: var(--accent); white-space: nowrap; }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: .17em; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
+  }
+
+  /* «дані не підтверджені» marker — evidence status is design material here */
+  .nd {
+    color: var(--no); font-family: var(--mono); font-size: .85em;
+    border-bottom: 1px dotted currentColor; white-space: nowrap;
+  }
+
+  /* ── sticky nav ─────────────────────────────────── */
+
+  .nav {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav-inner {
+    display: flex; align-items: center; gap: 1.6rem;
+    overflow-x: auto; scrollbar-width: none;
+    padding-block: .75rem;
+  }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav a {
+    font-family: var(--mono); font-size: .7rem; font-weight: 500;
+    letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); text-decoration: none; white-space: nowrap;
+  }
+  .nav a:hover { color: var(--accent); }
+  .nav a.brand { color: var(--accent); font-weight: 600; }
+
+  section { scroll-margin-top: 4.5rem; }
+
+  /* ── masthead ───────────────────────────────────── */
+
+  .masthead { padding-block: clamp(3rem, 8vw, 5rem) 0; }
+  .masthead-col { display: flex; flex-direction: column; gap: 1.3rem; max-width: 76ch; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: .35rem 2rem;
+    padding-top: 1.3rem; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: .73rem; color: var(--ink-3);
+  }
+  .meta b { color: var(--ink-2); font-weight: 500; }
+
+  .rule-note {
+    display: flex; flex-direction: column; gap: .45rem;
+    padding: 1.05rem 1.3rem; margin-top: 1.6rem;
+    background: var(--accent-soft); border-left: 2px solid var(--accent);
+    max-width: var(--measure);
+  }
+  .rule-note .lbl {
+    font-family: var(--mono); font-size: .66rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--accent);
+  }
+  .rule-note p { font-size: 1.02rem; }
+
+  /* ── section scaffolding ────────────────────────── */
+
+  .sec { padding-top: clamp(3.4rem, 7vw, 5rem); }
+  .sec-head {
+    display: flex; flex-direction: column; gap: .7rem;
+    padding-bottom: 1.6rem; border-bottom: 1px solid var(--ink);
+  }
+  .sec-head .num {
+    font-family: var(--mono); font-size: .68rem; font-weight: 600;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--accent);
+  }
+  .sub { padding-top: 2.6rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .sub > h3 + p, .sub > p + p { max-width: var(--measure); }
+
+  /* ── tables ─────────────────────────────────────── */
+
+  .t-scroll {
+    overflow-x: auto;
+    border-bottom: 1px solid var(--rule);
+    -webkit-overflow-scrolling: touch;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  caption {
+    text-align: left; font-family: var(--mono); font-size: .67rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3);
+    padding-bottom: .7rem;
+  }
+  thead th {
+    font-family: var(--mono); font-size: .63rem; font-weight: 600;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--ink-3);
+    padding: 0 1rem .55rem 0; border-bottom: 1px solid var(--rule);
+    white-space: nowrap; vertical-align: bottom;
+  }
+  tbody td, tbody th {
+    padding: .8rem 1rem .8rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top; color: var(--ink-2);
+    font-size: .87rem; line-height: 1.48;
+  }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  tbody th {
+    font-family: var(--mono); font-weight: 600; color: var(--ink);
+    font-size: .82rem; letter-spacing: -.01em; white-space: nowrap;
+  }
+  th:last-child, td:last-child { padding-right: 0; }
+  .t-wide { min-width: 62rem; }
+  .t-mid  { min-width: 44rem; }
+  .num-cell { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .t-scroll + .hint {
+    font-family: var(--mono); font-size: .66rem; color: var(--ink-3);
+    padding-top: .6rem; letter-spacing: .04em;
+  }
+
+  /* score table emphasis */
+  .up   { color: var(--ok); font-weight: 600; }
+  .flat { color: var(--ink-3); }
+  .dec  { color: var(--warn); }
+  tr.total th, tr.total td {
+    border-top: 1px solid var(--rule); border-bottom: 0;
+    padding-top: .8rem; font-weight: 600; color: var(--ink);
+  }
+
+  /* ── screens gallery ────────────────────────────── */
+
+  .shots {
+    display: grid; gap: 1.1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    padding-top: 1.6rem;
+  }
+  .shot { display: flex; flex-direction: column; gap: .5rem; text-decoration: none; }
+  .shot .frame {
+    position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+    background: var(--paper-sunk); border: 1px solid var(--rule);
+  }
+  .shot img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top center;
+  }
+  .shot .cap {
+    font-family: var(--mono); font-size: .68rem; color: var(--ink-2);
+    letter-spacing: -.01em; line-height: 1.35;
+  }
+  .shot:hover .frame { border-color: var(--accent); }
+  .shot:hover .cap { color: var(--accent); }
+  .shot .lock {
+    position: absolute; inset-inline: 0; bottom: 0;
+    background: color-mix(in srgb, var(--no) 88%, black);
+    color: #fff; font-family: var(--mono); font-size: .58rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; text-align: center;
+    padding: .3rem .4rem;
+  }
+
+  /* ── finding blocks ─────────────────────────────── */
+
+  .stack { display: flex; flex-direction: column; gap: 2.2rem; padding-top: 1.8rem; }
+
+  .find {
+    display: grid; grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 0 1.9rem; align-items: start;
+    padding-top: 1.6rem; border-top: 1px solid var(--rule);
+  }
+  .find .k {
+    font-family: var(--mono); font-size: .72rem; font-weight: 600;
+    letter-spacing: .1em; color: var(--accent); padding-top: .25em;
+  }
+  .find .body { display: flex; flex-direction: column; gap: .8rem; max-width: var(--measure); }
+  @media (max-width: 760px) {
+    .find { grid-template-columns: minmax(0,1fr); gap: .55rem; }
+  }
+
+  .kv { display: flex; flex-direction: column; gap: .18rem; }
+  .kv .lbl {
+    font-family: var(--mono); font-size: .63rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .kv p { font-size: .97rem; }
+
+  .chip {
+    display: inline-block; font-family: var(--mono); font-size: .66rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: .17rem .5rem; border: 1px solid var(--accent); color: var(--accent);
+    text-decoration: none; white-space: nowrap;
+  }
+  .chip:hover { background: var(--accent); color: var(--paper); }
+
+  /* verdict dots — shape carries meaning, not colour alone */
+  .verdict {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-family: var(--mono); font-size: .67rem; font-weight: 600;
+    letter-spacing: .11em; text-transform: uppercase; white-space: nowrap;
+  }
+  .verdict::before {
+    content: ""; width: .58rem; height: .58rem; border-radius: 50%; flex: none;
+    border: 1.5px solid currentColor; background: currentColor;
+  }
+  .v-ok   { color: var(--ok); }
+  .v-no   { color: var(--no); }
+  .v-warn { color: var(--warn); }
+  .v-abs  { color: var(--accent); }
+  .v-abs::before { background: transparent; }
+  .v-half { color: var(--warn); }
+  .v-half::before { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+
+  .pull {
+    font-size: 1.16rem; line-height: 1.42; color: var(--ink);
+    padding: .15rem 0 .15rem 1.2rem; border-left: 2px solid var(--accent);
+    max-width: var(--measure); text-wrap: pretty;
+  }
+
+  ol.reasons { display: flex; flex-direction: column; gap: 1.15rem; counter-reset: r; max-width: var(--measure); }
+  ol.reasons > li {
+    counter-increment: r; display: grid;
+    grid-template-columns: 1.9rem minmax(0,1fr); gap: .8rem;
+  }
+  ol.reasons > li::before {
+    content: counter(r, decimal-leading-zero);
+    font-family: var(--mono); font-size: .73rem; font-weight: 600;
+    color: var(--accent); padding-top: .38em; font-variant-numeric: tabular-nums;
+  }
+
+  ul.dash { display: flex; flex-direction: column; gap: .7rem; max-width: var(--measure); }
+  ul.dash > li { display: grid; grid-template-columns: 1rem minmax(0,1fr); gap: .55rem; }
+  ul.dash > li::before { content: "—"; font-family: var(--mono); color: var(--ink-3); font-size: .84rem; padding-top: .2em; }
+
+  ol.numlist { display: flex; flex-direction: column; gap: .8rem; counter-reset: n; max-width: var(--measure); }
+  ol.numlist > li { counter-increment: n; display: grid; grid-template-columns: 1.7rem minmax(0,1fr); gap: .6rem; }
+  ol.numlist > li::before {
+    content: counter(n) "."; font-family: var(--mono); font-size: .8rem; font-weight: 600;
+    color: var(--accent); padding-top: .1em; font-variant-numeric: tabular-nums;
+  }
+
+  footer { padding-top: clamp(3.4rem, 7vw, 5rem); }
+  footer .inner {
+    padding-top: 1.3rem; border-top: 1px solid var(--rule);
+    display: flex; flex-direction: column; gap: .35rem;
+    font-family: var(--mono); font-size: .71rem; color: var(--ink-3);
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">Cooksy · зведення</a>
+    <a href="#competitors">1 · Конкуренти</a>
+    <a href="#benchmark">2 · Бенчмарк</a>
+    <a href="#patterns">3 · Патерни</a>
+    <a href="#conclusions">4 · Висновки</a>
+    <a href="#unverified">5 · Не підтверджено</a>
+  </div>
+</nav>
+
+<header class="masthead wrap" id="top">
+  <div class="masthead-col">
+    <span class="eyebrow">Дослідження · 21 липня 2026</span>
+    <h1>Зведення досліджень</h1>
+    <p class="deck">П'ятнадцять продуктів у трьох тірах, один вимір пошуку, оцінений проти п'яти найкращих-у-ніші поза категорією, і п'ять патернів взаємодії — зведені до того, що з цього змінює рішення.</p>
+    <div class="meta">
+      <span><b>Продуктів</b> · 15</span>
+      <span><b>Скрінів</b> · 20</span>
+      <span><b>Документів-джерел</b> · 4</span>
+      <span><b>Прогалин із гіпотезою</b> · 8</span>
+    </div>
+  </div>
+  <div class="rule-note">
+    <span class="lbl">Правило джерел</span>
+    <p>Кожен факт має посилання або скрін. Де джерела немає — так і написано: <span class="nd">дані не підтверджені</span>. Нічого не домислено. Повний перелік непідтвердженого — у <a href="#unverified">розділі 5</a>.</p>
+  </div>
+</header>
+
+<!-- ══════════════ 1 ══════════════ -->
+<section class="sec wrap" id="competitors">
+  <div class="sec-head">
+    <span class="num">Розділ 1</span>
+    <h2>Конкуренти</h2>
+    <p class="lead prose">П'ятнадцять продуктів × п'ять осей × три тіри. Осі: аудиторія · база продукту · ключовий механізм · довіра · монетизація.</p>
+  </div>
+
+  <!-- Tier 1 -->
+  <div class="sub">
+    <h3>Тір 1 — Hard</h3>
+    <p class="prose">Той самий продукт, та сама аудиторія: бібліотека рецептів, масштабування порцій і зведений список покупок.</p>
+
+    <div class="t-scroll">
+      <table class="t-wide">
+        <caption>Тір 1 — п'ять осей</caption>
+        <thead>
+          <tr><th>Продукт</th><th>Аудиторія</th><th>База продукту</th><th>Ключовий механізм</th><th>Довіра</th><th>Монетизація</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th><a href="https://www.paprikaapp.com/">Paprika 3</a></th>
+            <td>Мультидевайсні кухарі, що закуповуються системно</td>
+            <td><strong>Бібліотека рецептів</strong>; план і список похідні від неї</td>
+            <td>Злиття інгредієнтів + сортування за відділами, <strong>кастомний порядок відділів</strong>, комора з кількістю / датою купівлі / терміном</td>
+            <td>«all of your data is stored locally», явний офлайн, разова оплата. Проти цього — <strong>household-шерингу немає взагалі</strong></td>
+            <td>Разова, окремо на платформу. $4.99 iOS</td>
+          </tr>
+          <tr>
+            <th><a href="https://fond.kitchen/vs/paprika/">Fond</a></th>
+            <td>Ентузіасти, «2&nbsp;400+ у вейтлісті»</td>
+            <td>Витягнуті рецепти (URL / фото / соцмережі) над нормалізованим шаром інгредієнтів</td>
+            <td>«Save–Plan–Shop–Cook» плюс асистент <strong>August</strong>, обмежений <em>твоєю</em> бібліотекою, а не відкритим інтернетом</td>
+            <td>Синк на 4 платформи. Офлайн, експорт і дозволи — <span class="nd">дані не підтверджені</span></td>
+            <td>Freemium, AI за пейволом. Ціни не опубліковані</td>
+          </tr>
+          <tr>
+            <th><a href="https://samsungfood.com/">Samsung Food</a></th>
+            <td>Глобальні кухарі + ЗОЖ + спільноти</td>
+            <td><strong>Контент-платформа</strong>; особистий рецепт-бокс другорядний</td>
+            <td>Імпорт із будь-якого сайту → drag-and-drop тижня → «one click» список → нутрієнти і Health&nbsp;Score</td>
+            <td>Рейтинг 4.8, номінація Webby. Проти цього — акаунт корпорації і AI-плани</td>
+            <td>Free + Food+ $59.99/рік — <span class="nd">не переперевірено</span> (403 фетчерам)</td>
+          </tr>
+          <tr>
+            <th><a href="https://learn.plantoeat.com/help/shopping-list">Plan to Eat</a></th>
+            <td>Організовані домогосподарства, «if you love meal planning»</td>
+            <td><strong>Планер-перший</strong>; список — побічний продукт календаря</td>
+            <td>«Pick your meals, and we'll automatically build your grocery list». <strong>Користувацький порядок категорій</strong>, списки по магазинах, Staples, окрема комора</td>
+            <td>14 днів тріалу без картки, відгуки. Офлайн, експорт, приватність — <span class="nd">дані не підтверджені</span></td>
+            <td>Лише підписка: $5.95/міс або $49/рік</td>
+          </tr>
+          <tr>
+            <th><a href="https://tandoor.dev/">Tandoor</a></th>
+            <td>Самохостери, «cooking enthusiasts with huge collections»</td>
+            <td><strong>База інгредієнтів</strong> — єдиний такий з п'ятнадцяти</td>
+            <td>Імпорт із тисяч сайтів, сортування за супермаркетом, <strong>редаговані конверсії одиниць</strong>, нутрієнти + ціни, live-синк списку</td>
+            <td>Найсильніша дата-історія набору: OSS, self-host, «GDPR Compliant — Made in Germany», без трекінгу, експорт 90 днів</td>
+            <td>OSS безкоштовно + хостинг €0 / €1.99 / €3.49 / <strong>€4.99 «Premium AI»</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Таблиця гортається вбік →</p>
+
+    <div class="shots">
+      <a class="shot" href="research/screens/t1-paprika.png"><span class="frame"><img src="research/screens/t1-paprika.png" alt="Головна сторінка сайту Paprika Recipe Manager" loading="lazy"></span><span class="cap">Paprika 3 — сайт</span></a>
+      <a class="shot" href="research/screens/t1-fond.png"><span class="frame"><img src="research/screens/t1-fond.png" alt="Головна сторінка сайту Fond" loading="lazy"></span><span class="cap">Fond — сайт</span></a>
+      <a class="shot" href="research/screens/t1-samsung-food.png"><span class="frame"><img src="research/screens/t1-samsung-food.png" alt="Головна сторінка Samsung Food" loading="lazy"></span><span class="cap">Samsung Food — сайт</span></a>
+      <a class="shot" href="research/screens/t1-plan-to-eat.png"><span class="frame"><img src="research/screens/t1-plan-to-eat.png" alt="Головна сторінка Plan to Eat" loading="lazy"></span><span class="cap">Plan to Eat — сайт</span></a>
+      <a class="shot" href="research/screens/t1-tandoor.png"><span class="frame"><img src="research/screens/t1-tandoor.png" alt="Головна сторінка Tandoor Recipes" loading="lazy"></span><span class="cap">Tandoor — сайт</span></a>
+      <a class="shot" href="research/screens/t1-tandoor-app-restricted.png"><span class="frame"><img src="research/screens/t1-tandoor-app-restricted.png" alt="Застосунок Tandoor за логіном" loading="lazy"><span class="lock">Access restricted</span></span><span class="cap">Tandoor — апка</span></a>
+    </div>
+  </div>
+
+  <!-- Tier 2 -->
+  <div class="sub">
+    <h3>Тір 2 — Soft</h3>
+    <p class="prose">Інший продукт, та сама робота. <strong>Саме тут рецепти живуть сьогодні</strong> — і саме проти цього вимірюється реальна вартість переходу, а не проти Paprika.</p>
+
+    <div class="t-scroll">
+      <table class="t-wide">
+        <caption>Тір 2 — п'ять осей</caption>
+        <thead>
+          <tr><th>Продукт</th><th>Аудиторія</th><th>База продукту</th><th>Ключовий механізм</th><th>Довіра</th><th>Монетизація</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Apple Notes / Notion</th>
+            <td>Усі — і в цьому суть</td>
+            <td><strong>Неструктуровані документи</strong>: без схеми, без кількостей, нескінченна толерантність</td>
+            <td>Миттєве внесення звідусіль через системний share sheet. Нічого налаштовувати, нічого виправляти</td>
+            <td>Довіряють, бо продукт <em>загальний</em> — немає кулінарного вендора, який може померти</td>
+            <td>Notes — з ОС; Notion — freemium</td>
+          </tr>
+          <tr>
+            <th>Instagram / TikTok</th>
+            <td>Усі до ~45. Де рецепти <em>знаходять</em> у 2026</td>
+            <td><strong>Чуже відео.</strong> Збереження — закладка на контент, який тобі не належить</td>
+            <td>Нескінченний дискавері + збереження в один тап. Внесення безкоштовне, <strong>пошук безнадійний</strong>: 114 млн рілзів лише на <span class="ref">#recipe</span></td>
+            <td>Структурно немає: ні пошуку, ні експорту, ні кількостей</td>
+            <td>Безкоштовно, за рахунок реклами</td>
+          </tr>
+          <tr>
+            <th>AnyList</th>
+            <td>Домогосподарства, що координують закупівлю</td>
+            <td><strong>Сам список.</strong> «The best way to create and share a grocery shopping list»</td>
+            <td>«Any changes made to a shared list will show up instantly to everyone» + автогрупування категорій + Siri</td>
+            <td>Синк Mac / PC / iOS / iPad. Офлайн, експорт, приватність — <span class="nd">дані не підтверджені</span></td>
+            <td>$9.99/рік особистий · $14.99/рік household</td>
+          </tr>
+          <tr>
+            <th>Reminders / Keep</th>
+            <td>Усі. Нульове зусилля</td>
+            <td><strong>Загальні чекбокси</strong>: без кількостей, без інгредієнтів, без семантики</td>
+            <td>Спільний список, галочка, вже встановлено, безкоштовно, працює всюди</td>
+            <td>Синк і офлайн рівня платформи</td>
+            <td>Безкоштовно з платформою</td>
+          </tr>
+          <tr>
+            <th>Cookpad / Pinterest</th>
+            <td>Шукачі натхнення. Cookpad — «пошук №1 у Японії»</td>
+            <td><strong>UGC-контент</strong> і <strong>візуальний граф закладок</strong>; зберігання — побічний ефект перегляду</td>
+            <td>Соціальний доказ як ранжування: つくれぽ, «made 300,000+ times»</td>
+            <td>Натовп замінює коректність: збережень багато, доготувань мало</td>
+            <td>Cookpad freemium; Pinterest реклама</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Таблиця гортається вбік →</p>
+
+    <div class="shots">
+      <a class="shot" href="research/screens/t2-notion.png"><span class="frame"><img src="research/screens/t2-notion.png" alt="Notion — сайт" loading="lazy"></span><span class="cap">Notion — сайт</span></a>
+      <a class="shot" href="research/screens/t2-apple-notes-restricted.png"><span class="frame"><img src="research/screens/t2-apple-notes-restricted.png" alt="Apple Notes за логіном iCloud" loading="lazy"><span class="lock">Access restricted</span></span><span class="cap">Apple Notes</span></a>
+      <a class="shot" href="research/screens/t2-instagram-recipe-tag.png"><span class="frame"><img src="research/screens/t2-instagram-recipe-tag.png" alt="Публічна сторінка тегу #recipe в Instagram" loading="lazy"></span><span class="cap">Instagram — тег #recipe</span></a>
+      <a class="shot" href="research/screens/t2-anylist.png"><span class="frame"><img src="research/screens/t2-anylist.png" alt="Головна сторінка AnyList" loading="lazy"></span><span class="cap">AnyList — сайт</span></a>
+      <a class="shot" href="research/screens/t2-google-keep-restricted.png"><span class="frame"><img src="research/screens/t2-google-keep-restricted.png" alt="Google Keep за логіном" loading="lazy"><span class="lock">Access restricted</span></span><span class="cap">Google Keep</span></a>
+      <a class="shot" href="research/screens/t2-cookpad.png"><span class="frame"><img src="research/screens/t2-cookpad.png" alt="Cookpad — сайт" loading="lazy"></span><span class="cap">Cookpad — сайт</span></a>
+      <a class="shot" href="research/screens/t2-pinterest.png"><span class="frame"><img src="research/screens/t2-pinterest.png" alt="Pinterest — сайт" loading="lazy"></span><span class="cap">Pinterest — сайт</span></a>
+    </div>
+  </div>
+
+  <!-- Tier 3 -->
+  <div class="sub">
+    <h3>Тір 3 — Aspirational</h3>
+    <p class="prose">Планка майстерності: як рецепт має читатися і як список має відчуватися під одним пальцем.</p>
+
+    <div class="t-scroll">
+      <table class="t-wide">
+        <caption>Тір 3 — п'ять осей</caption>
+        <thead>
+          <tr><th>Продукт</th><th>Аудиторія</th><th>База продукту</th><th>Ключовий механізм</th><th>Довіра</th><th>Монетизація</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Mela</th>
+            <td>Дизайн-свідомі користувачі Apple</td>
+            <td>Особиста бібліотека <strong>без обов'язкового акаунта</strong> — приватний контейнер iCloud</td>
+            <td><strong>Вбудований браузер із live-детекцією рецепта</strong>: гортаєш → визначилось → прев'ю → збережено. Плюс RSS, OCR книжок, імпорт з описів YouTube / TikTok / Instagram</td>
+            <td><strong>Найсильніша приватність із п'ятнадцяти:</strong> «Mela does not collect any data… does not depend on or use any third-party service»</td>
+            <td>Безкоштовно + разова покупка Mela+ $6.99</td>
+          </tr>
+          <tr>
+            <th>Crouton</th>
+            <td>Ті, хто готує <em>з пристрою</em></td>
+            <td>«Дім для улюблених рецептів», iCloud</td>
+            <td><strong>Покроковий режим готування</strong>: тап на інгредієнт усередині кроку показує кількість, безконтактне перегортання, масштабування за порціями <em>або поінгредієнтно</em>, таймери з іменами</td>
+            <td>iCloud, household, Family Sharing. Слабше за Mela: email і user ID прив'язані</td>
+            <td>Гібрид: $1.99/міс · $14.99/рік · <strong>$24.99 lifetime</strong></td>
+          </tr>
+          <tr>
+            <th>NYT Cooking</th>
+            <td>Підписники</td>
+            <td><strong>Редакційна бібліотека контенту</strong>; особистий Recipe Box за пейволом</td>
+            <td>Редакційний авторитет «tested and perfected» плюс нотатки спільноти</td>
+            <td>Авторитет запозичений у медіа-бренду, а не побудований софтом</td>
+            <td>Підписка. Ціна на захоплених сторінках <span class="nd">не показана</span></td>
+          </tr>
+          <tr>
+            <th>AnyList <em>(як бенчмарк синку)</em></th>
+            <td>Домогосподарства у двох різних рядах магазину</td>
+            <td>Той самий продукт, що в тірі 2 — оцінюється за виконанням</td>
+            <td>Синк спільного списку настільки швидкий, що читається як локальний. Призначення категорій майже завжди правильне</td>
+            <td>Надійність як довіра: не втратив жодної галочки</td>
+            <td>$9.99 / $14.99 на рік</td>
+          </tr>
+          <tr>
+            <th><a href="https://www.todoist.com/help/articles/introduction-to-filters-V98wIH">Things 3 / Todoist</a></th>
+            <td>Поза категорією — еталон списків</td>
+            <td>Об'єкти-задачі</td>
+            <td>Ергономіка одного пальця: миттєві записи, undo, жести, порожні стани, бездоганний офлайн</td>
+            <td>Things — дві Apple Design Awards. Todoist — ролі й дозволи на Business</td>
+            <td>Things разово; Todoist freemium. <span class="nd">Числові ціни публічно не рендеряться</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">Таблиця гортається вбік →</p>
+
+    <div class="shots">
+      <a class="shot" href="research/screens/t3-mela.png"><span class="frame"><img src="research/screens/t3-mela.png" alt="Mela — сайт" loading="lazy"></span><span class="cap">Mela — сайт</span></a>
+      <a class="shot" href="research/screens/t3-crouton.png"><span class="frame"><img src="research/screens/t3-crouton.png" alt="Crouton — сайт" loading="lazy"></span><span class="cap">Crouton — сайт</span></a>
+      <a class="shot" href="research/screens/t3-nyt-cooking.png"><span class="frame"><img src="research/screens/t3-nyt-cooking.png" alt="NYT Cooking — сайт" loading="lazy"></span><span class="cap">NYT Cooking — сайт</span></a>
+      <a class="shot" href="research/screens/t3-nyt-recipe-box-restricted.png"><span class="frame"><img src="research/screens/t3-nyt-recipe-box-restricted.png" alt="NYT Recipe Box за пейволом" loading="lazy"><span class="lock">Access restricted</span></span><span class="cap">NYT — Recipe Box</span></a>
+      <a class="shot" href="research/screens/t3-anylist-complete-pricing.png"><span class="frame"><img src="research/screens/t3-anylist-complete-pricing.png" alt="Сторінка цін AnyList Complete" loading="lazy"></span><span class="cap">AnyList — ціни</span></a>
+      <a class="shot" href="research/screens/t3-things.png"><span class="frame"><img src="research/screens/t3-things.png" alt="Things 3 — сайт" loading="lazy"></span><span class="cap">Things 3 — сайт</span></a>
+      <a class="shot" href="research/screens/t3-todoist.png"><span class="frame"><img src="research/screens/t3-todoist.png" alt="Todoist — сайт" loading="lazy"></span><span class="cap">Todoist — сайт</span></a>
+    </div>
+  </div>
+
+  <!-- patterns of the market -->
+  <div class="sub">
+    <h3>Три спільні патерни ринку</h3>
+    <p class="prose">У джерелі їх п'ять. Три, що найбільше впливають на рішення.</p>
+
+    <div class="stack">
+      <div class="find">
+        <span class="k">П-1</span>
+        <div class="body">
+          <h4>Усі продають внесення рецепта; ніхто не продає коректність</h4>
+          <p>Усі п'ять hard-конкурентів маркетують імпорт — «save from any website», «from wherever you find them». Жоден не маркетує точність кількостей, цілісність одиниць чи слід перевірки. Крок виправлення скрізь трактують як витрату, яку треба сховати, а не як фічу.</p>
+          <p><strong>Наслідок:</strong> обов'язковий екран звірки (<span class="ref">§5.2</span>) — це <strong>контрарна позиція</strong>, а не гігієнічний мінімум. Ріже в обидва боки.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">П-2</span>
+        <div class="body">
+          <h4>Список покупок завжди похідний, ніколи не авторський</h4>
+          <p>У кожному hard-продукті список — це вихід плану. Лише <strong>AnyList</strong> трактує його як самостійний об'єкт із власним життям — і саме з нього домогосподарства реально ходять у магазин. Paprika дозволяє позиції бути лише в одному списку одночасно, тож недоходжена закупівля знищується плануванням наступного тижня.</p>
+          <p><strong>Наслідок:</strong> пряма підтримка <span class="ref">§5.9</span> «генерація ніколи не руйнує» та датованої історії списків.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">П-3</span>
+        <div class="body">
+          <h4>Довіру сигналізують соціально, ніколи не доводять числом</h4>
+          <p>NYT позичає її в маспхеду, Cookpad — у «made 300,000+ times», Samsung — у рейтингів і нагород, Mela і Things — у дизайн-премій. <strong>Жоден не доводить число, показавши, з чого воно складається.</strong></p>
+          <p><strong>Наслідок:</strong> перевірюваність (<span class="ref">§7.2</span>) — незайнята позиція в усій категорії та найближче до захищеного клина, що є в Cooksy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- differences -->
+  <div class="sub">
+    <h3>Три відмінності</h3>
+    <div class="stack">
+      <div class="find">
+        <span class="k">В-1</span>
+        <div class="body">
+          <h4>Форма монетизації надійно передбачає архітектуру</h4>
+          <p>Разова оплата (Paprika $4.99, Mela $6.99, Things) → локально-перший, офлайн, без сервера, <strong>без шерингу</strong>. Підписка (Plan to Eat, Fond, Samsung, NYT) → сервер, синк, шеринг, AI. Безкоштовно / OSS (Instagram, Keep, Tandoor self-host) → ти або товар, або сисадмін.</p>
+          <p>Cooksy хоче офлайн-гарантії першої колонки з шерингом і серверним імпортом другої — <strong>найдорожчий кут матриці</strong>, при тому що <span class="ref">§8</span> виключає дохід. PWA закриває <em>клієнтську</em> половину безкоштовно; серверна (URL-імпорт, публічне посилання, live-синк) залишається і впирається у free-tier.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">В-2</span>
+        <div class="body">
+          <h4>Центр ваги в усіх різний — і лише один збігається з Cooksy</h4>
+          <p>Бібліотека (Paprika, Mela, Crouton) · планер (Plan to Eat) · список (AnyList) · контент (Samsung, Cookpad, NYT) · <strong>база інгредієнтів (Tandoor — один із п'ятнадцяти)</strong>. Tandoor єдиний поділяє інгредієнт-перший центр Cooksy — і водночас найменш доступний продукт набору.</p>
+          <p class="pull">Правильна модель історично приїжджала всередині найгіршого інтерфейсу. Вибір оптимізатора сьогодні — гарна модель за Docker або гарна апка, що округлює математику.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">В-3</span>
+        <div class="body">
+          <h4>Усі конвертують одиниці; ніхто їх не обмежує</h4>
+          <p>Crouton продає метрично-імперську конверсію <em>як фічу</em> — тобто свідомо зберігає обидві системи. Tandoor робить конверсії редагованими користувачем. Склянка борошна і склянка цукру різняться приблизно на 80 г, і всі п'ятнадцять продуктів тримають цю двозначність живою.</p>
+          <p><strong>Наслідок:</strong> правило трьох одиниць <span class="ref">г / мл / шт</span> (<span class="ref">§5.1</span>) унікальне серед усіх п'ятнадцяти і <strong>не підтверджене поведінкою жодного з них.</strong> Одночасно найгостріша ідея брифу і найменш підкріплена ззовні.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 ══════════════ -->
+<section class="sec wrap" id="benchmark">
+  <div class="sec-head">
+    <span class="num">Розділ 2</span>
+    <h2>Бенчмарк — пошук у власній бібліотеці</h2>
+    <p class="lead prose">Відстань між «хочу щось приготувати» і потрібним рецептом у бібліотеці, яка вже твоя. Не внесення і не дискавері. Поле — п'ять найкращих-у-ніші продуктів <strong>поза категорією</strong>, плюс Paprika і Tandoor як підлога категорії.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Де Cooksy зараз і куди дійде</h3>
+    <p class="prose">Вісім критеріїв, кожен 1–5. Сьогодні <strong>23 з 40</strong> — нижче за Tandoor, і саме по тому виміру, який ресерч називає болем №1.</p>
+
+    <div class="t-scroll">
+      <table class="t-mid">
+        <caption>Cooksy: специфікація сьогодні → прогноз із трьома механізмами</caption>
+        <thead>
+          <tr><th>#</th><th>Критерій</th><th class="num-cell">Зараз</th><th class="num-cell">Прогноз</th><th>Звідки зміна</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>R1</th><td>Знайти, не пам'ятаючи назви</td><td class="num-cell">4</td><td class="num-cell up">5</td><td>М-1</td></tr>
+          <tr><th>R2</th><td>Запит зі збереженого стану</td><td class="num-cell">2</td><td class="num-cell dec">2</td><td><strong>Рішення:</strong> комора не з'єднується з пошуком</td></tr>
+          <tr><th>R3</th><td>Толерантність до словника</td><td class="num-cell">4</td><td class="num-cell flat">4</td><td><span class="ref">§5.5</span> уже оплатив</td></tr>
+          <tr><th>R4</th><td>Композиція кількох умов</td><td class="num-cell">3</td><td class="num-cell up">4</td><td>М-1</td></tr>
+          <tr><th>R5</th><td>Прозорість збігу</td><td class="num-cell">3</td><td class="num-cell up">5</td><td>М-2</td></tr>
+          <tr><th>R6</th><td>Ціна першого результату</td><td class="num-cell">5</td><td class="num-cell flat">5</td><td>Уже найкраще в таблиці — <span class="ref">§5.12</span></td></tr>
+          <tr><th>R7</th><td>Довговічність запиту</td><td class="num-cell">1</td><td class="num-cell dec">1</td><td><strong>Рішення:</strong> frecency замінює збережені пошуки</td></tr>
+          <tr><th>R8</th><td>Два порожні стани</td><td class="num-cell">1</td><td class="num-cell up">4</td><td>М-1 + М-3</td></tr>
+          <tr class="total"><th>Разом</th><td>з 40</td><td class="num-cell">23</td><td class="num-cell up">30</td><td>+7</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="t-scroll">
+      <table class="t-mid">
+        <caption>Поле — де це проти інших</caption>
+        <thead><tr><th>Продукт</th><th>Ніша</th><th class="num-cell">Сума</th></tr></thead>
+        <tbody>
+          <tr><th><a href="https://www.supercook.com/">SuperCook</a></th><td>Пошук рецептів за коморою</td><td class="num-cell">34</td></tr>
+          <tr><th><a href="https://www.macrumors.com/how-to/ios-use-natural-language-search-photos/">Apple Photos</a></th><td>Пошук у непідписаній особистій бібліотеці</td><td class="num-cell">29</td></tr>
+          <tr><th><a href="https://www.eatyourbooks.com/quick-tour">Eat Your Books</a></th><td>Пошук по кулінарних книжках, які в тебе вже є</td><td class="num-cell">28</td></tr>
+          <tr><th><a href="https://manual.raycast.com/search-bar">Raycast</a></th><td>Пошук відомого об'єкта, економія натискань</td><td class="num-cell">28</td></tr>
+          <tr><th><a href="https://www.todoist.com/help/articles/introduction-to-filters-V98wIH">Todoist</a></th><td>Довговічні композиційні запити</td><td class="num-cell">26</td></tr>
+          <tr><th>Tandoor <em>(підлога)</em></th><td>Єдиний у категорії з реальною толерантністю до словника</td><td class="num-cell">25</td></tr>
+          <tr><th><strong>Cooksy</strong> <em>(специфікація)</em></th><td>Сьогодні → з трьома механізмами</td><td class="num-cell"><strong>23 → <span class="up">30</span></strong></td></tr>
+          <tr><th><a href="https://www.paprikaapp.com/help/ios/">Paprika</a> <em>(підлога)</em></th><td>Інкумбент категорії</td><td class="num-cell">20</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Топ-3 механізми для MVP</h3>
+    <div class="rule-note">
+      <span class="lbl">Критерій відбору</span>
+      <p>Механізм проходить у MVP, якщо він — <strong>арифметика над локальними даними і не потребує ні сервера, ні нового датасету</strong> (<span class="ref">§4</span>, нульовий бюджет). Цю умову проходять рівно три з чотирьох.</p>
+    </div>
+
+    <div class="stack">
+      <div class="find">
+        <span class="k">М-1</span>
+        <div class="body">
+          <h4>Пошук за кількома інгредієнтами, лише за наявністю — від SuperCook, зі знятою залежністю від комори</h4>
+          <p>Вводиш <strong>назви</strong> без кількостей: <span class="ref">курка лимон рис</span>. Результати ранжуються за тим, <strong>скільки введених термінів рецепт містить</strong>: спершу всі три, потім два з трьох, потім один. Кожен рядок каже, що збіглося, а що ні.</p>
+          <p><strong>Чому працює.</strong> <span class="ref">§5.13</span> уже обіцяє звуження до рецептів, що містять <em>усі</em> інгредієнти. Зміна — в одному рядку поведінки: <strong>часткові збіги ранжуються, а не відкидаються.</strong> Строгий AND, що повертає нуль, — це глухий кут; той самий запит із чотирма точними і одинадцятьма «два з трьох» — це відповідь. Заодно це готове відновлення після нуля результатів.</p>
+          <p><strong>Коштує нічого</strong> — резолвиться через канонічні інгредієнти <span class="ref">§5.5</span>, які вже оплачені. Рухає <strong>R1 · R4 · R8</strong>.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">М-2</span>
+        <div class="body">
+          <h4>Доказ збігу в кожному рядку результату — від Eat Your Books</h4>
+          <p>EYB не каже «ця книжка підходить». Він каже <strong>яка книжка і яка сторінка</strong> — доказ, достатньо точний, щоб діяти, нічого не відкриваючи. Індекс без цього нічого не вартий: з назви книжки не приготуєш.</p>
+          <p><strong>У Cooksy — три поля в рядку:</strong> що збіглося (канонічний інгредієнт) · скільки треба рецепту (<span class="ref">400 г</span>, при <strong>базовій</strong> кількості порцій, і це підписано) · група, якщо вона в рецепта є. Разом рядок читається так:</p>
+          <p class="pull">збіг: баклажан · 400 г · у «Для соусу»</p>
+          <p><strong>Чому працює.</strong> Це <span class="ref">§7.2</span> на крок раніше — не на рядку списку покупок, а на рядку пошуку. І це заповнення тієї самої порожньої позиції з <a href="#competitors">П-3</a>: три з п'яти найкращих-у-ніші продуктів мають R5 ≤ 3. Рухає <strong>R5: 3 → 5</strong>.</p>
+        </div>
+      </div>
+
+      <div class="find">
+        <span class="k">М-3</span>
+        <div class="body">
+          <h4>Frecency (частота × свіжість) як порядок за замовчуванням — від Raycast</h4>
+          <p>Опублікований порядок ранжування Raycast закінчується «Frecency score», і <strong>дозапитовий</strong> список уже за ним відсортований: відкриваєш рядок — і потрібне зазвичай уже видно, до того як щось набрав. Є <strong>Reset Ranking</strong>, тож навчання ніколи не стає пасткою.</p>
+          <p><strong>У Cooksy:</strong> порядок бібліотеки за замовчуванням — частота і свіжість <strong>готування</strong>, не збереження. Планер (<span class="ref">§5.7</span>) і історія списків (<span class="ref">§5.9</span>) уже датують кожне готування, тож це коштує один ключ сортування. <span class="ref">§5.7</span> сам зауважує, що домогосподарства ротують ті самі п'ятнадцять страв — ці п'ятнадцять і мають бути вгорі, без запиту.</p>
+          <p><strong>Чому працює.</strong> Лагодить дозапитову половину R8 за ціну сортування <strong>і замінює R7 на цьому розмірі бібліотеки.</strong> Todoist потрібна мова фільтрів, бо в списку задач тисячі позицій; домогосподарству з шістдесятьма рецептами потрібні не оператори, а п'ятнадцять зверху. Рухає <strong>R8: 1 → 4</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Четвертий механізм — і чому він поза топ-3</h3>
+    <div class="find">
+      <span class="k">М-4</span>
+      <div class="body">
+        <h4>Пошук за описом і процесом, у двох тірах — від Apple Photos</h4>
+        <p><span class="ref">смажена курка</span> повертає спершу страви, які <em>є</em> смаженою куркою (тір <strong>Страви</strong> — назва, теги), потім кожну страву, де смаження курки — частина процесу (тір <strong>Використано в</strong> — кроки методу, зв'язані суб-рецепти <span class="ref">§5.2.2</span>).</p>
+        <p>Не входить у топ-3 з двох незалежних причин:</p>
+        <ol class="numlist">
+          <li><p><strong>Це єдиний механізм із новою вартістю даних.</strong> Щоб <span class="ref">смажений</span> дотягувався до <em>смажити</em>, <em>підсмажений</em>, <em>обсмажка</em>, потрібен невеликий словник кулінарних дій — <strong>другий датасет поруч із відкритим питанням <span class="ref">§10</span></strong>. Менший за базу інгредієнтів, але це реальна нова робота.</p></li>
+          <li><p><strong>За шкалою R1–R8 він не додає жодного бала понад М-1</strong> — обидва піднімають R1 з 4 до 5. Це радше межа шкали, ніж оцінка механізму: два тіри результатів — нова здатність, для якої в критеріях просто немає клітинки.</p></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Один механізм, що не спрацює: комора як фільтр пошуку</h3>
+    <p class="prose"><em>«SuperCook only shows you recipes that require the ingredients you already have. All the recipes you see on SuperCook are recipes you can make right now.»</em> Найпривабливіша ідея всього бенчмарку: вона дає SuperCook 5 за R2 і найвищу суму в таблиці. <strong>І її не можна копіювати</strong> — з трьох причин, що підсилюють одна одну.</p>
+
+    <ol class="numlist">
+      <li><p><strong>Вона інвертує правило довіри, яке бриф уже написав.</strong> <span class="ref">§5.8</span>: <em>«віднімання завжди видиме… інгредієнт ніколи не зникає безслідно»</em>. Фільтр по коморі робить рівно цю помилку на рівень вище: <strong>зникають рецепти</strong> — і це строго менш відновлювано, бо забутий рядок у списку виявляється в магазині, а невидимий рецепт не виявляється ніколи. Не можна натиснути «насправді в мене закінчилось» на результаті, якого тобі не показали.</p></li>
+      <li><p><strong>Вона вимагає повноти інвентаря, якої <span class="ref">§5.8</span> свідомо відмовляється вимагати.</strong> SuperCook потрібна вся кухня — <em>«навіть та стара пляшка вустерського соусу»</em> — і пікер на 2&nbsp;000+ інгредієнтів. У Cooksy базові запаси не мають кількостей узагалі, облік опційний, а бриф прямо каже, що облікові кількості дрейфують у ту мить, коли ти готуєш, не сказавши застосунку. Це <span class="ref">§7.3</span> «тиха помилка» — і саме на тому екрані, де її найважче помітити.</p></li>
+      <li><p><strong>Економіка перевернута — і це вбиває ідею остаточно.</strong> SuperCook фільтрує <strong>11 млн рецептів, які тобі не належать</strong>: приховування — єдине, що робить цей набір придатним, а хибний негатив нічого не коштує, бо є ще чотириста. Cooksy шукає <strong>по шістдесяти рецептах, які ти сам обрав і виправив на звірці</strong>. Ховати нема від чого — і на такому розмірі фільтр, що прибирає результати, прибирає саме те, що шукали.</p></li>
+    </ol>
+
+    <p class="pull">Рахувати інгредієнти, які користувач ввів, а не ті, якими він володіє. Рецепт, який не приготуєш сьогодні, — усе одно той рецепт, який шукали.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 3 ══════════════ -->
+<section class="sec wrap" id="patterns">
+  <div class="sec-head">
+    <span class="num">Розділ 3</span>
+    <h2>Патерни</h2>
+    <p class="lead prose">Питання не «як виглядає екран», а <strong>що застосунок вважає головним об'єктом і хто тримає структуру</strong>. Від цієї відповіді залежить, що взагалі можливо порахувати.</p>
+  </div>
+
+  <div class="sub">
+    <h3>П'ять відповідей</h3>
+    <div class="t-scroll">
+      <table class="t-mid">
+        <thead><tr><th>#</th><th>Патерн</th><th>Головний об'єкт</th><th>Хто тримає структуру</th><th>Приклади</th></tr></thead>
+        <tbody>
+          <tr><th>П1</th><td><strong>Типізований запис</strong></td><td>запис у базі</td><td>застосунок, у момент внесення</td><td>Paprika, Grocy, Airtable</td></tr>
+          <tr><th>П2</th><td><strong>Документ</strong></td><td>нотатка</td><td>ніхто — людина в голові</td><td>Apple Notes, Obsidian, коробка з картками</td></tr>
+          <tr><th>П3</th><td><strong>Індекс</strong></td><td>запит</td><td>індекс, у момент пошуку</td><td>Gmail, Spotlight, Apple Photos</td></tr>
+          <tr><th>П4</th><td><strong>Вихідний артефакт</strong></td><td>список покупок</td><td>сам артефакт, на один тиждень</td><td>AnyList, Bring!, дошка на холодильнику</td></tr>
+          <tr><th>П5</th><td><strong>Розмова</strong></td><td>репліка</td><td>модель, на вимогу</td><td>ChatGPT, Alexa-списки</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Один сценарій, прогнаний через усі п'ять</h3>
+    <p class="prose">Найшвидший спосіб побачити різницю — прогнати один випадок.</p>
+    <div class="rule-note">
+      <span class="lbl">Сценарій</span>
+      <p>Зберігаєш рецепт, де написано «2 цибулини». За три дні хочеш <strong>подвоїти порції</strong> і зробити <strong>один список покупок</strong> разом з іншим рецептом, де є «200 г цибулі».</p>
+    </div>
+
+    <div class="t-scroll">
+      <table class="t-mid">
+        <thead><tr><th>#</th><th>Що зберігається</th><th>Подвоєння</th><th>Злиття двох рецептів</th></tr></thead>
+        <tbody>
+          <tr>
+            <th>П1</th>
+            <td><span class="ref">2</span> · <span class="ref">шт</span> · <span class="ref">цибуля</span> <em>(канонічний інгредієнт)</em></td>
+            <td><strong>4 шт</strong> — автоматично, живим перерахунком</td>
+            <td><strong>цибуля — 200 г + 4 шт</strong>; рядок можна відкрити і побачити, з яких рецептів він складений</td>
+          </tr>
+          <tr>
+            <th>П2</th>
+            <td>рядок тексту «2 цибулини»</td>
+            <td>у голові</td>
+            <td>вручну, на папірці</td>
+          </tr>
+          <tr>
+            <th>П3</th>
+            <td>будь-що; головне — знайти</td>
+            <td><strong>індекс цього не робить</strong> — він відповідає «де», не «скільки»</td>
+            <td>не робить</td>
+          </tr>
+          <tr>
+            <th>П4</th>
+            <td>нічого: «2 цибулини» одразу йдуть у список цього тижня</td>
+            <td><strong>немає до чого застосувати</strong> — базової кількості порцій не існує</td>
+            <td>список сам і є злиттям, але наступного тижня все набирається заново</td>
+          </tr>
+          <tr>
+            <th>П5</th>
+            <td>текст, як його зрозуміла модель</td>
+            <td>модель каже «4 цибулини»</td>
+            <td>модель каже число — <strong>звідки воно, перевірити не можна</strong>; у магазині без мережі відповіді не буде</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="pull">Уся петля продукту — <em>зберегти → задати порції → спланувати → отримати один список</em> — це чотири дії над структурою. Стовпчики «подвоєння» і «злиття» заповнені лише в одного патерна.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Обрано: П1, типізований запис <span class="verdict v-ok" style="margin-inline-start:.6rem">Обрано</span></h3>
+    <p class="prose"><strong>Що це означає конкретно.</strong> Інгредієнт зберігається не як фраза, а як <strong>набір полів із відомим типом</strong>: кількість (число), одиниця (одне з трьох: <span class="ref">г</span>/<span class="ref">мл</span>/<span class="ref">шт</span>), інгредієнт (посилання на канонічний запис), примітка, прапорець «не масштабується». Внесення — воронка, що закінчується формою: вставив → розпарсилось → <strong>звірив і виправив</strong> → збереглось. А все, що користувач бачить далі — картка рецепта, перерахований список, зведена закупівля, калорії — це <strong>не окремі фічі, а проєкції над цими рядками</strong>.</p>
+
+    <ol class="reasons">
+      <li><p><strong>Усе, що Cooksy показує, — це арифметика. Арифметика вимагає типів.</strong> Вагова модель (<span class="ref">§5.3</span>), живий перерахунок порцій (<span class="ref">§5.4</span>), ккал/100 г (<span class="ref">§5.6</span>), злиття списку (<span class="ref">§5.9</span>) — це не фічі, які можна «додати». Це обчислення, під якими або є типізовані рядки, або їх немає, і тоді немає й обчислень. <span class="ref">§5.1</span> — те саме рішення з іншого боку: продукт, який <strong>заборонив столові ложки</strong>, щоб гарантувати тип, уже обрав цей патерн. Решта — наслідок.</p></li>
+      <li><p><strong>Канонічний інгредієнт — це ключ, і лише в цьому патерні є на чому його зводити.</strong> На одному записі сходяться <strong>чотири</strong> фічі: злиття списку, калорії, комора, пошук за інгредієнтом. У П2 «цибуля» — рядок тексту, і ті самі чотири фічі перетворюються на чотири окремі евристики, кожна з яких ламається по-своєму на «2 великі жовті цибулини». Фраза брифу <em>«кожна година тут окупається чотири рази»</em> — це опис нормалізованої схеми: множник 4 існує саме тому, що зводити є на що.</p></li>
+      <li><p><strong>Обіцянка «показати склад числа» вимагає збереженого походження.</strong> <span class="ref">§7.2</span> і <span class="ref">§7.3</span> недосяжні в П3 і П5: і індекс, і модель повертають результат, який <strong>не вміють пояснити</strong> — саме на цій підставі <span class="ref">§10</span> заборонив модель на етапі запиту. Плюс це єдиний патерн, де <span class="ref">§5.12</span> дістається безкоштовно: записи на пристрої плюс арифметика — це локальне читання, без спінера і без мережі.</p></li>
+    </ol>
+
+    <div class="rule-note">
+      <span class="lbl">Ціна, і де вона падає</span>
+      <p>У П1 рівно одна вразливість — <strong>вартість внесення</strong>. Бриф платить її свідомо і двічі: звірка лишилась обов'язковою на кожному шляху (<span class="ref">§5.2</span>), а share sheet поїхав у пост-MVP (<span class="ref">§8.1</span>), тож вставка тексту — єдина дорога в продукт. Звідси: <strong>екран звірки і швидкість парсера — найризикованіші поверхні MVP</strong>, а не планер і не комора.</p>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Вердикти по решті</h3>
+    <div class="t-scroll">
+      <table class="t-mid">
+        <thead><tr><th>#</th><th>Патерн</th><th>Вердикт</th><th>Чому саме так</th></tr></thead>
+        <tbody>
+          <tr>
+            <th>П2</th><td>Документ</td><td><span class="verdict v-no">Відкинуто</span></td>
+            <td>Чинний інкумбент і причина, чому Cooksy існує. Виграє на єдиній осі, де його не перемогти — швидкість внесення — і програє <strong>все, що нижче по потоку, одразу</strong>. <strong>Документ — найшвидший спосіб зберегти рецепт і найповільніший спосіб ним скористатися.</strong></td>
+          </tr>
+          <tr>
+            <th>П3</th><td>Індекс</td><td><span class="verdict v-abs">Уже всередині</span></td>
+            <td>Корисну половину <span class="ref">§5.13</span> вже забрав: два тіри результатів із доказом збігу і порядок за frecency. Мова запитів і збережені пошуки відкинуті — оператори це клавіатура і стіл, а <span class="ref">§7.4</span> описує мокрі руки й один палець.</td>
+          </tr>
+          <tr>
+            <th>П4</th><td>Вихідний артефакт</td><td><span class="verdict v-warn">Резерв</span></td>
+            <td>План Б за умови X — див. <a href="#g2">Г-2</a>. Розворот дешевий: змінюється порядок вкладок і головна дія, <strong>модель даних не рухається</strong>.</td>
+          </tr>
+          <tr>
+            <th>П5</th><td>Розмова</td><td><span class="verdict v-half">Розділено</span></td>
+            <td><span class="ref">§10</span> дозволяє модель на етапі створення даних і збагачення при імпорті та <strong>забороняє на етапі запиту</strong>. Модель може <em>писати</em> дані, але ніколи не стоїть між натиском клавіші і результатом.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="prose" style="padding-top:1.4rem"><strong>Дошка / канва</strong> (Trello, Miro) розглядалась і не увійшла в п'ятірку: Cooksy вже використовує її там, де вона доречна — тижнева сітка (<span class="ref">§5.7</span>) <em>і є</em> дошка, — а як патерн бібліотеки це той самий перегляд, тільки з гіршою щільністю і жестами точності, які <span class="ref">§7.4</span> забороняє.</p>
+
+    <p class="prose"><strong>Джерело цього розділу.</strong> Продукти, названі як приклади, мають джерела в <a href="#competitors">розділі 1</a> або скріни. <strong>Сама класифікація П1–П5 — власна аналітична рамка цього дослідження; <span class="nd">зовнішнього джерела вона не має</span>.</strong></p>
+  </div>
+</section>
+
+<!-- ══════════════ 4 ══════════════ -->
+<section class="sec wrap" id="conclusions">
+  <div class="sec-head">
+    <span class="num">Розділ 4</span>
+    <h2>Висновки</h2>
+    <p class="lead prose">Вісім прогалин. Для кожної — гіпотеза, яку можна спростувати, посилання на розділ, з якого вона випливає, і чим перевіряється.</p>
+  </div>
+
+  <div class="stack">
+    <div class="find" id="g1">
+      <span class="k">Г-1</span>
+      <div class="body">
+        <h4>Швидкість внесення рецепта</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Якщо <em>вставити → звірити → зберегти</em> займає більше часу, ніж вставити той самий текст в Apple Notes, бібліотека не набереться — і <strong>жоден механізм нижче по потоку не спрацює, бо не буде на чому</strong>.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#competitors">Розділ 1 · П-1</a> <a class="chip" href="#patterns">Розділ 3 · П1</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>Парсер-бейк-офф: ті самі 10 реальних URL (мінімум 3 у чашках/унціях, 2 з групами інгредієнтів) через Samsung Food, Paprika і Mela — виміряти, скільки виправлень вимагає кожен. Сьогодні це <span class="nd">твердження, а не вимір</span>.</p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g2">
+      <span class="k">Г-2</span>
+      <div class="body">
+        <h4>Умова X: чи набереться бібліотека взагалі</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Якщо через 4 тижні в бібліотеці менше 15 рецептів, а медіана «скільки разів готували» дорівнює 1, архів не окупає вартості внесення — і головним об'єктом продукту має стати список (П4), а не бібліотека.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#patterns">Розділ 3 · П4</a> <a class="chip" href="#competitors">Розділ 1 · П-2</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>Дві метрики з першого тижня: розмір бібліотеки і медіана «разів приготовано». Поріг 15 не довільний — <span class="ref">§5.7</span> сам стверджує, що домогосподарства ротують п'ятнадцять страв. Ціна помилки низька: розворот змінює порядок вкладок і головну дію, модель даних не чіпає.</p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g3">
+      <span class="k">Г-3</span>
+      <div class="body">
+        <h4>Перевірюваність як клин</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Якщо показати склад кожного зведеного числа, оптимізатор перестане перераховувати вручну — і це єдина позиція, яку в категорії ще ніхто не зайняв.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#competitors">Розділ 1 · П-3</a> <a class="chip" href="#benchmark">Розділ 2 · М-2</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p><strong>Не перевірювана деск-ресерчем.</strong> Висновок зроблено з <em>відсутності</em> в маркетингу, а не зі спостереження за людьми. Потребує користувачів на реальній закупівлі. <span class="nd">Дані не підтверджені.</span></p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g4">
+      <span class="k">Г-4</span>
+      <div class="body">
+        <h4>Три одиниці</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Строгі <span class="ref">г</span>/<span class="ref">мл</span>/<span class="ref">шт</span> прибирають цілий клас тихих помилок у масштабуванні, злитті й калоріях — і ця вигода більша за ціну, яка падає на парсер (конверсії, густини, вага штуки).</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#competitors">Розділ 1 · В-3</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>Той самий бейк-офф Г-1, з додатковим лічильником: <strong>яка частка рядків із 10 рецептів потребує ручного введення густини або ваги штуки</strong>. Це водночас вимір ціни <span class="ref">§5.1</span> і вимір покриття <span class="ref">§10</span>.</p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g5">
+      <span class="k">Г-5</span>
+      <div class="body">
+        <h4>Джерело даних про канонічні інгредієнти</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Кілька сотень курованих інгредієнтів покриють більшість домашньої кухні; решта падає на екран звірки, де користувач вводить число один раз. Відкрита нутрієнтна база дає ккал, але <strong>не дає густини, середньої ваги штуки і категорії відділу</strong> — трьох із чотирьох потрібних атрибутів.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#benchmark">Розділ 2 · М-1, М-2</a> <a class="chip" href="#competitors">Розділ 1 · Tandoor</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>На тих самих 10 рецептах порахувати частку рядків, що резолвляться автоматично. Фолбек зафіксовано незалежно від джерела: нерозпізнаний інгредієнт <strong>ніколи не блокує збереження рецепта</strong>.</p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g6">
+      <span class="k">Г-6</span>
+      <div class="body">
+        <h4>Порядок відділів для європейського магазину</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Один фіксований порядок обходу достатньо добрий — але оскільки реордер відкинуто (<span class="ref">§8</span>), це <strong>єдиний порядок, який користувач узагалі отримає</strong>, тож він має бути правильним для тих магазинів, якими люди реально ходять.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#competitors">Розділ 1 · Тір 1</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>Пройти реальний європейський супермаркет із поточним порядком <span class="ref">§5.5</span> і записати кількість повернень назад. Ресерч <span class="nd">повністю американоцентричний</span>; таксономії відділів не валідовані на європейському магазині. Paprika, Plan to Eat і AnyList — усі три дають перевпорядкування; це дефолт категорії, а не примха одного продукту.</p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g7">
+      <span class="k">Г-7</span>
+      <div class="body">
+        <h4>Комора як «фіча-цвинтар»</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Дворівнева комора (базові запаси без кількостей + опційний облік) переживе дрейф саме тому, що жоден рівень не обов'язковий: пропусти її повністю — і Cooksy поводиться так, ніби комора порожня.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#benchmark">Розділ 2 · відкинутий механізм</a> <a class="chip" href="#competitors">Розділ 1 · Paprika</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p><strong>Ніхто не спостерігав, як саме вмирають реалізації комори.</strong> Потрібен місяць реального ведення — власного або тірдауну Paprika. <span class="nd">Дані не підтверджені.</span></p></div>
+      </div>
+    </div>
+
+    <div class="find" id="g8">
+      <span class="k">Г-8</span>
+      <div class="body">
+        <h4>Frecency як правильний дефолтний порядок</h4>
+        <div class="kv"><span class="lbl">Гіпотеза</span><p>Частота × свіжість <strong>готування</strong> (не збереження) виводить нагору ті п'ятнадцять страв, які домогосподарство реально ротує — і цим замінює збережені пошуки на бібліотеці в шістдесят рецептів.</p></div>
+        <div class="kv"><span class="lbl">Випливає з</span><p><a class="chip" href="#benchmark">Розділ 2 · М-3</a></p></div>
+        <div class="kv"><span class="lbl">Перевірка</span><p>Неможлива до того, як із бібліотеки готували місяць. Відкрите питання, чи це правильний порядок, чи просто найдешевший. Ризик знято наперед: порядок <strong>скидається</strong>, тож навчання не стає пасткою.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 5 ══════════════ -->
+<section class="sec wrap" id="unverified">
+  <div class="sec-head">
+    <span class="num">Розділ 5</span>
+    <h2>Дані не підтверджені</h2>
+    <p class="lead prose">Усе, що в цьому зведенні не має джерела або має лише слабке. Нічого з цього не домислено.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Про конкурентів</h3>
+    <ol class="numlist">
+      <li><p><strong>Fond</strong> — офлайн, експорт і дозволи не заявлені ніде на сайті; продукт читається як пре-лонч. Модель ролей <em>owner / editor / viewer</em> з ранньої чернетки <strong>відкликана як непідтверджена</strong>, і <span class="ref">§5.10</span> більше на неї не спирається.</p></li>
+      <li><p><strong>Samsung Food</strong> — $59.99/рік узято з попереднього деск-ресерчу і не переперевірено: сайт віддає 403 серверним фетчерам.</p></li>
+      <li><p><strong>Plan to Eat</strong> — офлайн, експорт і приватність на сайті відсутні.</p></li>
+      <li><p><strong>AnyList</strong> — офлайн, експорт і приватність на сайті не розглянуті.</p></li>
+      <li><p><strong>Ціни не рендеряться публічно</strong> у Fond, NYT Cooking, Things і Todoist — відповідні клітинки це кажуть, а не вгадують.</p></li>
+      <li><p><strong>Tandoor</strong> — тріграмний пошук (<span class="ref">chkn</span> → chicken) підтверджено лише вторинним джерелом; офіційна сторінка документації пошуку віддає 404.</p></li>
+      <li><p><strong>Apple Notes як найпоширеніше місце зберігання рецептів</strong> — правдоподібно, але це власне припущення без даних.</p></li>
+      <li><p><strong>Чотири скріни за логіном</strong>, марковані ACCESS RESTRICTED замість підробки: Tandoor app · Apple Notes · Google Keep · NYT Recipe Box. Особиста колекція збережень Instagram недосяжна без акаунта — захоплено публічну сторінку тегу <span class="ref">#recipe</span>, звідки й узято цифру 114 млн.</p></li>
+    </ol>
+  </div>
+
+  <div class="sub">
+    <h3>Про метод загалом</h3>
+    <ol class="numlist" start="9">
+      <li><p><strong>Це не спостережений біль користувачів.</strong> Уся картина болю виведена з маркетингу вендорів, текстів App Store і з того, що п'ятнадцять продуктів вирішили побудувати або пропустити. <strong>Ні тірдаунів, ні інтерв'ю.</strong> Відсутність у маркетингу — справжній сигнал, і збіг через три незалежні тіри чогось вартий, але це твердження, а не вимір.</p></li>
+      <li><p><strong>Оцінки бенчмарку</strong> — це оцінка <em>специфікації</em> за документацією, а не вимір працюючого продукту. 23/40 і прогноз 30/40 мають той самий статус.</p></li>
+      <li><p><strong>Якість парсера</strong> — твердження. Бейк-офф не проведено, хоча обов'язкова звірка була підтверджена саме на міркуваннях.</p></li>
+      <li><p><strong>Порядок відділів</strong> не валідований на європейському супермаркеті.</p></li>
+      <li><p><strong>Класифікація патернів П1–П5</strong> — власна аналітична рамка цього дослідження; зовнішнього джерела не має.</p></li>
+    </ol>
+  </div>
+
+  <div class="sub">
+    <h3>Що з цього робити далі</h3>
+    <p class="prose">Один пункт закриває три прогалини одразу. <strong>Парсер-бейк-офф</strong> (10 реальних URL × 3 продукти) вимірює <a href="#g1">Г-1</a> (швидкість внесення), <a href="#g4">Г-4</a> (ціна трьох одиниць) і <a href="#g5">Г-5</a> (покриття бази інгредієнтів) за один прохід — і це рівно та поверхня, яку <a href="#patterns">розділ 3</a> називає найризикованішою в MVP.</p>
+    <p class="prose">Друге за віддачею — <strong>дві метрики з першого тижня</strong> для <a href="#g2">Г-2</a>: розмір бібліотеки і медіана «разів приготовано». Коштують ключа сортування, який М-3 і так вимагає, а відповідають на питання, чи правильний головний об'єкт продукту обрано.</p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="inner">
+    <p>Cooksy · зведення досліджень · 21 липня 2026</p>
+    <p>Джерела: research/competitive-landscape.md · comparison.md · benchmark-retrieval.md · ux-patterns.md · summary.md</p>
+    <p>Посилання <span class="ref">§</span> вказують на CLAUDE.md. Скріни — research/screens/, клікабельні до повного розміру.</p>
+  </div>
+</footer>
+
+</body>
+</html>
