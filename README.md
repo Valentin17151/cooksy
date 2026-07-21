@@ -29,7 +29,7 @@ This table is the index — update the status column as work lands.
 | [`research/comparison.md`](./research/comparison.md) | The 15 compared on audience · product base · key mechanism · trust · monetization | ✅ Written |
 | [`research/benchmark-retrieval.md`](./research/benchmark-retrieval.md) | Retrieval scored — 8 criteria × 5 best-in-niche products, what to transfer, what to refuse | ✅ Written |
 | [`research/ux-patterns.md`](./research/ux-patterns.md) | Five organising principles for storing and retrieving a recipe; which one the brief already chose, and its one failure mode | ✅ Written |
-| [`research/summary.md`](./research/summary.md) | Ukrainian-language synthesis of the three documents above, with eight gaps each carrying a falsifiable hypothesis | ✅ Written |
+| [`research/summary.md`](./research/summary.md) | Synthesis of the three documents above, with eight gaps each carrying a falsifiable hypothesis | ✅ Written |
 | [`research.html`](./research.html) | The same synthesis as one browsable page — comparison tables, screens, cross-linked gaps | ✅ Written |
 | [`research/screens/`](./research/screens/) | Screenshots from other products, referenced by `comparison.md` | ✅ 20 captured |
 | [`wireframes/`](./wireframes/) | Low-fidelity layouts for the seven screens | ⬜ Empty |
