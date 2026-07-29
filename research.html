@@ -397,9 +397,63 @@
     display: flex; flex-direction: column; gap: .35rem;
     font-family: var(--mono); font-size: .71rem; color: var(--ink-3);
   }
+
+  /* ── site sidebar ───────────────────────────────── */
+  body { padding-left: 14rem; }
+  .sidenav {
+    position: fixed; inset: 0 auto 0 0; width: 14rem; z-index: 40;
+    background: var(--paper-sunk);
+    border-right: 1px solid var(--rule);
+    padding: 1.6rem 1.1rem;
+    display: flex; flex-direction: column; gap: 1.9rem;
+    overflow-y: auto;
+  }
+  .sidenav-brand { text-decoration: none; color: var(--ink); line-height: 1.1; }
+  .sidenav-brand b { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; }
+  .sidenav-brand span {
+    display: block; font-family: var(--mono); font-size: .58rem;
+    letter-spacing: .17em; text-transform: uppercase; color: var(--ink-3); margin-top: .4rem;
+  }
+  .sidenav-list { display: flex; flex-direction: column; gap: .15rem; }
+  .sidenav-list a {
+    display: flex; gap: .6rem; align-items: baseline;
+    font-family: var(--mono); font-size: .71rem; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-2); text-decoration: none;
+    padding: .55rem .6rem; border-left: 2px solid transparent;
+  }
+  .sidenav-list a:hover { background: var(--paper-raised); color: var(--ink); }
+  .sidenav-list a[aria-current="page"] { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+  .sidenav-list a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .sidenav-list .n { color: var(--ink-3); font-size: .64rem; flex: none; }
+  .sidenav-foot { margin-top: auto; font-family: var(--mono); font-size: .6rem; line-height: 1.7; color: var(--ink-3); }
+
+  @media (max-width: 62rem) {
+    body { padding-left: 0; }
+    .sidenav {
+      position: static; width: auto; flex-direction: row; align-items: center;
+      gap: 1rem; padding: .7rem 1rem; border-right: 0; border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+    }
+    .sidenav-list { flex-direction: row; gap: .3rem; }
+    .sidenav-list a { border-left: 0; border-bottom: 2px solid transparent; padding: .4rem .5rem; }
+    .sidenav-list a[aria-current="page"] { border-left: 0; border-bottom-color: var(--accent); }
+    .sidenav-foot, .sidenav-brand span { display: none; }
+  }
 </style>
 </head>
 <body>
+
+<aside class="sidenav">
+  <a class="sidenav-brand" href="index.html"><b>Cooksy</b><span>Design phase</span></a>
+  <nav class="sidenav-list">
+    <a href="research.html" aria-current="page"><span class="n">01</span>Research</a>
+    <a href="jtbd.html"><span class="n">02</span>JTBD</a>
+  </nav>
+  <div class="sidenav-foot">
+    Source of truth<br>research/summary.md<br>research/jtbd.md
+  </div>
+</aside>
+
 
 <nav class="nav">
   <div class="wrap nav-inner">

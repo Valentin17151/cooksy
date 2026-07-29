@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Design phase</title>
+<link rel="canonical" href="research.html">
+<meta http-equiv="refresh" content="0; url=research.html">
+<style>
+  :root {
+    --paper: #F5F2F6; --ink: #1D181F; --ink-3: #6E6574; --accent: #6B2E5B;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+    --serif: "Iowan Old Style", Charter, "Bitstream Charter", Cambria, Georgia, serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #16131A; --ink: #EDE7F0; --ink-3: #8B8291; --accent: #CB8CBA; color-scheme: dark; }
+  }
+  body {
+    margin: 0; min-height: 100vh;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--serif);
+    display: grid; place-items: center; padding: 2rem;
+  }
+  .box { display: flex; flex-direction: column; gap: 1rem; text-align: center; max-width: 34ch; }
+  h1 { margin: 0; font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; }
+  p { margin: 0; color: var(--ink-3); font-family: var(--mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; }
+  nav { display: flex; gap: 1.25rem; justify-content: center; font-family: var(--mono); font-size: .78rem; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>Cooksy</h1>
+    <p>Design phase</p>
+    <nav>
+      <a href="research.html">01 · Research</a>
+      <a href="jtbd.html">02 · JTBD</a>
+    </nav>
+  </div>
+</body>
+</html>

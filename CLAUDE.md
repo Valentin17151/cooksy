@@ -28,6 +28,24 @@ Two things follow from this:
 - **The user is the source of recipes, not the app.** No content library, no editorial, no discovery feed.
 - **Precision earns trust.** An optimiser will abandon the product the moment the maths is wrong. Quantity handling is the feature, not a detail.
 
+### 2.1 Primary persona and the jobs, in brief
+
+Worked out in [`research/personas.md`](./research/personas.md) and [`research/jtbd.md`](./research/jtbd.md); the short version lives here because the build order answers to it.
+
+**P-1 — the Systematic Optimiser.** Cooks regularly and already knows what they want to cook; needs the logistics around it to disappear. Defined by behaviour, never demographics — nothing in the research supports an age, a country or a household size. Three secondary personas exist (the Household Logistics Lead, the Reel Hoarder, the Data Sovereign), and each hits a structural block in MVP that P-1 does not.
+
+**The main job.** *When I have decided what we are eating over the next few days, I want to get everything into the house in one go, without doing the arithmetic or the remembering myself, so that the week I planned is the week we actually cook.*
+
+**Three jobs for the MVP core** — the ones P-1 needs most that the market has not already closed:
+
+| | Job | Why it survives the filter |
+|---|---|---|
+| **J-2** | Getting back to a dish that already works | Pain #1 in the research, and in-category coverage is poor — the products that do it well are outside the category |
+| **J-3** | Cooking for the number of people actually eating | The market converts units and **nobody constrains them**; §5.1's three-unit rule is the half nobody serves |
+| **E-2** | Being careful about food without having to be technical | The only unoccupied position P-1 rates highest. **Not a feature and cannot be scheduled** — it is the bar J-2 and J-3 are held to |
+
+**Status of all of the above: inferred, not observed.** The research contains no interviews, no teardowns and no user reviews, so every persona is a falsifiable hypothesis and every job priority is an inference from competitor marketing. [`research/critique.md`](./research/critique.md) audits which claims drive decisions while resting on nothing, and names the three questions that would close the gaps. **Do not treat this section as settled the way §4's decisions are settled.**
+
 ## 3. Platform
 
 **Cooksy is a PWA** — an installable web app, one codebase, no App Store, no native shells. Mobile-first, desktop adapted later.
