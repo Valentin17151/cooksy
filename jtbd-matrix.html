@@ -1,0 +1,883 @@
+<title>Cooksy — JTBD Matrix</title>
+
+<style>
+  :root {
+    --ground:      #EEF0EC;
+    --surface:     #F7F8F6;
+    --surface-alt: #E4E8E3;
+    --ink:         #141A19;
+    --ink-soft:    #48534F;
+    --ink-faint:   #78847F;
+    --rule:        #D2D8D2;
+    --rule-soft:   #E1E5E0;
+    --accent:      #1C4B48;
+    --accent-ink:  #F7F8F6;
+    --accent-soft: #DEE9E6;
+    --query:       #9A5E06;
+    --query-soft:  #F2E7D0;
+    --alert:       #8E3B3B;
+    --alert-soft:  #F0DFDD;
+
+    --font-serif: "Iowan Old Style", "Charter", "Bitstream Charter", Georgia, "Times New Roman", serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    --measure: 46rem;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:      #0E1312;
+      --surface:     #161D1B;
+      --surface-alt: #1D2523;
+      --ink:         #E7EBE8;
+      --ink-soft:    #A5B0AC;
+      --ink-faint:   #717D79;
+      --rule:        #283130;
+      --rule-soft:   #1F2726;
+      --accent:      #74C3B9;
+      --accent-ink:  #0E1312;
+      --accent-soft: #17302D;
+      --query:       #DDA04A;
+      --query-soft:  #33270F;
+      --alert:       #D98B85;
+      --alert-soft:  #331C1B;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0E1312; --surface:#161D1B; --surface-alt:#1D2523;
+    --ink:#E7EBE8; --ink-soft:#A5B0AC; --ink-faint:#717D79;
+    --rule:#283130; --rule-soft:#1F2726;
+    --accent:#74C3B9; --accent-ink:#0E1312; --accent-soft:#17302D;
+    --query:#DDA04A; --query-soft:#33270F;
+    --alert:#D98B85; --alert-soft:#331C1B;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --ground:#EEF0EC; --surface:#F7F8F6; --surface-alt:#E4E8E3;
+    --ink:#141A19; --ink-soft:#48534F; --ink-faint:#78847F;
+    --rule:#D2D8D2; --rule-soft:#E1E5E0;
+    --accent:#1C4B48; --accent-ink:#F7F8F6; --accent-soft:#DEE9E6;
+    --query:#9A5E06; --query-soft:#F2E7D0;
+    --alert:#8E3B3B; --alert-soft:#F0DFDD;
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 78rem;
+    margin: 0 auto;
+    padding: clamp(1.75rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 1.1rem; border-bottom: 1px solid var(--ink); padding-bottom: 1.75rem; }
+  .masthead h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    text-wrap: balance;
+    max-width: 20ch;
+  }
+  .masthead .standfirst { font-size: 1.12rem; color: var(--ink-soft); max-width: 52ch; text-wrap: pretty; }
+  .masthead .twoq {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.85rem;
+    line-height: 1.75;
+  }
+
+  /* ---------- verdict cards ---------- */
+  .verdict { display: flex; flex-direction: column; gap: 1.35rem; }
+  .sec-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.75rem;
+    border-bottom: 1px solid var(--rule); padding-bottom: 0.6rem;
+  }
+  .sec-head h2 { font-size: 1.32rem; font-weight: 400; letter-spacing: -0.01em; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent);
+    padding: 1.1rem 1.15rem 1.25rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .card--cut { border-top-color: var(--alert); }
+  .card-id { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent); }
+  .card--cut .card-id { color: var(--alert); }
+  .card h3 { font-size: 1.14rem; font-weight: 600; line-height: 1.25; text-wrap: balance; }
+  .card p { font-size: 0.93rem; color: var(--ink-soft); text-wrap: pretty; }
+  .card .metric { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); border-top: 1px solid var(--rule-soft); padding-top: 0.55rem; margin-top: auto; }
+
+  /* ---------- legend ---------- */
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.9rem 1.75rem; }
+  .legend-row { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.88rem; color: var(--ink-soft); }
+
+  /* ---------- score chips ---------- */
+  .s {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    width: 1.75rem; height: 1.75rem;
+    display: inline-grid; place-items: center;
+    border-radius: 2px;
+    flex: none;
+  }
+  .s3 { background: var(--accent); color: var(--accent-ink); }
+  .s2 { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .s1 { background: transparent; color: var(--ink-faint); border: 1px solid var(--rule); }
+  .sq { background: var(--query-soft); color: var(--query); border: 1px dashed var(--query); }
+
+  .cov {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0.5em;
+    border-radius: 2px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .cov--covered { color: var(--ink-faint); border-color: var(--rule); }
+  .cov--half    { color: var(--accent); border-color: var(--accent); }
+  .cov--open    { color: var(--accent-ink); background: var(--accent); }
+  .cov--gap     { color: var(--alert); border-color: var(--alert); background: var(--alert-soft); }
+
+  /* ---------- matrix ---------- */
+  .matrix { display: flex; flex-direction: column; gap: 0; }
+
+  .mrow-head, .rowsum {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) repeat(4, 3.1rem) minmax(6.5rem, 0.85fr);
+    gap: 0.6rem;
+    align-items: center;
+  }
+  .mrow-head {
+    padding: 0 0.7rem 0.5rem;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+  .mrow-head span {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+  .mrow-head span:first-child, .mrow-head span:last-child { text-align: left; }
+
+  details.job { border-bottom: 1px solid var(--rule-soft); }
+  details.job[open] { background: var(--surface); }
+  details.job.core { box-shadow: inset 3px 0 0 var(--accent); }
+  details.job.gap  { box-shadow: inset 3px 0 0 var(--alert); }
+
+  summary.rowsum {
+    padding: 0.7rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary.rowsum::-webkit-details-marker { display: none; }
+  summary.rowsum:hover { background: var(--surface-alt); }
+  summary.rowsum:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .jobcell { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; }
+  .jobcell .jid { font-family: var(--font-mono); font-size: 0.74rem; color: var(--accent); flex: none; }
+  .jobcell .jname { font-size: 0.97rem; text-wrap: pretty; }
+  .jobcell .tagcore, .jobcell .taggap {
+    font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.1em;
+    padding: 0.15em 0.4em; border-radius: 2px; flex: none;
+  }
+  .jobcell .tagcore { background: var(--accent); color: var(--accent-ink); }
+  .jobcell .taggap { background: var(--alert); color: var(--ground); }
+
+  .cellwrap { display: grid; place-items: center; }
+  .covwrap { display: flex; justify-content: flex-start; }
+
+  .detail {
+    display: flex; flex-direction: column; gap: 1rem;
+    padding: 0.35rem 0.7rem 1.35rem;
+    border-top: 1px dashed var(--rule);
+  }
+
+  /* ---------- the job statement, both languages ---------- */
+  .stmt {
+    display: flex; flex-direction: column; gap: 0.75rem;
+    background: var(--surface-alt);
+    border-left: 2px solid var(--accent);
+    padding: 0.95rem 1.05rem;
+  }
+  .stmt-en { display: flex; flex-direction: column; gap: 0.3rem; }
+  .stmt-en p { font-size: 1.02rem; line-height: 1.5; text-wrap: pretty; }
+  .cl {
+    font-family: var(--font-mono);
+    font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-right: 0.4rem;
+  }
+  .stmt-ua {
+    font-size: 0.93rem; line-height: 1.55; color: var(--ink-soft);
+    font-style: italic; text-wrap: pretty;
+    border-top: 1px solid var(--rule); padding-top: 0.7rem;
+  }
+  .stmt-ua .cl { font-style: normal; color: var(--ink-faint); }
+  .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.85rem; }
+  .ev { display: flex; gap: 0.6rem; align-items: flex-start; }
+  .ev-txt { font-size: 0.86rem; line-height: 1.5; color: var(--ink-soft); }
+  .ev-txt b { display: block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); font-weight: 400; }
+
+  .fc { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.85rem; border-top: 1px solid var(--rule-soft); padding-top: 0.9rem; }
+  .fc div { font-size: 0.9rem; color: var(--ink-soft); text-wrap: pretty; }
+  .fc b { display: block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-faint); font-weight: 400; margin-bottom: 0.2rem; }
+  .fc .none { color: var(--alert); }
+
+  .conflict {
+    background: var(--query-soft);
+    border-left: 2px solid var(--query);
+    padding: 0.7rem 0.85rem;
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+  }
+  .conflict b { color: var(--query); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ---------- unknown density ---------- */
+  .density { display: flex; flex-direction: column; gap: 1.1rem; }
+  .dens-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.9rem; }
+  .dens {
+    border: 1px solid var(--rule); background: var(--surface);
+    padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.45rem;
+  }
+  .dens--worst { border-color: var(--query); background: var(--query-soft); }
+  .dens .num { font-family: var(--font-mono); font-size: 1.75rem; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .dens--worst .num { color: var(--query); }
+  .dens .lbl { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .dens .note { font-size: 0.86rem; color: var(--ink-soft); }
+
+  .bar { height: 5px; background: var(--rule); border-radius: 3px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--query); }
+
+  .prose { max-width: var(--measure); display: flex; flex-direction: column; gap: 0.85rem; }
+  .prose p { text-wrap: pretty; color: var(--ink-soft); }
+  .prose strong { color: var(--ink); font-weight: 600; }
+
+  footer.colophon {
+    border-top: 1px solid var(--rule); padding-top: 1.25rem;
+    font-family: var(--font-mono); font-size: 0.71rem; line-height: 1.7;
+    color: var(--ink-faint); display: flex; flex-direction: column; gap: 0.35rem;
+  }
+
+  em { font-style: italic; }
+  .q { font-family: var(--font-mono); color: var(--query); font-weight: 600; }
+
+  @media (max-width: 52rem) {
+    .mrow-head { display: none; }
+    .rowsum {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+      justify-items: start;
+    }
+    .scores-m { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .cellwrap { position: relative; }
+    .cellwrap::after {
+      content: attr(data-p);
+      font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.06em;
+      color: var(--ink-faint); display: block; text-align: center; margin-top: 0.15rem;
+    }
+  }
+  @media (min-width: 52.01rem) {
+    .scores-m { display: contents; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Cooksy · Research · JTBD matrix · 29 July 2026</p>
+    <h1>What to build first, and what not to build at all</h1>
+    <p class="standfirst">Twelve jobs against four personas. Every score carries its evidence; every cell the research cannot speak to stays visibly empty rather than being averaged into a number.</p>
+    <p class="twoq">12 jobs × 4 personas = 48 cells<br>17 of them are unknown — and the pattern in <em>which</em> 17 is the finding</p>
+  </header>
+
+  <!-- ============ VERDICT A ============ -->
+  <section class="verdict">
+    <div class="sec-head">
+      <h2>Build these three</h2>
+      <span class="eyebrow">scored 3 by the primary persona · not already closed by the market</span>
+    </div>
+    <div class="prose">
+      <p>Seven jobs score <strong>3</strong> for P-1. Four drop out immediately because the category already does them well — <strong>J-0, J-1, J-4 and J-6</strong> are covered heavily, universally, thoroughly, and by three products respectively. Building there is building a worse Paprika. Three survive.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <span class="card-id">J-2</span>
+        <h3>Using what I already have</h3>
+        <p>Pain #1 in the entire corpus, and in-category coverage is genuinely poor. Paprika searches seven fields and still scores 3/5 on zero-recall find. The products that do this well — SuperCook, Eat Your Books — are outside the category and not competing here.</p>
+        <p class="metric">P-1 = 3 · P-3 = 3 · spec scored 23/40, below Tandoor</p>
+      </div>
+      <div class="card">
+        <span class="card-id">J-3</span>
+        <h3>Amounts for the people actually eating</h3>
+        <p>The market covers half of this and skips the half that matters. <em>Everyone converts units; nobody constrains them.</em> Crouton sells metric/imperial conversion as a feature — deliberately preserving the ambiguity — and Tandoor makes conversions user-editable.</p>
+        <p class="metric">P-1 = 3 · three-unit rule unique across all 15, validated by none</p>
+      </div>
+      <div class="card">
+        <span class="card-id">E-2</span>
+        <h3>Careful about food without being technical</h3>
+        <p>The only unoccupied position a primary persona scores 3 on. <em>The optimiser's real choice today is a good model behind Docker, or a good app that fudges the maths.</em> Not a feature and cannot be scheduled as one — it is the standard the other two are held to.</p>
+        <p class="metric">P-1 = 3 · 1 of 15 products is ingredient-first, and it is the least approachable</p>
+      </div>
+    </div>
+    <div class="conflict">
+      <b>The fourth candidate, and why it is not in the three</b><br>
+      <strong>H-1 — seeing what a total is made of</strong> would otherwise top this list: auditability is <em>“an unoccupied position in the entire category, and the closest thing Cooksy has to a defensible wedge.”</em> It is held back because it is a <strong>hypothesis, not an established job</strong>. The market gap is documented; the human desire behind it is graded <em>“logic, not data”</em>, and G-3 states it is not testable by desk research. Build it — but do not let it into a list labelled <em>evidenced</em> until someone has been watched either verifying a number or declining to.
+    </div>
+  </section>
+
+  <!-- ============ LEGEND ============ -->
+  <section class="verdict">
+    <div class="sec-head">
+      <h2>How to read a cell</h2>
+      <span class="eyebrow">open any row for the full job, in both languages, and its evidence</span>
+    </div>
+    <div class="legend">
+      <div class="legend-row"><span class="s s3">3</span><span>The job this persona is <strong>defined by</strong> — the reason they would adopt anything at all.</span></div>
+      <div class="legend-row"><span class="s s2">2</span><span>Clearly matters and is evidenced, but is not what defines them.</span></div>
+      <div class="legend-row"><span class="s s1">1</span><span><strong>Evidenced as low priority</strong>, inferred from documented behaviour — vast saves against dismal cook-through, or living happily on a platform that exports nothing. Not a stated preference.</span></div>
+      <div class="legend-row"><span class="s sq">?</span><span><strong>Nothing in the corpus speaks to this cell.</strong> An absence, not a low score. Never averaged, never guessed.</span></div>
+    </div>
+    <div class="legend" style="margin-top:0.5rem">
+      <div class="legend-row"><span class="cov cov--covered">covered</span><span>The category already ships this well.</span></div>
+      <div class="legend-row"><span class="cov cov--half">half / weak</span><span>Partly served, with the important half missing.</span></div>
+      <div class="legend-row"><span class="cov cov--open">unoccupied</span><span>Nobody is here.</span></div>
+      <div class="legend-row"><span class="cov cov--gap">no mvp function</span><span>A job we have evidence for, and ship nothing against.</span></div>
+    </div>
+  </section>
+
+  <!-- ============ MATRIX ============ -->
+  <section class="verdict">
+    <div class="sec-head">
+      <h2>The matrix</h2>
+      <span class="eyebrow">12 jobs × 4 personas</span>
+    </div>
+
+    <div class="matrix">
+      <div class="mrow-head">
+        <span>Job</span><span>P-1</span><span>P-2</span><span>P-3</span><span>P-4</span><span>Market</span>
+      </div>
+
+      <!-- J-0 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-0</span><span class="jname">Everything in the house, in one go</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s1">1</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s2">2</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>I have decided what we are eating over the next few days,</p>
+              <p><span class="cl">I want</span>to get everything into the house in one go, without doing the arithmetic or the remembering myself,</p>
+              <p><span class="cl">so that</span>the week I planned is the week we actually cook.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли я вирішив, що ми їстимемо найближчі кілька днів, я хочу зібрати все потрібне за один похід і не рахувати та не пригадувати все сам, щоб тиждень, який я спланував, і був тижнем, який ми справді зготували.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>§9's success criteria <em>are</em> this job</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-2 Household</b>“we'll automatically build your grocery list”, sold to busy families</span></div>
+            <div class="ev"><span class="s s1">1</span><span class="ev-txt"><b>P-3 Hoarder</b>Inferred from behaviour: vast saves, dismal cook-through</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-4 Sovereign</b>Tandoor sorts the list by supermarket</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.7 planner → §5.9 list generation</div>
+            <div><b>Competitors</b>Covered heavily. Paprika, Plan to Eat, Samsung and Tandoor all ship the loop end to end</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-1 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-1</span><span class="jname">Keeping what I find</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s2">2</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>something I want to cook goes past me — in a video, on a blog, in a message from a friend —</p>
+              <p><span class="cl">I want</span>to keep it in the seconds before it is gone, in a form that still makes sense three weeks later,</p>
+              <p><span class="cl">so that</span>finding it again is never harder than finding it the first time.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли повз мене проходить те, що я хочу зготувати — у відео, в блозі, у повідомленні від друга, — я хочу зберегти це за ті кілька секунд, поки воно не зникло, і так, щоб через три тижні воно ще мало сенс, щоб знайти це вдруге було не важче, ніж знайти вперше.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>Capture cost is the typed-record pattern's one weakness</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>Nothing addresses whether the coordinator is the one capturing</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-3 Hoarder</b>114M reels on one tag; one-tap save</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-4 Sovereign</b>Mela ships live detection, RSS, OCR, video-description import</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.2 paste + URL import → mandatory review</div>
+            <div><b>Competitors</b>Covered universally. “Everyone leads with capture”; Mela is the benchmark</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-2 CORE -->
+      <details class="job core" open>
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-2</span><span class="jname">Getting back to a dish that already works</span><span class="tagcore">CORE</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s2">2</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--half">weak</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>something in the fridge turns tomorrow and I cannot remember what I made with it last time,</p>
+              <p><span class="cl">I want</span>to get back to the dish I already know works,</p>
+              <p><span class="cl">so that</span>it ends up in a pan rather than a bin.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли те, що лежить у холодильнику, завтра вже зіпсується, а я не пам'ятаю, що готував із цим минулого разу, я хочу повернутися до страви, яка в мене вже виходила, щоб воно опинилося в каструлі, а не у смітнику.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>Pain #1 in the corpus; the aubergine question is theirs</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>No research on whether the coordinator searches by ingredient</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-3 Hoarder</b>“Retrieval is hopeless” is their tier's finding</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-4 Sovereign</b>“Huge collections”; Tandoor trigram search ⚠︎ secondary source</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.13 two-tier search over §5.5 canonical ingredients</div>
+            <div><b>Competitors</b>Barely, in-category. Paprika scores 3/5 across seven fields; the good answers — SuperCook, Eat Your Books — sit outside the category</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-3 CORE -->
+      <details class="job core" open>
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-3</span><span class="jname">Cooking for the number actually eating</span><span class="tagcore">CORE</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s2">2</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--half">half</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>there are six of us at the table and the dish was written for four,</p>
+              <p><span class="cl">I want</span>the amounts to already be right without me doing sums in my head,</p>
+              <p><span class="cl">so that</span>I neither run short nor throw half of it away.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли нас за столом шестеро, а страва розрахована на чотирьох, я хочу, щоб кількості вже були правильні й мені не довелося рахувати в голові, щоб і не забракло, і половина не пішла у смітник.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>Crouton sells scaling; unit chaos documented across all 15</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>Portions × people is the brief's design, marked [?] in the personas too</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-3 Hoarder</b>Nothing speaks to it</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-4 Sovereign</b>Tandoor ships editable unit conversions — unit correctness, not people-scaling</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.4 scaling · §5.1 three units · §5.3 weight model</div>
+            <div><b>Competitors</b>Half. Everyone converts; <strong>nobody constrains.</strong> The three-unit rule is unique across all 15 and validated by none</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-4 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-4</span><span class="jname">Walking the shop once</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s1">1</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s2">2</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>I am standing at the entrance to the shop with several meals' worth to buy,</p>
+              <p><span class="cl">I want</span>to walk it once, in the order the shop is actually laid out,</p>
+              <p><span class="cl">so that</span>I am not doubling back for onions I already walked past.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли я стою на вході в магазин, а купити треба одразу на кілька страв, я хочу пройти його один раз, у тому порядку, як він насправді розкладений, щоб не вертатися по цибулю, повз яку я вже пройшов.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>§9's “one pass through the store”</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-2 Household</b>AnyList category assignment “essentially always right”</span></div>
+            <div class="ev"><span class="s s1">1</span><span class="ev-txt"><b>P-3 Hoarder</b>Inferred from behaviour, as J-0</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-4 Sovereign</b>List auto-sorted by supermarket</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.9 merge + aisle order · §5.8 pantry subtraction</div>
+            <div><b>Competitors</b>Covered thoroughly. The category's marketed mechanism; reordering is the default, incumbent included</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-5 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-5</span><span class="jname">Feeding a household without collisions</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s sq">?</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>two of us are out buying for the same few days at the same time,</p>
+              <p><span class="cl">I want</span>us both watching the same picture change as it changes,</p>
+              <p><span class="cl">so that</span>nothing gets bought twice, and nothing gets left behind because each of us assumed the other had it.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли ми вдвох закуповуємось на ті самі кілька днів одночасно, я хочу, щоб ми обидва бачили, як змінюється одна й та сама картина, щоб нічого не купилося двічі й нічого не лишилося тому, що кожен подумав, ніби це взяв інший.</p>
+          </div>
+          <div class="conflict">
+            <b>Two cells refused rather than averaged</b><br>
+            <strong>P-1:</strong> Paprika ships <em>no</em> household sharing and its audience stays anyway — reads as low importance. Against that, sharing is now table stakes and <em>“its absence is a defect.”</em> The two point opposite ways.<br>
+            <strong>P-4:</strong> Tandoor ships live list sync; Mela ships no sharing at all and holds the strongest advocacy in the set. Both are P-4 anchor products.<br>
+            Averaging either to a 2 would manufacture a fact, so both stay <span class="q">[?]</span>.
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-2 Household</b>Priced at +$5/yr for a whole household; “instantly to everyone”</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-3 Hoarder</b>Nothing speaks to it</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.10 household + live shared list</div>
+            <div><b>Competitors</b>Covered — table stakes. Paprika is the outlier</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- J-6 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">J-6</span><span class="jname">The good version outlasting my memory of it</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s2">2</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s3">3</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>a dish finally comes out right — my version of it, on the third attempt —</p>
+              <p><span class="cl">I want</span>that version kept somewhere that is properly mine, in the state I actually cook it in,</p>
+              <p><span class="cl">so that</span>in five years I am not rebuilding from memory what I had already worked out.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли страва нарешті виходить така, як треба, — моя версія, з третьої спроби, — я хочу, щоб саме ця версія зберігалася там, де вона справді моя, і в тому вигляді, в якому я її насправді готую, щоб через п'ять років не відновлювати з пам'яті те, що я вже колись довів до пуття.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>Paprika's product base <em>is</em> the library, with plan and list derived from it</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>AnyList's base is the list, not a library</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-3 Hoarder</b>Saving at that scale is keeping-intent, unmet</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-4 Sovereign</b>“Huge collections”, “a personal collection”</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§6.1 Library · §5.2 review → save · §8.1 export <em>(post-MVP)</em></div>
+            <div><b>Competitors</b>Covered. The centre of gravity for 3 of the 15</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- E-1 GAP -->
+      <details class="job gap" open>
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">E-1</span><span class="jname">Committing without being trapped</span><span class="taggap">NO FUNCTION</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s2">2</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s1">1</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s3">3</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--gap">no mvp function</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>I am about to put years of my own collecting into someone else's hands,</p>
+              <p><span class="cl">I want</span>to know I could take all of it back out again,</p>
+              <p><span class="cl">so that</span>I can commit to it properly, instead of half-using it and quietly keeping a copy elsewhere.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли я збираюся віддати роки власного збирання в чужі руки, я хочу знати, що зможу забрати все назад, щоб довіритися по-справжньому, а не користуватися наполовину, тихцем тримаючи копію десь іще.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-1 Optimiser</b>“Nobody types in sixty recipes without knowing they can leave”</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>Nothing speaks to it</span></div>
+            <div class="ev"><span class="s s1">1</span><span class="ev-txt"><b>P-3 Hoarder</b>Accepts a platform that exports nothing at all</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-4 Sovereign</b>GDPR, self-host, 90-day export</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b><span class="none">None in MVP — §8.1 defers full library export</span></div>
+            <div><b>Competitors</b>Split. Mela and Tandoor own it outright; Fond, Plan to Eat and AnyList are silent</div>
+          </div>
+          <div class="conflict">
+            <b>The inverse failure, and it matters more than any cut</b><br>
+            This is the <strong>defining job of one persona</strong> and a stated precondition for the primary persona typing anything in at all — and MVP ships nothing against it. The corpus already called this pain <em>“knowingly left on the table.”</em> The matrix puts a number on what is being left.
+          </div>
+        </div>
+      </details>
+
+      <!-- E-2 CORE -->
+      <details class="job core" open>
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">E-2</span><span class="jname">Careful about food without being technical</span><span class="tagcore">CORE</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s2">2</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s1">1</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--open">unoccupied</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>I finally find something precise enough to be worth relying on,</p>
+              <p><span class="cl">I want</span>to use it without first learning to run a server,</p>
+              <p><span class="cl">so that</span>being exact about food is not a privilege reserved for technical people.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли я нарешті знаходжу щось достатньо точне, щоб на нього покластися, я хочу просто ним користуватися, а не вчитися спершу адмініструвати сервер, щоб точність у їжі не була привілеєм технічних людей.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-1 Optimiser</b>Pain 7: Docker, or a good app that fudges the maths</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>Nothing speaks to it</span></div>
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-3 Hoarder</b>His tier is defined by zero setup</span></div>
+            <div class="ev"><span class="s s1">1</span><span class="ev-txt"><b>P-4 Sovereign</b>They already pay the technical cost willingly — the inversion is the point</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>Not a feature — §3's PWA and §7's design principles</div>
+            <div><b>Competitors</b><strong>Unoccupied.</strong> The single ingredient-first product is the least approachable of the fifteen</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- E-3 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">E-3</span><span class="jname">It stays what I chose</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s s2">2</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s s1">1</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s s3">3</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--half">eroding</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>I pick something because it does one thing properly,</p>
+              <p><span class="cl">I want</span>it to still be that same thing a year from now,</p>
+              <p><span class="cl">so that</span>I am not slowly moved somewhere I never chose to go.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли я обираю щось саме за те, що воно добре робить одну річ, я хочу, щоб через рік воно лишалося тим самим, щоб мене поступово не перенесли туди, куди я не погоджувався йти.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-1 Optimiser</b>The one-time-purchase column persists</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-2 Household</b>Nothing speaks to it</span></div>
+            <div class="ev"><span class="s s1">1</span><span class="ev-txt"><b>P-3 Hoarder</b>Lives on platforms that change under them constantly</span></div>
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-4 Sovereign</b>Open source and self-host are this job absolute</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>Not a feature — §8's refusals, §4's no-monetisation stance. <em>Correctly</em> featureless: a promise kept by not building things is still kept</div>
+            <div><b>Competitors</b>Eroding. “AI is the 2026 land-grab, and it's the paywall”</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- S-1 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">S-1</span><span class="jname">Legible to the people I share a kitchen with</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s s3">3</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s sq">?</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--covered">covered</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>feeding us is a job several of us share,</p>
+              <p><span class="cl">I want</span>what I have already done to be visible without me having to announce it,</p>
+              <p><span class="cl">so that</span>nobody has to ask what has been handled and what has not.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли годувати нас — спільна справа кількох людей, я хочу, щоб зроблене мною було видно без окремих оголошень, щоб нікому не доводилося перепитувати, що вже зроблено, а що ні.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s3">3</span><span class="ev-txt"><b>P-2 Household</b>AnyList is sold on visibility to others, not private organisation</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-1, P-3, P-4</b>Nothing in the corpus speaks to any of the three</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.7 member assignment · §5.10 live list</div>
+            <div><b>Competitors</b>Covered. AnyList</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- S-2 -->
+      <details class="job">
+        <summary class="rowsum">
+          <span class="jobcell"><span class="jid">S-2</span><span class="jname">Handing it to someone outside my tools</span></span>
+          <span class="scores-m">
+            <span class="cellwrap" data-p="P-1"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-2"><span class="s s2">2</span></span>
+            <span class="cellwrap" data-p="P-3"><span class="s sq">?</span></span>
+            <span class="cellwrap" data-p="P-4"><span class="s sq">?</span></span>
+          </span>
+          <span class="covwrap"><span class="cov cov--half">weak</span></span>
+        </summary>
+        <div class="detail">
+          <div class="stmt">
+            <div class="stmt-en">
+              <p><span class="cl">When</span>the person going to the shop is not the person who worked out what we need,</p>
+              <p><span class="cl">I want</span>to hand over what is needed in whatever form already reaches them,</p>
+              <p><span class="cl">so that</span>helping out never requires them to install anything of mine.</p>
+            </div>
+            <p class="stmt-ua"><span class="cl">Українською</span>Коли до магазину йде не той, хто продумував, що нам потрібно, я хочу передати це в тому вигляді, який до людини і так доходить, щоб допомога не вимагала від неї нічого встановлювати.</p>
+          </div>
+          <div class="ev-grid">
+            <div class="ev"><span class="s s2">2</span><span class="ev-txt"><b>P-2 Household</b>Reminders and Keep are already on every phone</span></div>
+            <div class="ev"><span class="s sq">?</span><span class="ev-txt"><b>P-1, P-3, P-4</b>Nothing speaks to any of the three</span></div>
+          </div>
+          <div class="fc">
+            <div><b>Function</b>§5.11 text export</div>
+            <div><b>Competitors</b>Weak. Sharing <em>inside</em> an app is common; handover <em>outside</em> it is unaddressed on most sites</div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ VERDICT B ============ -->
+  <section class="verdict">
+    <div class="sec-head">
+      <h2>Features that close no job</h2>
+      <span class="eyebrow">read straight off the function column</span>
+    </div>
+    <div class="cards">
+      <div class="card card--cut">
+        <span class="card-id">§5.6</span>
+        <h3>Calorie reporting</h3>
+        <p>Not one of the twelve jobs needs it — and the persona work points the other way. P-1 is explicitly <em>not a diet persona</em>, and health-goal seekers are recorded as an <strong>anti-persona</strong>. The dependent pieces fall with it: the finished-dish weight field exists mainly to make kcal/100 g honest.</p>
+        <p class="metric">Locked in §4 — a flag for a decision-maker, not a cut</p>
+      </div>
+      <div class="card card--cut">
+        <span class="card-id">§5.2.2</span>
+        <h3>Sub-recipe links</h3>
+        <p>Their only retrieval value is placing a recipe in the <em>Used in</em> tier — which J-2's function already reaches through method text and ingredient matching. The brief concedes the position: they <em>“cost nothing to defer because nothing depends on them.”</em></p>
+        <p class="metric">A feature nothing depends on, serving a job nothing requires</p>
+      </div>
+      <div class="card card--cut">
+        <span class="card-id">§5.2.1</span>
+        <h3>Ingredient groups</h3>
+        <p>Serve no job directly. The justification that survives is narrow but real — parse fidelity, since a heading in the source is information the cook loses if dropped, plus one field on a search result row.</p>
+        <p class="metric">Weak case rather than a damning one</p>
+      </div>
+    </div>
+    <div class="prose">
+      <p><strong>Two readings of the calorie finding, and the research cannot choose between them.</strong> Either a genuine job is missing because nobody went looking for <em>“I want to know what I'm actually eating”</em>, or the feature is unanchored. Both are live.</p>
+    </div>
+  </section>
+
+  <!-- ============ DENSITY ============ -->
+  <section class="density">
+    <div class="sec-head">
+      <h2>What the empty cells say</h2>
+      <span class="eyebrow">17 of 48 · just over a third unknown</span>
+    </div>
+    <div class="dens-grid">
+      <div class="dens">
+        <span class="num">3<span style="color:var(--ink-faint);font-size:1rem">/12</span></span>
+        <span class="lbl">P-1 Optimiser · primary</span>
+        <div class="bar"><i style="width:25%"></i></div>
+        <span class="note">Best understood, as it should be. All three gaps are social or household jobs.</span>
+      </div>
+      <div class="dens dens--worst">
+        <span class="num">7<span style="color:var(--ink-faint);font-size:1rem">/12</span></span>
+        <span class="lbl">P-2 Household</span>
+        <div class="bar"><i style="width:58%"></i></div>
+        <span class="note">The least understood persona in the set — and the strongest secondary.</span>
+      </div>
+      <div class="dens">
+        <span class="num">4<span style="color:var(--ink-faint);font-size:1rem">/12</span></span>
+        <span class="lbl">P-3 Hoarder</span>
+        <div class="bar"><i style="width:33%"></i></div>
+        <span class="note">Well evidenced on capture and retrieval, blank on everything downstream.</span>
+      </div>
+      <div class="dens">
+        <span class="num">3<span style="color:var(--ink-faint);font-size:1rem">/12</span></span>
+        <span class="lbl">P-4 Sovereign</span>
+        <div class="bar"><i style="width:25%"></i></div>
+        <span class="note">Sharply defined, on a narrow set of jobs.</span>
+      </div>
+    </div>
+    <div class="prose">
+      <p><strong>P-2 is the actionable one.</strong> Everything known about them concerns coordination — J-5, J-4, S-1, S-2 — and everything about what they cook, keep, find or scale is blank. This is also the persona carrying a live <em>“maybe there is no pain here”</em> verdict: <em>“a household with a working shared Keep list has no felt problem for Cooksy to solve.”</em></p>
+      <p>A secondary persona that is simultaneously the least understood <strong>and</strong> the one under a standing doubt is the cheapest place a single conversation would change the picture — and worth more than another pass over the same fifteen products.</p>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <p>Source of truth: research/jtbd.md §5–§8. Jobs from research/jtbd.md §1–§4; personas from research/personas.md.</p>
+    <p>Every score is an inference from vendor marketing, captured screens, or cross-product patterns. The corpus contains no interviews, no teardowns and no user reviews — so this matrix ranks hypotheses against each other, not measurements.</p>
+    <p>Scores 1–3 and [?] are defined in the legend above. [?] is an absence, never an average.</p>
+  </footer>
+
+</div>

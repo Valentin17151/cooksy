@@ -1,0 +1,1039 @@
+<title>Cooksy — Personas</title>
+
+<style>
+  :root {
+    --ground:      #EEF0EC;
+    --surface:     #F7F8F6;
+    --surface-alt: #E4E8E3;
+    --ink:         #141A19;
+    --ink-soft:    #48534F;
+    --ink-faint:   #78847F;
+    --rule:        #D2D8D2;
+    --rule-soft:   #E1E5E0;
+    --accent:      #1C4B48;
+    --accent-ink:  #F7F8F6;
+    --accent-soft: #DEE9E6;
+    --query:       #9A5E06;
+    --query-soft:  #F2E7D0;
+    --query-hl:    rgba(154, 94, 6, 0.16);
+
+    --font-serif: "Iowan Old Style", "Charter", "Bitstream Charter", Georgia, "Times New Roman", serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    --measure: 46rem;
+    --rail: 8.5rem;
+    --gutter: 3rem;
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:      #0E1312;
+      --surface:     #161D1B;
+      --surface-alt: #1D2523;
+      --ink:         #E7EBE8;
+      --ink-soft:    #A5B0AC;
+      --ink-faint:   #717D79;
+      --rule:        #283130;
+      --rule-soft:   #1F2726;
+      --accent:      #74C3B9;
+      --accent-ink:  #0E1312;
+      --accent-soft: #17302D;
+      --query:       #DDA04A;
+      --query-soft:  #33270F;
+      --query-hl:    rgba(221, 160, 74, 0.18);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0E1312;
+    --surface:     #161D1B;
+    --surface-alt: #1D2523;
+    --ink:         #E7EBE8;
+    --ink-soft:    #A5B0AC;
+    --ink-faint:   #717D79;
+    --rule:        #283130;
+    --rule-soft:   #1F2726;
+    --accent:      #74C3B9;
+    --accent-ink:  #0E1312;
+    --accent-soft: #17302D;
+    --query:       #DDA04A;
+    --query-soft:  #33270F;
+    --query-hl:    rgba(221, 160, 74, 0.18);
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"] {
+    --ground:      #EEF0EC;
+    --surface:     #F7F8F6;
+    --surface-alt: #E4E8E3;
+    --ink:         #141A19;
+    --ink-soft:    #48534F;
+    --ink-faint:   #78847F;
+    --rule:        #D2D8D2;
+    --rule-soft:   #E1E5E0;
+    --accent:      #1C4B48;
+    --accent-ink:  #F7F8F6;
+    --accent-soft: #DEE9E6;
+    --query:       #9A5E06;
+    --query-soft:  #F2E7D0;
+    --query-hl:    rgba(154, 94, 6, 0.16);
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 4.5rem) clamp(1.15rem, 4vw, 3rem) 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 6vw, 5rem);
+  }
+
+  /* ---------- shared apparatus ---------- */
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .q {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    font-weight: 600;
+    color: var(--query);
+    background: var(--query-soft);
+    padding: 0.08em 0.34em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .ev {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 0.1em 0.4em;
+    white-space: nowrap;
+  }
+  .ev--query { color: var(--query); border-color: var(--query); }
+
+  .cite {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--ink-faint);
+    letter-spacing: 0.01em;
+  }
+  .cite b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: clamp(1.75rem, 4vw, 2.75rem);
+  }
+
+  .masthead h1 {
+    font-size: clamp(2.35rem, 6.4vw, 4.15rem);
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    text-wrap: balance;
+    max-width: 18ch;
+  }
+  .masthead h1 em {
+    font-style: italic;
+    color: var(--query);
+  }
+
+  .standfirst {
+    font-size: clamp(1.1rem, 2vw, 1.32rem);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 42ch;
+    text-wrap: pretty;
+  }
+
+  .masthead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    padding-top: 0.5rem;
+  }
+  .masthead-meta span b { color: var(--ink-soft); font-weight: 500; }
+
+  /* ---------- caveat ---------- */
+
+  .caveat {
+    border-left: 3px solid var(--query);
+    background: var(--query-soft);
+    padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    max-width: 54rem;
+  }
+  .caveat p { max-width: 62ch; text-wrap: pretty; }
+  .caveat strong {
+    font-weight: 400;
+    box-shadow: inset 0 -0.55em 0 var(--query-hl);
+  }
+
+  /* ---------- legend + control ---------- */
+
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .legend-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.75rem;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.15rem 2rem;
+  }
+  .legend-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .legend-item > span:first-child { align-self: flex-start; }
+
+  .filter {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    border-radius: 2px;
+    padding: 0.55em 0.9em;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  }
+  .filter:hover { border-color: var(--query); color: var(--query); }
+  .filter[aria-pressed="true"] {
+    background: var(--query);
+    border-color: var(--query);
+    color: var(--ground);
+  }
+  .filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  [data-unverified] { transition: opacity 220ms ease; }
+  body.sourced-only [data-unverified] { opacity: 0.14; }
+
+  /* ---------- overview ---------- */
+
+  .overview { display: flex; flex-direction: column; gap: 2rem; }
+
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    min-width: 34rem;
+  }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 400;
+    text-align: left;
+    padding: 0 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--ink-soft);
+  }
+  tbody td {
+    padding: 0.85rem 0.9rem 0.85rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  tbody td:first-child {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  tbody td:nth-child(2) { color: var(--ink); }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .tag--primary { color: var(--accent-ink); background: var(--accent); padding: 0.15em 0.5em; border-radius: 2px; }
+  .tag--secondary { color: var(--ink-faint); }
+
+  .why {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    max-width: var(--measure);
+  }
+  .why h3 {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--ink-faint);
+  }
+  .why ol {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    counter-reset: why;
+    list-style: none;
+  }
+  .why ol li {
+    position: relative;
+    padding-left: 2.1rem;
+    text-wrap: pretty;
+  }
+  .why ol li::before {
+    counter-increment: why;
+    content: counter(why);
+    position: absolute;
+    left: 0;
+    top: 0.08em;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+
+  /* ---------- personas ---------- */
+
+  .personas { display: flex; flex-direction: column; gap: clamp(3.5rem, 7vw, 6rem); }
+
+  .persona {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: var(--gutter);
+    border-top: 1px solid var(--ink);
+    padding-top: 1.75rem;
+  }
+
+  .persona-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .rail-sticky { position: sticky; top: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+  .persona-id {
+    font-family: var(--font-mono);
+    font-size: 1.9rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+  }
+  .persona--primary .persona-id { font-weight: 600; }
+
+  .persona-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    max-width: var(--measure);
+  }
+
+  .persona-head { display: flex; flex-direction: column; gap: 0.85rem; }
+  .persona-head h2 {
+    font-size: clamp(1.7rem, 3.6vw, 2.45rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  .persona--primary .persona-head h2 { font-weight: 600; }
+  .persona-tagline {
+    font-size: 1.08rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-wrap: pretty;
+  }
+
+  .block { display: flex; flex-direction: column; gap: 0.9rem; }
+  .block > h3 {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.45rem;
+  }
+  .block p { text-wrap: pretty; }
+
+  .list { display: flex; flex-direction: column; gap: 0.75rem; list-style: none; }
+  .list li { position: relative; padding-left: 1.35rem; text-wrap: pretty; }
+  .list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.45rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .ranked { display: flex; flex-direction: column; gap: 0.85rem; counter-reset: rank; list-style: none; }
+  .ranked li { position: relative; padding-left: 2rem; text-wrap: pretty; }
+  .ranked li::before {
+    counter-increment: rank;
+    content: counter(rank);
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--accent);
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    width: 1.35rem;
+    height: 1.35rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .tt { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .tt-col { display: flex; flex-direction: column; gap: 0.85rem; }
+  .tt-col > h4 {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 400;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .tt-col--yes > h4 { color: var(--accent); }
+  .tt-col--no > h4 { color: var(--query); }
+  .tt-col ul { display: flex; flex-direction: column; gap: 0.8rem; list-style: none; }
+  .tt-col li { font-size: 0.95rem; text-wrap: pretty; }
+
+  .voice {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: clamp(1.15rem, 3vw, 1.6rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    position: relative;
+  }
+  .voice::before {
+    content: "\201C";
+    position: absolute;
+    top: -0.15em;
+    right: 0.35rem;
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--query);
+    opacity: 0.22;
+  }
+  .voice-missing {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.05em;
+    color: var(--query);
+  }
+  .voice-sub { font-size: 1.02rem; color: var(--ink); text-wrap: pretty; }
+  .voice-sub i { font-style: italic; }
+  .voice-attr { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-faint); line-height: 1.5; }
+
+  .persona--primary .persona-head { border-left: 3px solid var(--accent); padding-left: 1rem; margin-left: -1rem; }
+
+  /* ---------- anti + validation ---------- */
+
+  .closing { display: flex; flex-direction: column; gap: clamp(2.5rem, 5vw, 3.5rem); }
+
+  .anti {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    max-width: var(--measure);
+    border-top: 1px solid var(--ink);
+    padding-top: 1.75rem;
+  }
+  .anti h2, .validation h2 {
+    font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .anti ul { display: flex; flex-direction: column; gap: 0.9rem; list-style: none; }
+  .anti li { padding-left: 1.6rem; position: relative; color: var(--ink-soft); text-wrap: pretty; }
+  .anti li::before {
+    content: "\00D7";
+    position: absolute;
+    left: 0;
+    top: -0.05em;
+    font-family: var(--font-mono);
+    color: var(--query);
+    font-size: 1rem;
+  }
+
+  .validation {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: var(--measure);
+    border-top: 1px solid var(--ink);
+    padding-top: 1.75rem;
+  }
+  .validation ol { display: flex; flex-direction: column; gap: 0.9rem; counter-reset: val; list-style: none; }
+  .validation ol li { position: relative; padding-left: 2rem; text-wrap: pretty; }
+  .validation ol li::before {
+    counter-increment: val;
+    content: counter(val);
+    position: absolute;
+    left: 0;
+    top: 0.06em;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .validation ol li:last-child { color: var(--query); }
+  .validation ol li:last-child::before { color: var(--query); }
+
+  footer.colophon {
+    border-top: 1px solid var(--rule);
+    padding-top: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 54rem;
+  }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  a { color: var(--accent); text-underline-offset: 0.15em; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width: 46rem) {
+    .persona { grid-template-columns: 1fr; gap: 1.25rem; }
+    .rail-sticky { position: static; flex-direction: row; align-items: center; gap: 0.85rem; }
+    .persona-id { font-size: 1.5rem; }
+    .tt { grid-template-columns: 1fr; gap: 1.75rem; }
+    .persona--primary .persona-head { margin-left: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Cooksy · Research · 25 July 2026</p>
+    <h1>Four people, and what we <em>don't</em> know about them</h1>
+    <p class="standfirst">Personas assembled from a corpus that contains no interviews, no teardowns and no user reviews. Every one of them is a hypothesis with a test attached.</p>
+    <div class="masthead-meta">
+      <span><b>Basis</b> · 5 research docs, 15 products, 20 screens</span>
+      <span><b>Primary</b> · P-1 Systematic Optimiser</span>
+      <span><b>Source of truth</b> · research/personas.md</span>
+    </div>
+  </header>
+
+  <section class="caveat">
+    <p class="eyebrow" style="color:var(--query)">Method caveat — load-bearing</p>
+    <p>The corpus states of itself: <em>“no hands-on teardown, no user interviews.”</em> These personas are reconstructed from vendor-declared audiences and from what fifteen products chose to build or omit. <strong>Each persona is a falsifiable hypothesis about a user, not a measured segment.</strong></p>
+    <p>The research also contains <strong>no real user reviews and no forum material</strong>. Every <em>Voice</em> below is therefore marked <span class="q">[?]</span> and substituted with the closest line that actually exists in the corpus, labelled for what it is. None of them is a user speaking, and none should ever be quoted as one.</p>
+    <p class="cite">competitive-landscape.md · <b>How good is this evidence</b> — summary.md · <b>§5.9 Unverified</b></p>
+  </section>
+
+  <section class="legend">
+    <div class="legend-head">
+      <h2 class="eyebrow">How to read the evidence marks</h2>
+      <button class="filter" id="filter" type="button" aria-pressed="false">Fade the <span id="count">0</span> unverified claims</button>
+    </div>
+    <div class="legend-grid">
+      <div class="legend-item"><span class="ev">vendor copy</span><span>A product's own site or App Store listing.</span></div>
+      <div class="legend-item"><span class="ev">screen</span><span>Captured screenshot, held in <code style="font-family:var(--font-mono);font-size:0.85em">research/screens/</code>.</span></div>
+      <div class="legend-item"><span class="ev">correlation</span><span>A desk-research pattern across several products.</span></div>
+      <div class="legend-item"><span class="ev">assertion</span><span>The research's or the brief's own claim, no external source.</span></div>
+      <div class="legend-item"><span class="ev ev--query">[?] hypothesis</span><span>No data exists. Phrased as a hypothesis, never as fact.</span></div>
+    </div>
+  </section>
+
+  <section class="overview">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">ID</th><th scope="col">Persona</th><th scope="col">Status</th><th scope="col">Anchored in</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P-1</td>
+            <td>The Systematic Optimiser</td>
+            <td><span class="tag tag--primary">Primary</span></td>
+            <td>Paprika's declared audience · pains 1, 4, 6, 7 · the §9 success criteria</td>
+          </tr>
+          <tr>
+            <td>P-2</td>
+            <td>The Household Logistics Lead</td>
+            <td><span class="tag tag--secondary">Secondary</span></td>
+            <td>Plan to Eat / AnyList audiences · market pattern 3 · pains 2, 3</td>
+          </tr>
+          <tr>
+            <td>P-3</td>
+            <td>The Reel Hoarder</td>
+            <td><span class="tag tag--secondary">Secondary — risk</span></td>
+            <td>Instagram/TikTok tier · the meta-pain · Condition X</td>
+          </tr>
+          <tr>
+            <td>P-4</td>
+            <td>The Data Sovereign</td>
+            <td><span class="tag tag--secondary">Secondary — edge</span></td>
+            <td>Tandoor's audience · pain 5 · pain 7</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="why">
+      <h3>Why P-1 is primary — three reasons, all sourced</h3>
+      <ol>
+        <li><strong>The product loop is theirs.</strong> Four of §9's five success criteria — a real shop, trusted scaling, one pass through the store, nothing bought twice — are P-1's jobs almost verbatim. Every wedge the research found attacks a P-1 pain specifically: auditability as an unoccupied position (MP-3), the unique three-unit rule (D-3), the ingredient-first centre (D-2).</li>
+        <li><strong>The category default already targets them</strong>, which is the strongest external evidence any of these personas has: Paprika's audience is <em>“multi-device home cooks who shop systematically.”</em> <span class="ev">vendor copy</span> <span class="cite">comparison.md · tier 1 — screen: <b>t1-paprika.png</b></span></li>
+        <li><strong>Each of the other three hits a structural block in MVP.</strong> P-2 waits on household sharing, deliberately build step 8 of 8. P-3's entry path — the share sheet — is deferred post-MVP. P-4 collides with day-one cloud accounts and deferred export. Only P-1 is fully served by MVP as scoped.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="personas">
+
+    <!-- ============ P-1 ============ -->
+    <article class="persona persona--primary" id="p1">
+      <div class="persona-rail">
+        <div class="rail-sticky">
+          <span class="persona-id">P-1</span>
+          <span class="tag tag--primary">Primary</span>
+        </div>
+      </div>
+
+      <div class="persona-body">
+        <div class="persona-head">
+          <h2>The Systematic Optimiser</h2>
+          <p class="persona-tagline">Already knows what to cook. Wants the logistics to disappear.</p>
+        </div>
+
+        <section class="block">
+          <h3>Context</h3>
+          <p>Cooks regularly and already knows what they want to cook — needs a home recipe book that removes the overhead: scaling, merging, one list, no re-typing. The category describes this person only behaviourally: <em>“multi-device home cooks who shop systematically. No demographic claimed; the UI selects for tolerance.”</em> <span class="ev">vendor copy</span></p>
+          <p class="cite">comparison.md · tier 1 — screen: <b>t1-paprika.png</b></p>
+          <ul class="list">
+            <li data-unverified>Where their recipes live today: <span class="q">[?]</span> — hypothesis: a notes app plus browser bookmarks, per the research's own flagged assumption that Apple Notes is <em>“plausibly where more recipes live than in every dedicated app combined.”</em> <span class="ev">assertion</span></li>
+            <li data-unverified>Demographics — age, country, income: <span class="q">[?]</span> Nothing in the corpus.</li>
+            <li><strong>Not a diet persona.</strong> They want to know what a dish <em>is</em>, not track goals. “Health-goal seekers” are Samsung Food's declared audience and explicitly out of Cooksy's scope. <span class="ev">vendor copy</span></li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>Jobs</h3>
+          <ul class="list">
+            <li>Get a recipe into the system <strong>faster than retyping it</strong> — the bar is set by pasting into a note.</li>
+            <li>Rescale portions <strong>without doing arithmetic</strong>. Crouton's inline scaling is the category's aspirational bar. <span class="ev">screen</span> <span class="cite">t3-crouton.png</span></li>
+            <li>Walk the store <strong>once</strong>, off one merged, aisle-ordered list.</li>
+            <li>Query their own library by what's in the fridge — the <em>“what can I make with the aubergine”</em> job, pain #1 in the corpus.</li>
+            <li><strong>Verify any merged number</strong> before trusting it.</li>
+            <li>Confirm the data can leave <strong>before</strong> typing sixty recipes in.</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>Pains, ranked</h3>
+          <ol class="ranked">
+            <li><strong>Retrieval from their own hoard.</strong> <em>“Storage is solved everywhere; usable storage nowhere.”</em> <span class="ev">correlation</span></li>
+            <li><strong>Numbers nobody shows the parts of</strong> — so they re-check merged quantities by hand. <span class="ev">assertion</span> The corpus grades this itself: “logic, not data.”</li>
+            <li><strong>Quantity chaos.</strong> A cup of flour and a cup of sugar differ by ~80 g, and all fifteen products preserve the ambiguity. <span class="ev">correlation</span></li>
+            <li><strong>The notes-app residue</strong> — retyping, portion maths in the head, three laps of the supermarket. <span class="ev">assertion</span></li>
+            <li><strong>The forced trade:</strong> <em>“a good model behind Docker, or a good app that fudges the maths.”</em> <span class="ev">correlation</span></li>
+          </ol>
+          <p class="cite">competitive-landscape.md · <b>pains 1, 4, 6, 7</b> — ux-patterns.md · <b>§9</b> — summary.md · <b>G-3</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Trust triggers</h3>
+          <div class="tt">
+            <div class="tt-col tt-col--yes">
+              <h4>Convinces</h4>
+              <ul>
+                <li>Local data, explicit offline, one-time purchase — the Paprika precedent users demonstrably tolerate an ageing UI for. <span class="ev">vendor copy</span></li>
+                <li>An export path before commitment. The two strongest data stories, Mela and Tandoor, correlate with the most evangelical users. <span class="ev">correlation</span></li>
+                <li>Numbers that open to show their parts — an unoccupied position in the entire category. <span class="ev">correlation</span></li>
+              </ul>
+            </div>
+            <div class="tt-col tt-col--no">
+              <h4>Repels</h4>
+              <ul>
+                <li>Subscriptions. The one-time column of the market exists and holds. <span class="ev">correlation</span></li>
+                <li>AI and content bloat. Samsung Food's drift toward feeds and Health Scores is named as the opposite of this audience. <span class="ev">correlation</span></li>
+                <li data-unverified><span class="q">[?]</span> Hypothesis: one visibly wrong number ends the relationship. <em>“An optimiser will abandon the product the moment the maths is wrong”</em> is the brief's claim, unmeasured.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Voice</h3>
+          <div class="voice">
+            <p class="voice-missing">[?] — no user quote exists anywhere in the corpus</p>
+            <p class="voice-sub">Closest verbatim line: <i>“an optimiser re-checks the merged quantity by hand — and a tool you verify by hand has negative ROI.”</i></p>
+            <p class="voice-attr">The research's own synthesis. Not a user speaking.<br>competitive-landscape.md · pain 4</p>
+          </div>
+        </section>
+
+        <section class="block" data-unverified>
+          <h3>Open questions</h3>
+          <ul class="list">
+            <li>Does the segment exist at any measurable size? <span class="q">[?]</span> It is the brief's construct; the research never sizes it.</li>
+            <li>Will they tolerate mandatory review? <span class="q">[?]</span> Gap G-1 — the parser bake-off has not been run.</li>
+            <li>Will they build a sixty-recipe library over paste alone? <span class="q">[?]</span> Gap G-2, Condition X.</li>
+          </ul>
+        </section>
+      </div>
+    </article>
+
+    <!-- ============ P-2 ============ -->
+    <article class="persona" id="p2">
+      <div class="persona-rail">
+        <div class="rail-sticky">
+          <span class="persona-id">P-2</span>
+          <span class="tag tag--secondary">Secondary</span>
+        </div>
+      </div>
+
+      <div class="persona-body">
+        <div class="persona-head">
+          <h2>The Household Logistics Lead</h2>
+          <p class="persona-tagline">Runs the food logistics for two to four people. Needs one shared source of truth.</p>
+        </div>
+
+        <section class="block">
+          <h3>Context</h3>
+          <p>Runs the plan, the shop and the split for a shared household. The market's words for them: <em>“organised households, busy families… if you love meal planning and staying organized”</em>; <em>“households coordinating a shop”</em>, and later <em>“households mid-shop, in two different aisles.”</em> <span class="ev">vendor copy</span> <span class="ev">screen</span></p>
+          <p>They need the app as one shared source of truth, replacing a shared Keep list that has <em>“no quantities, no ingredients, no semantics.”</em></p>
+          <ul class="list">
+            <li data-unverified>Household size 2–4 is <strong>the brief's assumption, not research data</strong> <span class="q">[?]</span></li>
+            <li>The household contains a second member type who never authors anything and only ticks items off. <span class="ev">assertion</span></li>
+          </ul>
+          <p class="cite">comparison.md · tiers 1–3 — screens: <b>t1-plan-to-eat.png</b> · <b>t2-anylist.png</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Jobs</h3>
+          <ul class="list">
+            <li>Keep <strong>one shared plan and one live list</strong> the whole household sees.</li>
+            <li>Split a shop in real time — two people, two aisles, basement signal.</li>
+            <li data-unverified>Get portions × people right when different people eat different meals. <span class="q">[?]</span> Hypothesis: the member-assignment mechanic is the brief's design, with no researched demand behind it.</li>
+            <li>Hand the list to the household member who won't install anything — Keep and Reminders are named as the export target.</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>Pains, ranked</h3>
+          <ol class="ranked">
+            <li><strong>The honest one first: the pain may not be felt.</strong> <em>“A household with a working shared Keep list has no felt problem for Cooksy to solve.”</em> <span class="ev">assertion</span></li>
+            <li><strong>The category default offers them nothing.</strong> Paprika has no household sharing at all, and its absence is now a defect rather than the norm. <span class="ev">vendor copy</span> <span class="ev">correlation</span></li>
+            <li><strong>A half-finished shop gets destroyed</strong> when next week is planned — Paprika's one-list-at-a-time, called <em>“a known complaint”</em> whose complainant is unsourced.</li>
+            <li><strong>Lost or laggy checkoffs mid-shop.</strong> The bar is AnyList, which <em>“has simply never lost a checkoff.”</em> <span class="ev">assertion</span></li>
+          </ol>
+          <p class="cite">competitive-landscape.md · <b>tier 2, pains 2–3</b> — comparison.md · <b>pattern 3</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Trust triggers</h3>
+          <div class="tt">
+            <div class="tt-col tt-col--yes">
+              <h4>Convinces</h4>
+              <ul>
+                <li>Sync so fast it reads as local. <span class="ev">assertion</span> The AnyList benchmark.</li>
+                <li>Household priced at almost nothing — AnyList charges $5/yr more for a whole household than an individual. <span class="ev">vendor copy</span> <span class="cite">t3-anylist-complete-pricing.png</span></li>
+                <li>Joining with zero ceremony. Crouton ships household via Family Sharing. <span class="ev">vendor copy</span></li>
+              </ul>
+            </div>
+            <div class="tt-col tt-col--no">
+              <h4>Repels</h4>
+              <ul>
+                <li data-unverified><span class="q">[?]</span> Hypothesis: roles and permissions ceremony. “Households run on trust that already exists offline” is the brief's own reasoning, reaffirmed <em>without</em> competitor evidence.</li>
+                <li data-unverified><span class="q">[?]</span> Hypothesis: per-seat pricing would read as a tax on the family.</li>
+                <li data-unverified>Any household UI leaking into solo use — the brief's rule, untested against users. <span class="q">[?]</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Voice</h3>
+          <div class="voice">
+            <p class="voice-missing">[?] — no user quote exists in the corpus</p>
+            <p class="voice-sub">Closest verbatim line: <i>“Any changes made to a shared list will show up instantly to everyone sharing the list.”</i></p>
+            <p class="voice-attr">AnyList's vendor copy — the promise this persona is being sold, not their own words.<br>comparison.md · tier 2</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Why secondary</h3>
+          <p>Household sharing is deliberately the <strong>last</strong> build step, 8 of 8. And the market evidence says this persona's core job is already the best-served one in the category — AnyList exists, works, and is the product <em>“households actually run their shop from.”</em> The wedge for P-2 is thinner than for P-1.</p>
+        </section>
+      </div>
+    </article>
+
+    <!-- ============ P-3 ============ -->
+    <article class="persona" id="p3">
+      <div class="persona-rail">
+        <div class="rail-sticky">
+          <span class="persona-id">P-3</span>
+          <span class="tag tag--secondary">Secondary — risk</span>
+        </div>
+      </div>
+
+      <div class="persona-body">
+        <div class="persona-head">
+          <h2>The Reel Hoarder</h2>
+          <p class="persona-tagline">Saving is solved. Everything after saving is broken.</p>
+        </div>
+
+        <section class="block">
+          <h3>Context</h3>
+          <p>Finds recipes where recipes are found in 2026 — Instagram and TikTok — and saves them in one tap: <strong>114M reels under <code style="font-family:var(--font-mono);font-size:0.9em">#recipe</code> alone</strong>. <span class="ev">screen</span> The overflow lands in screenshots and notes, where <em>“most ‘I'll organise it later' recipes die.”</em> <span class="ev">assertion</span></p>
+          <ul class="list">
+            <li data-unverified>Age <em>“under ~45”</em> is <strong>the research's own unsourced estimate</strong> <span class="q">[?]</span> — the only age-shaped datum in the entire corpus.</li>
+          </ul>
+          <p class="cite">comparison.md · tier 2 — screen: <b>t2-instagram-recipe-tag.png</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Jobs</h3>
+          <ul class="list">
+            <li>Capture in <strong>one gesture without leaving the video or page</strong> — the share-sheet job, which MVP explicitly defers.</li>
+            <li>Actually <strong>find</strong> a saved recipe weeks later.</li>
+            <li>Turn a saved blob into something cookable — portions, a list.</li>
+            <li><strong>Own</strong> the save. Platform content can vanish, exports nothing, and saves are login-gated. <span class="ev">correlation</span></li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>Pains, ranked</h3>
+          <ol class="ranked">
+            <li><em>“Capture is effortless; <strong>retrieval is hopeless</strong>.”</em> <span class="ev">correlation</span></li>
+            <li>A save is <strong>a bookmark on content you don't own</strong> — no search, no export, no quantities. <span class="ev">correlation</span></li>
+            <li>Video carries no pasteable text — and video import is rejected for MVP, so Cooksy's answer to their #1 source is “screenshot and retype”.</li>
+            <li>Forms kill them fastest: <em>“field-hunting is where libraries die at eleven recipes.”</em> <span class="ev">assertion</span></li>
+          </ol>
+          <p class="cite">comparison.md · <b>tier 2</b> — ux-patterns.md · <b>§2</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Trust triggers</h3>
+          <div class="tt">
+            <div class="tt-col tt-col--yes">
+              <h4>Convinces</h4>
+              <ul>
+                <li>Zero setup — nothing to configure, nothing to correct. The Notes bar. <span class="ev">correlation</span></li>
+                <li>Capture speed above all. The whole market leads with it. <span class="ev">correlation</span></li>
+              </ul>
+            </div>
+            <div class="tt-col tt-col--no">
+              <h4>Repels</h4>
+              <ul>
+                <li>Anything that reads as a form. <span class="ev">assertion</span></li>
+                <li data-unverified><span class="q">[?]</span> Hypothesis: the mandatory review screen itself. No competitor ships a forced correction step, and whether this persona walks at the sight of one is exactly what the unrun bake-off (G-1) would measure.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Voice</h3>
+          <div class="voice">
+            <p class="voice-missing">[?] — no user quote exists in the corpus</p>
+            <p class="voice-sub">Closest verbatim line: <i>“capture is effortless; retrieval is hopeless.”</i></p>
+            <p class="voice-attr">The research's own synthesis of the tier. Not a user.<br>comparison.md · tier 2</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Why secondary — and why “risk”</h3>
+          <p>MVP is weakest exactly at their front door: share-sheet deferred, video rejected, and <em>“the paste box carries the whole load.”</em> Whether a hoarder ever converts into a library-builder is <strong>Condition X</strong> — the named live risk, with defined metrics and no data.</p>
+          <p>Chasing them first would also turn Cooksy into a capture product — the position the entire market already occupies.</p>
+          <p class="cite">ux-patterns.md · <b>§8</b> — summary.md · <b>G-2</b> — comparison.md · <b>pattern 1</b></p>
+        </section>
+      </div>
+    </article>
+
+    <!-- ============ P-4 ============ -->
+    <article class="persona" id="p4">
+      <div class="persona-rail">
+        <div class="rail-sticky">
+          <span class="persona-id">P-4</span>
+          <span class="tag tag--secondary">Secondary — edge</span>
+        </div>
+      </div>
+
+      <div class="persona-body">
+        <div class="persona-head">
+          <h2>The Data Sovereign</h2>
+          <p class="persona-tagline">Wants Tandoor's model honesty without the sysadmin tax.</p>
+        </div>
+
+        <section class="block">
+          <h3>Context</h3>
+          <p>Technical, with a large collection: <em>“cooking enthusiasts with huge collections” — self-hosters.</em> <span class="ev">vendor copy</span> <span class="ev">screen</span> Today they either run Tandoor behind Docker or refuse the category entirely, because the only ingredient-first product is <em>“comfortably the least approachable of the fifteen.”</em> <span class="ev">correlation</span></p>
+          <p class="cite">comparison.md · tier 1 — competitive-landscape.md · <b>pain 7</b> — screen: <b>t1-tandoor.png</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Jobs</h3>
+          <ul class="list">
+            <li><strong>Own and export everything</strong>, at GDPR grade. The Tandoor bar: open source, self-host, no tracking, 90-day export.</li>
+            <li>Get <strong>ingredient-level correctness</strong> — a real food database, editable conversions.</li>
+            <li>Pay once, or not at all. <span class="ev">correlation</span></li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3>Pains, ranked</h3>
+          <ol class="ranked">
+            <li>The correct model ships inside the worst interface, and the setup cost keeps it technical. <span class="ev">correlation</span></li>
+            <li>Cloud competitors won't state offline, export or privacy anywhere on their sites — Fond, Plan to Eat and AnyList are all silent. <span class="ev">correlation</span></li>
+          </ol>
+          <p class="cite">competitive-landscape.md · <b>pain 7</b> — summary.md · <b>§5.1–5.4</b></p>
+        </section>
+
+        <section class="block">
+          <h3>Trust triggers</h3>
+          <div class="tt">
+            <div class="tt-col tt-col--yes">
+              <h4>Convinces</h4>
+              <ul>
+                <li><em>“GDPR Compliant — Made in Germany”</em>, self-host, 90-day export. <span class="ev">vendor copy</span></li>
+                <li><em>“Mela does not collect any data… does not depend on or use any third-party service.”</em> <span class="ev">vendor copy</span> <span class="cite">t3-mela.png</span></li>
+                <li>The strongest data stories correlate with the most evangelical users. <span class="ev">correlation</span></li>
+              </ul>
+            </div>
+            <div class="tt-col tt-col--no">
+              <h4>Repels</h4>
+              <ul>
+                <li data-unverified><strong>A mandatory cloud account</strong> — which Cooksy requires from day one. An honest collision, unresolved. <span class="q">[?]</span> Hypothesis: this alone disqualifies Cooksy for the strict end of this persona.</li>
+                <li>Export deferred to post-MVP. The corpus itself calls this pain <em>“knowingly left on the table.”</em></li>
+                <li>Subscription of any kind. <span class="ev">correlation</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Voice</h3>
+          <div class="voice">
+            <p class="voice-missing">[?] — no user quote exists in the corpus</p>
+            <p class="voice-sub">Closest verbatim line: <i>“GDPR Compliant — Made in Germany.”</i></p>
+            <p class="voice-attr">Tandoor's vendor copy — the promise this persona organises around, not their own words.<br>comparison.md · tier 1</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h3>Why secondary</h3>
+          <p>Segment size is <span class="q">[?]</span> and plausibly the smallest of the four, and two locked MVP decisions — day-one cloud accounts and deferred export — point directly away from them. Serving them first would mean reopening locked decisions; serving them eventually is cheap, because full library export is already a recorded post-MVP obligation.</p>
+        </section>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="closing">
+    <section class="anti">
+      <h2>Anti-personas — deliberately not served</h2>
+      <p style="color:var(--ink-soft);max-width:60ch">The boundary is as load-bearing as the personas.</p>
+      <ul>
+        <li><strong>The health-goal tracker</strong> — Samsung Food's declared audience segment. Macros, goals and diet tracking are rejected in the brief. <span class="ev">vendor copy</span></li>
+        <li><strong>The discovery-seeker</strong> — Cookpad and Pinterest's audience: browsing for inspiration, social proof as ranking. The feed is rejected in the brief. <span class="ev">vendor copy</span> <span class="ev">screen</span> <span class="cite">t2-cookpad.png</span></li>
+      </ul>
+    </section>
+
+    <section class="validation">
+      <h2>What would make these personas real</h2>
+      <p style="color:var(--ink-soft);max-width:60ch">In priority order, matching the corpus's own next steps.</p>
+      <ol>
+        <li><strong>The parser bake-off</strong> (G-1) tests P-1's and P-3's tolerance for mandatory review — the single riskiest assumption shared by the primary and the risk persona.</li>
+        <li><strong>The two week-one metrics</strong> (G-2: library size, median times-cooked) decide between P-1 and P-3 as the real centre of the product. Condition X made measurable.</li>
+        <li><strong>A month of real pantry and cooking use</strong> (G-7, G-8) tests P-1's ranked pains against lived behaviour.</li>
+        <li><strong>Any five user interviews would outweigh everything on this page.</strong> The corpus contains none.</li>
+      </ol>
+    </section>
+
+    <footer class="colophon">
+      <p>Source of truth: <b>research/personas.md</b>. Evidence drawn from competitive-landscape.md, comparison.md, ux-patterns.md, benchmark-retrieval.md and summary.md, plus 20 screenshots in research/screens/.</p>
+      <p>Screens are cited by filename rather than embedded — the originals live in the repository, and four of them are watermarked ACCESS RESTRICTED rather than faked.</p>
+      <p>Decision register: §10.1 and §10.2 of CLAUDE.md. This page records what the evidence said, not what was decided.</p>
+    </footer>
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('filter');
+    var count = document.getElementById('count');
+    var marks = document.querySelectorAll('[data-unverified]');
+    count.textContent = marks.length;
+
+    btn.addEventListener('click', function () {
+      var on = document.body.classList.toggle('sourced-only');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.firstChild.nodeValue = on ? 'Show the ' : 'Fade the ';
+      btn.lastChild.nodeValue = on ? ' unverified claims' : ' unverified claims';
+    });
+  })();
+</script>

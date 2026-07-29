@@ -10,9 +10,23 @@ Save a recipe → set the portions → plan a few meals → get one merged groce
 
 Every quantity rescales live when you change the serving count. Ingredients shared across meals combine into a single line, grouped by store aisle, minus whatever is already in your cupboard.
 
-## Who it's for
+## People
 
 Cooking lovers who are also optimisers — people who enjoy cooking but resent the overhead around it. They already know what they want to cook; they want the logistics to disappear.
+
+**The primary persona is P-1, the Systematic Optimiser.** Defined by behaviour, never demographics: nothing in the research supports an age, a country or a household size. Three secondary personas sit behind them, and each hits a structural block in MVP that P-1 does not.
+
+**The main job:** *when I have decided what we are eating over the next few days, I want to get everything into the house in one go, without doing the arithmetic or the remembering myself, so that the week I planned is the week we actually cook.*
+
+**Three jobs make the MVP core** — highest-value to P-1 and not already closed by the market: **getting back to a dish that already works**, **cooking for the number of people actually eating**, and **being careful about food without having to be technical**.
+
+| Document | What's in it |
+|---|---|
+| [`research/personas.md`](./research/personas.md) | Four personas — one primary, three secondary — each with context, jobs, pains, trust triggers and a voice. Plus two anti-personas marking the scope boundary. Every claim is source-linked; gaps say `[?]` and are written as hypotheses, never as fact. |
+| [`research/jtbd.md`](./research/jtbd.md) | Twelve jobs in *when / I want / so that* form, in English and Ukrainian — one main job, six related, three emotional, two social. Then the **JTBD matrix**: jobs × personas, scored 1–3 with `[?]` where the research is silent, plus what closes each job and whether competitors already do. Ends with the three MVP-core jobs and the features that close no job. |
+| [`research/critique.md`](./research/critique.md) | An adversarial audit of the two above. Every claim marked **confirmed / hypothesis / invented**, then the dangerous list — claims that drive design decisions while resting on nothing — and three questions that would close the biggest gaps. |
+
+**Read the caveat before using any of it.** The research contains no interviews, no teardowns and no user reviews, so every persona is a falsifiable hypothesis and every job priority is inferred from competitor marketing. `critique.md` exists because that distinction is easy to lose once the personas are written down.
 
 ---
 
@@ -30,7 +44,12 @@ This table is the index — update the status column as work lands.
 | [`research/benchmark-retrieval.md`](./research/benchmark-retrieval.md) | Retrieval scored — 8 criteria × 5 best-in-niche products, what to transfer, what to refuse | ✅ Written |
 | [`research/ux-patterns.md`](./research/ux-patterns.md) | Five organising principles for storing and retrieving a recipe; which one the brief already chose, and its one failure mode | ✅ Written |
 | [`research/summary.md`](./research/summary.md) | Synthesis of the three documents above, with eight gaps each carrying a falsifiable hypothesis | ✅ Written |
+| [`research/personas.md`](./research/personas.md) | Four personas plus two anti-personas, source-linked, with `[?]` wherever the research is silent | ✅ Written |
+| [`research/jtbd.md`](./research/jtbd.md) | Twelve jobs in English and Ukrainian, the jobs × personas matrix, the three MVP-core jobs, and the features that close no job | ✅ Written |
+| [`research/critique.md`](./research/critique.md) | Adversarial audit of the two above — confirmed / hypothesis / invented, the dangerous list, and three questions that would close the gaps | ✅ Written |
+| [`index.html`](./index.html) | Entry point for the browsable research site | ✅ Written |
 | [`research.html`](./research.html) | The same synthesis as one browsable page — opens with a product summary, then comparison tables, screens and cross-linked gaps | ✅ Written |
+| [`jtbd.html`](./jtbd.html) | The jobs and the matrix as one browsable page, alongside `research.html` in the site nav | ✅ Written |
 | [`research/screens/`](./research/screens/) | Screenshots from other products, referenced by `comparison.md` | ✅ 20 captured |
 | [`wireframes/`](./wireframes/) | Low-fidelity layouts for the seven screens | ⬜ Empty |
 | [`concept/`](./concept/) | Visual direction — moodboards, type and colour, a rendered screen or two | ⬜ Empty |
