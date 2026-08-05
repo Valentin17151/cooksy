@@ -399,6 +399,49 @@ The tiers are never merged into one ranked list, because the distinction is the 
 
 Pantry is deliberately kept out of the tab bar: it's configured once and touched rarely, and a tab bar should reflect frequency of use, not feature count. The contextual entry point from the grocery list is where the thought actually occurs.
 
+### 6.1 Information architecture — 5 August 2026
+
+Worked out in [`sitemap.md`](./sitemap.md) and [`flows.md`](./flows.md), published as [`ia.html`](./ia.html). **Objects were derived from the jobs, screens from the objects, and navigation from frequency of use** — never from a competitor's menu.
+
+> ⚠️ **This section supersedes parts of §5 and §6 above.** Seven decisions taken on 5 August removed features this brief still describes in full. Read §5 with this list beside it, and treat the IA as current where they conflict:
+>
+> | No longer in the product | Was |
+> |---|---|
+> | **Pantry** — staples and tracked quantities | §5.8, and the *"assumed you have"* section of §5.9 |
+> | **Household** — shared library, shared plan, member assignment, live shared list | §5.10, §5.7's member slots, §5.9's live list |
+> | **URL import** — the server-side fetcher | §5.2. Recipes are written or pasted **as text**; a site can be copied *from*, nothing is fetched |
+> | **The seven-day planner grid** — days, breakfast/lunch/dinner slots | §5.7. Replaced by a **flat cook list** |
+> | **Full library export** | §8.1. **Declined**, not deferred — a list leaves as text and one recipe leaves as a link; the collection does not leave |
+> | **Deterministic parsing** | §5.2. **A model** formats a pasted recipe and proposes steps, tags, ingredient rows and an estimated portion count — all editable |
+> | **Ingredient substitution** — *added, not removed* | Not in §5 at all. Swap one ingredient for another, **once · always · as a copy** |
+
+**The sitemap, top level.** Five intentions, nine screens. The top level is not navigation.
+
+```
+Getting a recipe in ..................... RECIPE EDITOR → FIX INGREDIENT
+Getting back to what I already have ..... LIBRARY · RECIPE · REPLACE INGREDIENT
+Deciding what to cook ................... COOK LIST
+Getting it into the house ............... GROCERY LIST
+Keeping the maths honest ................ ACCOUNT → MY INGREDIENTS
+```
+
+**Global navigation — four.** The rule is frequency of use, not feature count.
+
+| | Job cluster | |
+|---|---|---|
+| **Library** | J-2 · J-6 · J-1 | Two of the three daily things, plus the paste box |
+| **Cook list** | J-0 · J-3 | Where *"I have decided what we are eating"* becomes an object |
+| **Grocery list** | J-4 · J-0 · S-2 | The only screen used in a shop |
+| **Account** | none | Required by the architecture, produced by no job. Holds sign-in, who you are, and *My ingredients* |
+
+The first three read back as the product's one sentence: **keep → decide → buy.**
+
+**The main flow, J-0.** `Library → Recipe → set portions (swap an ingredient if needed) → add to cook list → Cook list → generate → Grocery list → tick`.
+
+**Depth to the main job: one tap of navigation.** The grocery list and the cook list are each one tap from a cold open, and nothing in the product sits deeper than two. The whole loop from cold with one recipe is five taps, **of which one is navigation** — the other four are the decisions the job is made of, and the portion count is not one to optimise away.
+
+**Coverage.** Twelve jobs against nine screens: **8 of 12 jobs have a screen, 8 of 9 screens have a job.** Every blank is reviewed and accepted — Account is architecture with no job; J-5 and S-1 went with the household; E-3 is closed by things not being built; E-1 is declined.
+
 ## 7. Design principles
 
 1. **The servings stepper is the hero.** The moment a user drags portions from 4 to 6 and watches every quantity reflow instantly is the moment the product sells itself. It must feel immediate and physical.
