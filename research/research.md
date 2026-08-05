@@ -29,6 +29,20 @@ The brief has four areas where other products have already made the mistakes, an
 
 One area to add, now that aisle reordering is rejected: **the default aisle order itself.** It's the only order a user will ever get, and it has never been validated against a European supermarket.
 
+## What building the IA exposed — 5 August 2026
+
+Drawing [`sitemap.md`](../sitemap.md) and [`flows.md`](../flows.md) put weight on this corpus and found four places where it holds nothing. Recorded here rather than in the IA, because these are gaps in the **research**, not in the map.
+
+**1 · Ingredient substitution has no prior art in this corpus at all.** The product now lets a person swap one ingredient for another with three scopes — once, always, or saved as a variant copy. **Not one of the fifteen products was examined for this**, so there is no answer to the obvious questions: does anyone ship it, do they scope it, and does a variant stay linked to its parent or stand alone. Cooksy chose *stands alone*, on internal consistency with how a shared recipe saves, and on nothing external.
+
+**2 · The parser bake-off (G-1) has changed shape and is now worth more, not less.** It was framed as *does a deterministic parse produce a review a person will tolerate*. Formatting is now done by a model, so the question is **does a model's proposal produce a review a person will tolerate** — and a second one arrived with it: **is a text-only draft, saved offline and formatted later by a queue, acceptable, or does it read as the app failing?** Both are still unrun, and the second has no prior art here either.
+
+**3 · The persona weighting no longer matches the product, and the coverage matrix now says so numerically.** `personas.md` rates **P-2 the Household Logistics Lead** the strongest secondary persona and calls them *"the cheapest place a single conversation would change the picture."* After the household was paused, **P-2 has zero screens.** P-4 the Data Sovereign has zero too, and after bulk export was declined that is permanent. **Three of the four personas in this corpus are now unserved by the product it was written for.** That is a scope position rather than an error — but a persona document whose secondary characters have no product left should say so on its own front page, and currently does not.
+
+**4 · Pain #1 rests on the narrowest surface in the product.** Retrieval is the corpus's loudest single finding, and the matrix gives **J-2 two screens** — the fewest of any covered job. That is defensible, since search is the substance of the Library rather than a screen of its own. It is also exactly the kind of thing worth knowing before, not after, a first real week of use.
+
+**None of the four is closed by more desk research.** The first needs a teardown, the second needs the bake-off, the third needs a decision recorded in `personas.md`, and the fourth needs someone cooking for a month.
+
 ## Format
 
 One section per product. For each: what it does well, where it breaks down, and the specific implication for Cooksy — a finding without an implication isn't finished.

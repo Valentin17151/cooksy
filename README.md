@@ -47,6 +47,9 @@ This table is the index — update the status column as work lands.
 | [`research/personas.md`](./research/personas.md) | Four personas plus two anti-personas, source-linked, with `[?]` wherever the research is silent | ✅ Written |
 | [`research/jtbd.md`](./research/jtbd.md) | Twelve jobs in English and Ukrainian, the jobs × personas matrix, the three MVP-core jobs, and the features that close no job | ✅ Written |
 | [`research/critique.md`](./research/critique.md) | Adversarial audit of the two above — confirmed / hypothesis / invented, the dangerous list, and three questions that would close the gaps | ✅ Written |
+| [`sitemap.md`](./sitemap.md) | The information architecture — objects, screens, navigation, every screen's states, and the job-to-screen coverage matrix, with a dated decision register | ✅ Written |
+| [`flows.md`](./flows.md) | Four user flows as Mermaid diagrams — the main job and three related ones, drawn to their dead ends | ✅ Written |
+| [`ia.html`](./ia.html) | The sitemap, the flows and the coverage matrix as one browsable page | ✅ Written |
 | [`index.html`](./index.html) | Entry point for the browsable research site | ✅ Written |
 | [`research.html`](./research.html) | The same synthesis as one browsable page — opens with a product summary, then comparison tables, screens and cross-linked gaps | ✅ Written |
 | [`jtbd.html`](./jtbd.html) | The jobs and the matrix as one browsable page, alongside `research.html` in the site nav | ✅ Written |
@@ -60,9 +63,36 @@ This table is the index — update the status column as work lands.
 
 The folders exist but are placeholders — each holds a `.gitkeep` and nothing else, so git tracks the structure before there's work in it. Delete a row if a folder turns out not to be needed.
 
+## Структура — where the IA lives
+
+Two documents carry the information architecture, and they are read in that order.
+
+### [`sitemap.md`](./sitemap.md) — the map
+
+Built in passes, each recorded with its consequences:
+
+- **Entities** — twelve objects, each naming the job that produces it. Where an object is in the model *by decision rather than by job*, it says so. Three retired objects are kept as tombstones with the jobs that went with them
+- **Screens** — nine, each tagged with its job. One orphan, named as one. Plus what was deliberately **demoted** to a state, a control or an action rather than allowed to become a screen
+- **Navigation** — four global items chosen on frequency of use, the tap count to the main job, and what is global · contextual · deep
+- **Every screen's states** — empty, loading and error for all nine, under two rules: an empty state names the next thing to do, and an error never blocks what is already on the device
+- **Traceability** — the job-to-screen coverage matrix, with every blank row and column carrying a verdict
+- **Resolved** — a dated register of every decision and what it cost
+
+### [`flows.md`](./flows.md) — the paths
+
+Four Mermaid flowcharts: the main job **J-0** end to end, plus **J-1** keeping what I find, **J-2** using what I already have, and **J-3** amounts for the people eating.
+
+Each one carries its decisions and states in words underneath, and each is drawn to **both ends — success and the places a person can get stuck.** Green arrows are branches labelled *yes*, red ones *no*; the colour marks which answer was given, not whether the outcome is good.
+
+### [`ia.html`](./ia.html) — the same thing, browsable
+
+The tree, the four flows rendered, and the coverage matrix with its orphans highlighted, on one dark page alongside [`research.html`](./research.html) and [`personas.html`](./personas.html).
+
 ## Screens
 
-Three primary tabs, because three things get used daily — **Library**, **Week plan**, **Grocery list**. Reached contextually rather than from the tab bar: **Recipe**, **Add recipe**, **Pantry**, **Settings**. Pantry stays out of the tab bar deliberately: it's configured once and touched rarely.
+**Four global items** — **Library**, **Cook list**, **Grocery list**, **Account** — chosen on frequency of use, not feature count. The first three read back as the product's one sentence: *keep → decide → buy*. Reached contextually rather than from the bar: **Recipe**, **Recipe editor**, **Replace ingredient**, **Fix ingredient**, **My ingredients**.
+
+**One tap of navigation reaches the main job**, and nothing sits deeper than two. See [`sitemap.md`](./sitemap.md) for the count and the trade-offs behind it.
 
 ## Scope
 

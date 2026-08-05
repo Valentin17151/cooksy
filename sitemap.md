@@ -1,12 +1,12 @@
 # Cooksy — sitemap
 
-**Status:** draft. **Entities only — no screens, no navigation.** Those come after this list is settled, because a screen is a view onto objects and there is no point arranging views of objects that have not been agreed.
+**Status:** draft. Three passes, in the order they have to happen: **[entities](#entities) → [screens](#screens) → [navigation](#navigation)**. A screen is a view onto objects, so the objects are agreed first; navigation is an argument about frequency, so the screens exist before it starts. The flows drawn over all of it live in [`flows.md`](./flows.md).
 
 ---
 
 ## Entities
 
-**Date:** 5 August 2026 · four passes, twelve decisions, none left open
+**Date:** 5 August 2026 · five passes, sixteen decisions, none left open
 **Derived from:** [`research/jtbd.md`](./research/jtbd.md) and [`research/personas.md`](./research/personas.md), then cut and extended by product decisions taken the same day.
 
 ### Method, and what it deliberately is not
@@ -56,13 +56,21 @@ One dish, in the state its owner actually cooks it — not the state the blog wr
 **Parts**
 
 - **servings** — **a number the user sets.** An input, never a fixed property inherited from a source; the ingredient amounts on screen are always computed from it
-- **title**
+- **title** — named by the person first, because a name is the one field they always have
 - ordered **ingredient lines** (E2), optionally under **group headings** — *for the dough*, *for the sauce*. A heading is a label on a row, not a container: it changes display and nothing else
-- numbered **steps**, free text
+- numbered **steps**, free text. **Formatted by a model at creation, and editable word by word** — see E4
 - **source** — free text, and it may be a URL the person pasted as a note. **Nothing fetches it** — see E4
-- **photo**
+- **photos** — **one or several.** Optional, added at creation before anything is parsed
 - **prep + cook time**
-- **tags** (E13)
+- **tags** (E13) — proposed by the model, then added, renamed or removed by the person
+- **draft** — **whether anything about this recipe is still unconfirmed.** Not a lifecycle stage and not a lesser kind of recipe: a draft is fully usable, cookable and searchable. It is **shown and highlighted**, on itself and in the Library, until the person has settled it. Three things raise it, and they are three different sentences on screen:
+
+  | Cause | What the person sees |
+  |---|---|
+  | **Never formatted** — saved offline as text, no ingredient rows | *Not formatted yet. It cannot be shopped for until it is* |
+  | **Formatted, but rows are flagged** — saved with its doubts attached | *Some amounts are unconfirmed* |
+  | **Formatted while you were away** — the queue caught up and the model ran without you | *This was processed while you were offline. Check it* |
+
 - **finished-dish weight** — optional. Cooking drives off water, so raw weight overstates yield; weighing the pot once makes the estimate honest
 - **kcal per 100 g** — derived, scale-invariant, the number worth putting on the card
 - **portion size in grams** — **derived**, not entered: yield weight ÷ servings. Servings is the input, so this is its output
@@ -75,10 +83,12 @@ One dish, in the state its owner actually cooks it — not the state the blog wr
 - **has many** Ingredient lines (E2) — they have no life outside it
 - **belongs to** one Account (E12). There is no shared library
 - **referenced by** Plan slots (E6), many-to-one — cook once, eat twice
-- **created from** a Capture (E4), or typed directly, or saved from a Shared recipe (E14)
+- **created from** a Capture (E4), or typed directly, or saved from a Shared recipe (E14), **or copied as a variant** — see below
 - **links to** other Recipes — *"uses: basic tomato sauce"*, a tappable reference. **Navigation only:** no ingredients, quantities or portions cross the link, and nothing downstream traverses it
 
-> **One piece of bookkeeping the person never meets.** Stored amounts have to be anchored to *some* count or there is nothing to scale from. That anchor is invisible: set once at review, never maintained, and it never surfaces as "this serves 4, and you asked for 6." The person sets a count; the amounts answer.
+**Variants — a swap saved as a copy.** Replacing an ingredient (see [Replace ingredient](#-replace-ingredient--j-6-j-0--p-1)) can be kept as **a second, independent recipe**: pancakes, and pancakes the diet way. The copy has **no thread back to the original** — the same rule a saved Shared recipe already follows. A variant tied to its parent would mean an edit to one silently reaching the other, which this product refuses to do anywhere else.
+
+> **The anchor the person barely meets.** Stored amounts have to be anchored to *some* count or there is nothing to scale from. Until 5 August that anchor was invisible, set silently at review. **The model now estimates it, and the person confirms or changes it once, at creation.** That is a better arrangement than assuming it — but note precisely what it is not: it is *not* the number that reaches the shop. That one is still typed, on the cook list entry (E6), and nothing guesses it.
 
 > **Not an entity: the Library.** It is the set of Recipes belonging to an Account. No fields of its own; its default order is a view, not a stored property — and it can no longer be frecency of *cooking*, because nothing records cooking. See [Resolved](#resolved).
 
@@ -139,13 +149,25 @@ One row of one recipe: an amount of one thing.
 
 ### E4 · Capture — transient
 
-**Pasted text, parsed, in front of you.** It exists for the length of one review and **is never stored** — decided 5 August.
+**A name, optional photos, and pasted text — formatted, in front of you.** It exists for the length of one review and **is never stored** — decided 5 August.
 
 **Parts**
 
+- **the title**, typed first
+- **photos**, one or several, optional
 - **the raw input** — text the person pasted or typed. **Nothing else.** URL import was cut: a recipe may be copied *from* a website, but it arrives as text
-- **parsed rows**, each with a confidence
+- **what the model proposes** — formatted steps · tags · ingredient rows · an estimated portion count. All four are proposals, all four are editable, and rows can be added or deleted outright
 - **flags**: unrecognised ingredient · inferred unit conversion · missing density · vague amount (*"a splash"*, *"a handful"*) · detected group heading
+
+**The parser is a model, and it lives on a server.** Decided 5 August. §10 of the brief already permitted a model at import time and forbade one at query time; this puts it at the centre of import rather than at the edge. **The cost is that capture now has a network dependency it did not have** — and the offline answer falls out of decisions already taken rather than needing a new one:
+
+> **With no signal, the name, photos and raw text save as a real recipe with no ingredient rows** — a **draft** (E1). It is the same shape as a parse that found nothing, and the same *fix it later* the product already allows. It can be cooked from and found by name and step text; **it cannot be shopped for until it is formatted.**
+
+**And it does not wait to be asked.** An unformatted recipe **queues**, and when the connection comes back **the model runs on it in the background.** The next time the person opens the app they are told: *this was processed while you were offline — check it.* The recipe stays a **draft** until they have.
+
+**This looks like it breaks "nothing saves silently", and it does not.** The recipe was already saved, by the person, deliberately — what the queue adds is structure to something that already exists. **Nothing is ever *confirmed* without the person**, which is the half of the rule that carries the weight. The draft flag is what keeps the promise: the app can propose in your absence, and only you can settle it.
+
+**One consequence, which fell out of combining this with the empty-contribution rule below.** If a draft was already on the cook list and a grocery list was generated from it, that list holds a **placeholder line** saying the recipe had nothing to contribute. When the queue later formats the recipe, **the list is not rewritten** — recipe edits never rewrite a generated list. Instead the placeholder changes what it offers: *this recipe has been formatted — add its ingredients?* An explicit tap, never an automatic rewrite of a document you are already shopping from.
 
 **Job.** **J-1** — *"I want to keep it in the seconds before it is gone."* **H-3** sits on top of it: whether entering something properly costs more than scribbling it down is decided by how much work this hands back.
 
@@ -197,6 +219,7 @@ One dish on that list, for a stated number of portions. After the flattening it 
 - **the recipe** (E1)
 - **servings** — **the whole point of the object.** A plain number the person types. It may be the number of guests, or the number of meals when cooking three days ahead. Either way it is just the number the ingredients are recomputed against.
   **Changeable at any time, in place** — decided 5 August — **and the change reaches the grocery list already generated from this cook list.** See [what propagates](#what-propagates-into-a-generated-list-and-what-does-not)
+- **substitutions for this occasion** — zero or more pairs: *sour cream → greek yoghurt*. **This is where a swap lands when its scope is "just this time"**, which is why the recipe stays untouched and the grocery list still buys yoghurt. Same shape as the servings count: transient while you are reading a recipe, stored the moment it carries into an entry
 
 **Job.** **J-3** — *"cooking for the number of people actually eating."* That number is a property of this occasion, not of the recipe, which is why the entry stores its own count rather than borrowing one. Also **J-0**.
 
@@ -262,6 +285,12 @@ The **contributions** part belongs to **H-1** — *"open it up and see what it i
 
 **What an unresolved row becomes here.** A recipe saved with a flagged row still generates a list. A row with no ingredient record has no identity to merge on and no aisle to sort into, so it **stands as its own line, in *other*, carrying its flag forward.** It is never dropped and never guessed at — which is the same rule the row itself follows, applied one screen later.
 
+**And what a recipe with *no rows at all* becomes — the rule that stops a list being quietly short.** A draft that was never formatted contributes nothing. Contributing nothing must never look like contributing correctly:
+
+> **Every cook list entry appears in the generated list, even when it has nothing to give.** A draft with no ingredient rows produces a **placeholder line** naming the dish and saying plainly that its ingredients are not known yet. It sits at the foot of the list, it cannot be ticked as if it were shopping, and it offers the two ways out: *format it now*, or *add what it needs by hand*.
+
+Without this, four dishes planned and three shopped for looks identical to four dishes planned and four shopped for. **That is the one unrecoverable failure**, arriving through the newest door in the product.
+
 ---
 
 ### E12 · Account
@@ -270,16 +299,18 @@ The identity that owns everything and carries it between devices. **After 5 Augu
 
 **Parts**
 
-- **identity**. [?] Nothing else that any job requires
+- **sign-in settings** — the address it is held under, how you signed in, changing it, signing out
+- **who you are** — a display name, and [?] whether anything else about a person is worth storing when nobody else can see it
+- **this device** — what is on it, what is still syncing, and when it last succeeded
 
-**Job.** **J-6**'s *"properly mine"* clause, **E-1** (*"someone else's hands"*), **E-3**.
+**Job.** **J-6**'s *"properly mine"* clause, **E-1** (*"someone else's hands"*), **E-3**. **None of them is closed here** — the traceability matrix records it as a screen with zero jobs, accepted because the architecture needs it.
 
 **Relations**
 
 - **owns** every Recipe, Cook list, Grocery list, Tag and Personal ingredient
 - **publishes** Shared recipes (E14), and **saves** recipes from other people's
 
-**E-1 wants this object to be able to hand back everything it holds, and nothing in the first release does.** See [Jobs with nothing to answer them](#jobs-with-nothing-to-answer-them).
+**E-1 wants this object to be able to hand back everything it holds, and it will not.** Bulk export was declined on 5 August, so this stays a screen that no job produces — kept because the architecture requires an identity, not because a person needs the screen. See [Jobs with nothing to answer them](#jobs-with-nothing-to-answer-them).
 
 ---
 
@@ -419,7 +450,7 @@ The inverse pass. **This list grew on 5 August**, which is the honest cost of th
 - **J-5 · feeding a household without collisions** — no object. Removed by decision
 - **S-1 · being legible to the people I share a kitchen with** — no object. Removed by decision
 - **H-2 · being sure of what is at home before leaving the shop** — no object. Removed with the pantry
-- **E-1 · committing without being trapped.** Scores 3 for one persona and 2 for the primary — a stated precondition for typing anything in at all — and there is still no object that answers it. There is no *my library as a thing that can leave*
+- **E-1 · committing without being trapped.** Scores 3 for one persona and 2 for the primary — a stated precondition for typing anything in at all — and no object answers it. **Declined on 5 August: there is no bulk export of the library.** A grocery list leaves as text and one recipe leaves as a link; the collection as a whole does not leave
 - **E-2 · careful without being technical.** Correctly has no object: it is the bar E3, E4 and the unit rule are held to
 - **E-3 · it stays what I chose.** Correctly has no object: closed by refusals
 - **H-6 · the order matching the shop I am standing in.** No store object by decision — one fixed walking order
@@ -475,6 +506,35 @@ Recorded in the register style of §10.1 of the brief so they are not reopened b
 |---|---|---|
 | Is the plan a seven-day grid, or a list of things to cook? | **A flat list. No days, no meal positions** | E5 and E6 renamed · meal position retired · the plan-level calorie average dies with the days |
 | Is a shared recipe a frozen copy or a live link? | **Frozen, and it cannot be revoked** | E14's lifetime question closed |
+
+### 5 August 2026 · fifth pass — from drawing the flows
+
+| Question | Decision | What moved |
+|---|---|---|
+| Can an ingredient be swapped for another? | **Yes** — sour cream for greek yoghurt — with three scopes: **once · always · as a copy** | **New screen: Replace ingredient** · E6 gains substitutions · E1 gains variants |
+| Where is the portion count set when planning? | **On the recipe, before adding**, and the add sheet carries it | J-0's flow · the Library-row shortcut stays for the unchanged case |
+| How does a recipe get created? | **A screen of its own.** Name, then optional photos, then the text — **then a model formats it**, proposing steps, tags, ingredient rows and an estimated portion count, all editable, rows addable and deletable | E1 · E4 · the Recipe editor screen |
+| What happens with no signal? | **The name, photos and raw text save as a real recipe with no rows, flagged.** Format it later, as an action on the recipe | E4 · J-1's flow |
+
+### 5 August 2026 · sixth pass — the coverage blanks, reviewed
+
+| Question | Decision | What moved |
+|---|---|---|
+| Account has no job — remove it? | **No. Accepted.** It is required by the architecture: an identity has to exist for sync and be reachable. A screen can be required by the architecture and by no job at once | Traceability · E12 · the fourth nav item |
+| J-5 and S-1 have no screen — add one? | **No. Accepted.** Household is paused, and the rows are the pause showing up in the coverage | Traceability |
+| E-1 has no screen — bring export forward? | **No. Bulk export of the library is not being built.** §8.1 listed it as a post-MVP obligation; that is now a rejection, not a schedule | Traceability · E12 · Jobs with nothing to answer them |
+
+### 5 August 2026 · seventh pass — from the IA critique
+
+| Question | Decision | What moved |
+|---|---|---|
+| Where does an empty search or an empty library lead? | **To a button that creates the recipe.** Not an apology, and **not a remark about whether you have ever cooked it** | Library states · J-2's flow |
+| What happens to a recipe that could not be formatted? | **It queues. The model runs on it when the connection returns, and the next time you open the app you are told to check it** | E1's draft field · E4 · J-1's flow |
+| How is an unfinished recipe shown? | **As a draft — visible and highlighted**, wherever it appears. Fully usable, never blocked | E1 · Library · Cook list |
+| What does a recipe with no ingredient rows contribute to a shopping list? | **A placeholder line that cannot be ticked**, naming the dish and saying its ingredients are not known. Never silence | E8 |
+| Does a substitution reach an already-generated list? | **Yes** — everything on a cook list entry reaches it; everything on a recipe does not | E7 · E8 · E6 |
+| What is on the Account screen? | **Sign-in settings, who you are, and this device's sync state** | E12 |
+| Are the empty, loading and error states specified? | **For all nine screens**, with two rules: an empty state names the next thing to do, and an error never blocks what is already on the device | New states table |
 
 ### 5 August 2026 · fourth pass
 
@@ -562,9 +622,10 @@ COOKSY
 │  │     · search — names · ingredients · steps · tags .. J-2
 │  │     · tag filter, composed with it ................. J-2
 │  │     · paste box .................................... J-1
-│  └─ ▸ RECIPE ...................... J-6 · J-3 · J-2 ... P-1
-│        · servings, and everything answering to it ..... J-3
-│        · shared state — opened from a forwarded link .. their J-1
+│  ├─ ▸ RECIPE ...................... J-6 · J-3 · J-2 ... P-1
+│  │     · servings, and everything answering to it ..... J-3
+│  │     · shared state — opened from a forwarded link .. their J-1
+│  └─ ▸ REPLACE INGREDIENT .......... J-6 · J-0 ......... P-1
 │
 ├─ Deciding what to cook ──────────────────────────────── J-0
 │  └─ ▸ COOK LIST ................... J-0 · J-3 ......... P-1
@@ -587,7 +648,7 @@ COOKSY
    ·  part of the screen above it — a state, a control or a section
 ```
 
-**Eight screens, and nothing left over.** Every candidate either became a screen or found a home inside one. None of the eight belongs to anyone but P-1 — and the one audience outside P-1 does not get a screen either, it gets a state of P-1's.
+**Nine screens, and nothing left over.** Every candidate either became a screen or found a home inside one. None of the nine belongs to anyone but P-1 — and the one audience outside P-1 does not get a screen either, it gets a state of P-1's.
 
 ---
 
@@ -595,11 +656,19 @@ COOKSY
 
 ### ▸ Recipe editor — J-1, J-6 · P-1 and P-3
 
-Where text becomes a recipe, and where a recipe gets corrected.
+Where text becomes a recipe, and where a recipe gets corrected. **Reached from the Library as a screen of its own** — creating a recipe is not something that happens inside a box on another screen.
+
+**What the person does, in order:**
+
+1. **Names it.** First, because a name is the one field they always have
+2. **Adds photos** — one or several, optional
+3. **Pastes or types the text**
+4. **A model formats it** and comes back with four proposals: the steps as readable text, tags, the ingredient rows, and an estimated portion count
+5. **Edits any of it.** Every word of the text, every tag, every row — and rows can be added or deleted outright
 
 **One screen, four ways in**, and this is the pass's main structural finding: **review and edit are the same screen.**
 
-1. Text was pasted → the parsed rows, doubts first
+1. Text was pasted → the model's proposals, doubts first
 2. Nothing was pasted → an empty recipe, typed by hand
 3. A saved recipe is being changed → the same rows, no doubts
 4. A flagged row is being fixed → the same screen, scrolled to it
@@ -632,6 +701,8 @@ Everything I have kept, and **the place J-2 is actually answered.**
 
 **Before anything is typed**, the order is frecency of planning, resettable. Tag filters compose with search rather than replacing it.
 
+**Two things this screen owes the person beyond retrieval.** **Drafts are highlighted here** — a recipe that is unformatted, unconfirmed or freshly processed by the queue is visibly so, in the one place the whole collection is seen at once. And **a search that matches nothing offers to create the recipe**, because "I could not find it" and "I do not have it" are the same sentence for a library of your own making, and the answer to both is a button, not an apology.
+
 **It is still not a separate screen.** There is no moment where the person has *gone to search* — the field is on the Library and the Library rearranges under it. Making it a screen of its own would add a destination to a task that is already here.
 
 **Objects:** E1, E13, resolved through E3 and E15.
@@ -656,6 +727,24 @@ That is the correction that removed a screen from this map, and it is right: a r
 The last row is the one thing worth stating out loud, because "just forward the URL" makes it sound live and it is not: the link resolves to the copy made at the moment of sharing. That was decided deliberately — it is what keeps *the user's recipe is sacred* true on both ends.
 
 **Objects:** E1, E2, E13, E14, resolved through E3 and E15.
+
+### ▸ Replace ingredient — J-6, J-0 · P-1
+
+*"Not sour cream. Greek yoghurt."* Reached from an ingredient row, on the Recipe screen or in the editor.
+
+**A screen rather than a sheet**, for the same reason *Fix ingredient* is: it needs a searchable list of everything the app knows about food, and it ends in a choice with three genuinely different consequences.
+
+| Scope | What changes | What it creates |
+|---|---|---|
+| **Just this time** | This occasion only | A substitution on the **cook list entry** (E6). The recipe is untouched; the grocery list buys yoghurt |
+| **Always** | The recipe, from here on | Nothing new — an edit to an ingredient row like any other |
+| **As a copy** | Nothing about the original | **A second recipe** (E1). Pancakes, and pancakes the diet way |
+
+**Job.** **J-6** — a variant you worked out is exactly *"my version, on the third attempt"*, which is the job's own phrasing. **J-0** — the list has to buy what will actually be cooked, and a swap that did not reach it would put the wrong thing in the trolley.
+
+**The stated motive is calories**, and it is worth recording precisely rather than glossing: swapping in order to see what a dish *becomes* rests on the calorie estimate, which **no job in the research produces** ([U1](#in-by-decision-not-by-job)). The screen has jobs; the reason it was asked for does not. Both facts are true and neither cancels the other.
+
+**Objects:** E1, E2, E3, E6, E15.
 
 ### ▸ Cook list — J-0, J-3 · P-1
 
@@ -696,9 +785,11 @@ Making the cook list's servings count reach the grocery list forced a distinctio
 | I changed… | The generated list | Why |
 |---|---|---|
 | **The count on a cook list entry** | **updates** | The count is a statement about *this occasion*, and the list is a rendering of that occasion. If the plan says six and the list says four, the list is simply wrong |
-| **The recipe itself** — an amount, an ingredient, a fixed flag | **does not update** | The recipe is a document you revise over years (J-6, *"my version, on the third attempt"*). Revising it must not retroactively rewrite shopping you already planned. The list keeps what the recipe said when it was generated — which is what E8's stored contributions are for |
+| **A substitution on a cook list entry** — *just this time, yoghurt not sour cream* | **updates** | Same object, same reasoning. A swap that did not reach the list would put the wrong thing in the trolley, which is worse than a wrong amount |
+| **The recipe itself** — an amount, an ingredient, a fixed flag, a swap set to *always* | **does not update** | The recipe is a document you revise over years (J-6, *"my version, on the third attempt"*). Revising it must not retroactively rewrite shopping you already planned. The list keeps what the recipe said when it was generated — which is what E8's stored contributions are for |
+| **A missing gram weight, supplied from a grocery line** | **updates that line only** | You were standing in the list and answered a question the list asked. It would be perverse to make the answer land anywhere else — and it changes one line, not the merge |
 
-**In one line: the list is downstream of the plan, and a snapshot of the recipes.**
+**In one line: the list is downstream of the plan, and a snapshot of the recipes.** Everything on a cook list entry reaches it; everything on a recipe does not.
 
 **Which list is affected.** Only the **in-progress** list generated from that cook list. Past and completed lists are records; they are never rewritten, exactly as they are never overwritten by a new generation.
 
@@ -739,7 +830,7 @@ That is the shape this pass keeps arriving at, and it is worth naming as a rule 
 
 | Persona | Screens of their own | Reading |
 |---|---|---|
-| **P-1** Systematic Optimiser | **All eight** | As it should be. The product is theirs |
+| **P-1** Systematic Optimiser | **All nine** | As it should be. The product is theirs |
 | **P-3** Reel Hoarder | **None.** Passes through the editor | Their two entry paths — share sheet and URL import — are both gone. What is left is a paste box they share with P-1 |
 | **P-2** Household Logistics Lead | **None** | Household was cut. There is nothing here for them at all |
 | **P-4** Data Sovereign | **None.** Account is the nearest, and it is an orphan | Export is post-MVP and a cloud account is mandatory. Both point away from them |
@@ -754,7 +845,7 @@ That is the shape this pass keeps arriving at, and it is worth naming as a rule 
 
 ## Demoted — states, controls and actions, not screens
 
-Listed because each of them is a screen in at least one competitor, and treating them as screens is how an eight-screen product becomes a twenty-screen one.
+Listed because each of them is a screen in at least one competitor, and treating them as screens is how a nine-screen product becomes a twenty-screen one.
 
 | | Where it actually lives |
 |---|---|
@@ -764,10 +855,32 @@ Listed because each of them is a screen in at least one competitor, and treating
 | **Past grocery lists** | A section of **Grocery list**, reached by the same control that switches between two live ones |
 | **Past cook lists** | A section of **Cook list**, same control, same shape. Required rather than symmetrical — see the screen |
 | **Line breakdown** — which recipes this came from | A disclosure on **Grocery list**. It is H-1's whole point and still not a screen |
-| **Add to cook list**, with its portion count | A sheet raised from **Recipe** |
+| **Add to cook list**, with its portion count | A sheet raised from a **Library** row or from **Recipe**. **It opens with the count already set to whatever the recipe screen is currently showing** — continuity with a number the person set seconds ago, not a default and not a guess, and still theirs to change. Decided 5 August, from [`flows.md`](./flows.md) |
 | **Export as text** | An action on **Grocery list** |
 | **Share a recipe** | An action on **Recipe**, producing E14 |
 | **Empty · loading · error · offline · unsaved** | States of whichever screen they occur on. Every screen has them; none of them is one |
+
+---
+
+## Every screen's states
+
+The line above — *every screen has them* — was true and useless while only four screens had theirs written down. **They were specified where a flow happened to pass and nowhere else.** This closes that: nine screens, every one of them.
+
+**Two rules govern the whole table.** An empty state **names the one thing to do next and offers the control for it** — an empty screen that only apologises is a dead end with better manners. And an error **never blocks what is already on the device**: the network failing is not a reason to stop reading a recipe.
+
+| Screen | Empty | Loading | Error | Also |
+|---|---|---|---|---|
+| **Library** | *Nothing saved yet* → **the button is New recipe.** It is the only thing to do here on day one | The first sync onto a new device — once, ever | **Sync failed.** Everything on the device still reads and still edits; a quiet marker, never a modal, never a blocked screen | **Drafts are highlighted.** A search that matches nothing offers **create this recipe** rather than an apology |
+| **Recipe editor** | A blank recipe, cursor in the name field | **The model formatting.** The one genuine network wait in the product | **Two, and they read differently.** *No signal* → saved as text, formatted when the connection returns. *The model failed* — timed out, errored, hit a limit → **retry**, or save as text and let the queue take it | Saved-with-doubts, on leaving |
+| **Fix ingredient** | The picker matches nothing → **name it yourself and give the weight.** This is the path that creates a personal ingredient | — | — | Reached from three places; it returns to whichever one it came from |
+| **Recipe** | — | — | **A dead link.** The account behind a shared recipe is gone. Say exactly that and offer nothing false — no "try again", no half-loaded page | Draft banner · *formatted while you were away, check it* · read-only when opened from a link |
+| **Replace ingredient** | The picker matches nothing → **create the ingredient**, or keep the original and close | — | — | The scope choice is the last step, never the first — nothing changes until it is made |
+| **Cook list** | *Nothing planned yet* → **the button is Go to the library** | — | — | An entry whose recipe is a draft with no rows is **marked here, before the list is generated** — the earliest place the problem can be seen |
+| **Grocery list** | Two, and they are not the same. *No list yet* → **Generate one from the cook list.** Everything ticked → **done**, with the date, not an empty screen | — | — | Offline · changed lines marked · the placeholder line for a draft entry |
+| **My ingredients** | *Nothing yet* — and it says **when this fills**: the first time you tell the app about something it did not know. Not a call to action; there is nothing to do here yet | — | — | This is the typical state for months. It should read as normal, not as a gap |
+| **Account** | — | Signing in | **Sign-in failed** — say which part. **Offline** is not an error: you stay signed in, and sync waits | — |
+
+**The one state that is not on this table**, because it belongs to no single screen: a **queued format** waiting for a connection. It lives on the recipe as a draft, it is highlighted in the Library, and it resolves itself without being asked.
 
 ---
 
@@ -778,7 +891,7 @@ Listed because each of them is a screen in at least one competitor, and treating
 # Navigation
 
 **Date:** 5 August 2026 · draft
-**Built on:** the eight screens above. **No new screens are invented here** — this pass only decides what is always visible, what appears in the flow, and how deep anything sits.
+**Built on:** the screens above. **No new screens are invented here** — this pass only decides what is always visible, what appears in the flow, and how deep anything sits.
 
 **Main job:** **J-0** — *"when I have decided what we are eating over the next few days, I want to get everything into the house in one go, without doing the arithmetic or the remembering myself."*
 **Primary persona:** **P-1**, the Systematic Optimiser — someone who already knows what they want to cook and needs the logistics to disappear.
@@ -805,7 +918,7 @@ Three was the recommendation, on the brief's own rule that **navigation reflects
 - **What it costs.** The bar is the most expensive real estate in the product, and a quarter of it now goes to a screen touched a handful of times a year. The three items that carry the loop each lost a share of the width
 - **What makes it defensible anyway.** The tab is not *Settings* — **it is the whole "keeping the maths honest" cluster**, and the thing carrying a job inside it is *My ingredients* (J-3, E-2). Naming the tab after the person rather than after a preferences screen is what makes it a place instead of a drawer
 - **What it fixes.** *Account* was reached through a header control that had no other reason to exist. A tab removes the control and the ambiguity with it
-- **What it does not fix.** The Account screen still closes no job. It is now an **orphan with permanent real estate**, which is a stronger claim than an orphan behind a gear icon — and it stays that way until full export lands and **E-1** gives it something to close
+- **What it does not fix.** The Account screen closes no job, and after 5 August it never will — bulk export was declined, so **E-1** is not coming to give it one. It is a **permanent orphan with permanent real estate**, kept because the architecture needs an identity to exist and be reachable. **A screen can be required by the architecture and required by no job at the same time**; that is what this one is
 
 ### Still refused
 
@@ -844,10 +957,12 @@ One recipe is not a real week. **Four dishes is**, and that is where the count t
 
 | A four-dish week | Taps |
 |---|---|
-| **As drawn in step 2** — open recipe · add · confirm · back, four times, then plan and generate | **18** |
-| **Restructured** — add to cook list from the Library row, without opening the recipe | **10** |
+| **Through the recipe** — open · set the portions · add · confirm · back, four times over, then plan and generate | **18** |
+| **From the Library row** — add in place, without opening the recipe | **10** |
 
-**The change: a Library row can be added to the cook list in place.** Tap the add control on the row, the servings sheet appears, confirm. No opening, no coming back.
+**Both paths exist, and the flows take the first one.** That is worth stating plainly rather than quoting the better number: [`flows.md`](./flows.md) routes J-0 through the **Recipe** screen, because that is where the portion count is set and where an ingredient can be swapped. **So the drawn main path costs 18, and 10 is what it drops to for dishes that need neither.**
+
+**The row shortcut is for the unchanged case** — the fifteen dishes a household rotates through, added at their usual count without a second thought. Tap the add control on the row, the servings sheet appears already carrying the recipe's own count, confirm.
 
 **The trade-off, stated rather than hidden.** You commit a dish to the week without looking at it first — which would be reckless in a discovery product and is not one here, because **P-1 is defined by already knowing what they want to cook.** The recipe is still one tap away for the times you do want to check, and nothing about the row control removes that path. What it costs is one more control on every library row, on the screen that most needs to stay scannable.
 
@@ -886,6 +1001,7 @@ A navigation model that only serves the main job is a bad one. All of them land 
 | **Recipe** | a Library row · a search result · a cook list entry · a grocery line's breakdown · a forwarded link |
 | **Recipe editor** | the paste box · *new recipe* · *edit* on a recipe · a flagged row |
 | **Fix ingredient** | a flagged row, wherever it appears — in the editor, on the recipe, or on a grocery line that landed in *other* |
+| **Replace ingredient** | any ingredient row, on **Recipe** or in the **Recipe editor** |
 | **Add to cook list** *(sheet)* | a Library row · a Recipe |
 | **Line breakdown** *(disclosure)* | a grocery line |
 | **Past lists, both kinds** *(section)* | the header control on Cook list and on Grocery list |
@@ -915,3 +1031,101 @@ A navigation model that only serves the main job is a bad one. All of them land 
 ---
 
 **Where this leaves the model:** four global items — three carrying the loop and one carrying the person — one tap of navigation to the main job, nothing deeper than two, and every contextual surface hanging off the object it concerns rather than off a menu.
+
+**Next:** [`flows.md`](./flows.md) — the main job and three related ones drawn end to end, including the states and the dead ends. Then [Traceability](#traceability), which counts what all of it actually covers.
+
+---
+
+# Traceability
+
+**Date:** 5 August 2026
+**Rows:** every job in [`research/jtbd.md`](./research/jtbd.md) — main, related, emotional, social. **Columns:** every screen in this document.
+
+**A ✓ means the screen genuinely takes part in closing the job**, not that it is somewhere on the route. The Library is on the way to almost everything; it is ticked only where retrieval is part of the job itself. **Being strict is the whole point** — a generous matrix hides exactly the defects this pass exists to find.
+
+## The matrix
+
+| Job | LIB | EDIT | FIX | REC | SWAP | COOK | SHOP | ING | ACC | Screens |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| **J-0** everything into the house in one go | ✓ | | | ✓ | ✓ | ✓ | ✓ | | | **5** |
+| **J-1** keeping what I find | ✓ | ✓ | ✓ | ✓ | | | | | | **4** |
+| **J-2** using what I already have | ✓ | | | ✓ | | | | | | **2** |
+| **J-3** amounts for the people eating | | ✓ | ✓ | ✓ | | ✓ | ✓ | ✓ | | **6** |
+| **J-4** one trip, not three laps | | | ✓ | | | ✓ | ✓ | | | **3** |
+| **J-5** a household without collisions | | | | | | | | | | **0** |
+| **J-6** the good version outlasting memory | ✓ | ✓ | | ✓ | ✓ | | | | | **4** |
+| **E-1** committing without being trapped | | | | | | | | | | **0** |
+| **E-2** careful without being technical | | ✓ | ✓ | | | | | ✓ | | **3** |
+| **E-3** it stays what I chose | | | | | | | | | | **0** |
+| **S-1** legible to the people I share a kitchen with | | | | | | | | | | **0** |
+| **S-2** handing it to someone outside my tools | | | | | | | ✓ | | | **1** |
+| **Jobs per screen** | **4** | **4** | **4** | **5** | **2** | **3** | **4** | **2** | **0** | 28 |
+
+`LIB` Library · `EDIT` Recipe editor · `FIX` Fix ingredient · `REC` Recipe · `SWAP` Replace ingredient · `COOK` Cook list · `SHOP` Grocery list · `ING` My ingredients · `ACC` Account
+
+**Coverage: 8 of 12 jobs have a screen. 8 of 9 screens have a job.** One empty column, four empty rows.
+
+### A few readings before the defects
+
+- **J-3 is the most covered job in the product**, touching six of the nine screens. That is the right shape: the three-unit rule and the portion count were named as the half of the market nobody serves, and the matrix shows the product actually built for it rather than talking about it.
+- **J-2 is covered by two screens** and is **pain #1 in the entire research corpus.** Thin is not the same as wrong — search is the substance of the Library rather than a screen of its own — but it is worth knowing that the loudest documented pain rests on the narrowest surface.
+- **Replace ingredient is the thinnest new screen at two jobs**, and the reason it was asked for — recalculating calories — contributes **zero**, because calories close no job. The screen earns its place on J-6 and J-0 and not on its own motive.
+- **One asymmetry, checked rather than left to look like an error.** SWAP is ticked for J-0 and FIX is not, though both are optional detours off the same path. The difference is real: **a swap changes what goes into the trolley, a fix changes only the aisle a line sorts into** — which is why FIX is ticked for J-4, where the walking order *is* the job.
+
+---
+
+## The five blank lines, reviewed — 5 August 2026
+
+Every empty row and column was put to a decision. **All five came back accepted.** The goal was never a matrix with no blanks for its own sake; it was a matrix with no *unexamined* blanks, and that is now the state: **zero outstanding defects, five recorded positions.**
+
+| Blank | Verdict | Reasoning |
+|---|---|---|
+| **ACC** — a screen with no job | **Accepted.** Not a candidate for removal | Architecturally necessary. An account has to exist for sync and identity, and it has to be reachable. **A screen can be required by the architecture and required by no job at the same time** — that is a real category, and the matrix simply cannot express it |
+| **J-5** household without collisions | **Accepted.** Household is paused | The row is the pause, showing up where it should |
+| **S-1** legible to the people I share a kitchen with | **Accepted.** Same cause | — |
+| **E-3** it stays what I chose | **Accepted.** Not screen-shaped | Closed by things *not* being built: no monetisation, no feed, no AI upsell, no drift toward a content platform. A promise kept by refusal is still kept, and no screen was ever going to hold it |
+| **E-1** committing without being trapped | **Accepted.** **Bulk export of the whole library is not being built** | See below — this one has a cost worth recording once |
+
+### E-1, and the cost recorded once
+
+The recommendation was to bring full library export into Account and close the empty column and the empty row together. **It was declined: there is no bulk download of every recipe.** That is a decision, and the register's job is to state what it costs, not to argue with it.
+
+- **The job is not deferred, it is declined.** §8.1 of the brief listed full library export as a *post-MVP obligation*; it is now a rejection. That is a change to the brief, not a scheduling note
+- **E-1 scores 3 for the Data Sovereign and 2 for the primary persona**, where the research records it as a precondition for typing anything in at all — *"nobody types in sixty recipes without knowing they can leave."* The corpus already called this pain *"knowingly left on the table"*; it is now off the table
+- **P-4 the Data Sovereign is permanently outside the product.** They were already pointed away by mandatory cloud accounts; this closes the other door
+
+**What the product does let out, stated precisely, because it is not nothing:**
+
+| | Out | How |
+|---|---|---|
+| A grocery list | **Yes** | Plain text, one tap — this is S-2, and it is covered |
+| One recipe | **Yes** | A frozen share link, one at a time, by hand |
+| The library as a whole | **No** | Nothing, by decision |
+
+The door is not shut, it is narrow: everything can leave one item at a time, and nothing can leave at once.
+
+---
+
+## Where this leaves the target
+
+| | Count | Status |
+|---|---|---|
+| **Empty columns** | 1 — Account | Accepted: required by the architecture, produced by no job |
+| **Empty rows** | 4 — J-5, S-1, E-3, E-1 | Two are the household pause · one is not screen-shaped · one is a declined feature |
+| **Outstanding defects** | **0** | Every blank has a verdict |
+
+**The blanks stay in the matrix rather than being tidied away.** A coverage table that shows only what is covered is a marketing document; the value of this one is that four jobs and one screen are visibly unaccounted for, on purpose, with the reason attached to each.
+
+## The hypotheses, for completeness
+
+Not part of the matrix above, because `jtbd.md` holds them outside the main list — they rest on no external evidence. Recorded because two of them do have surfaces and two are worth watching:
+
+| | Hypothesis | Screen | Note |
+|---|---|---|---|
+| **H-1** | seeing what a total is made of | **SHOP** — the line breakdown | The least evidenced job in the corpus, and the one the product's only defensible wedge is built on |
+| **H-3** | the cost of entering something properly | **EDIT** | What the unrun parser bake-off would measure |
+| **H-4** | the same handful of dishes, without asking | **LIB** frecency · **COOK** copy-forward | Two surfaces for a premise that is the brief's own assertion |
+| **H-2** | being sure of what is at home | — | No screen. Went with the pantry |
+| **H-5** | the pile I meant to cook | — | No screen, and none proposed. The behaviour is evidenced; the feeling behind it is not |
+| **H-6** | the order matching the shop I am standing in | — | No screen by decision — one fixed walking order |
+| **H-7** | measures I think in | — | No screen. Metric only, locked |
