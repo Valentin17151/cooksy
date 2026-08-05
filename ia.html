@@ -4,245 +4,317 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cooksy — Information architecture</title>
-<meta name="description" content="Cooksy's information architecture: twelve objects, nine screens, four doors, four user flows, and a job-to-screen coverage matrix.">
+<meta name="description" content="Twelve objects, nine screens, four doors, four user flows and a job-to-screen coverage matrix — derived from the jobs, never from a competitor's menu.">
 <style>
   :root {
-    --ground:      #0D1017;
-    --surface:     #151A25;
-    --surface-alt: #1C2231;
-    --ink:         #E6E9F2;
-    --ink-soft:    #A6AEC2;
-    --ink-faint:   #737B90;
-    --rule:        #29303F;
-    --rule-soft:   #1F2532;
-    --accent:      #8FAEE4;
-    --accent-ink:  #0D1017;
-    --accent-soft: #1A2540;
-    --query:       #DBA04C;
-    --query-soft:  #33270F;
-    --flag:        #E08D7C;
-    --flag-soft:   #331B17;
-    --green:       #2F9E44;
-    --red:         #E03131;
+    --paper:        #F5F2F6;
+    --paper-sunk:   #EDE8EF;
+    --paper-raised: #FCFAFD;
+    --ink:          #1D181F;
+    --ink-2:        #4A4350;
+    --ink-3:        #6E6574;
+    --rule:         #DBD3DF;
+    --rule-soft:    #E6E0EA;
+    --accent:       #6B2E5B;
+    --accent-soft:  #EBDDE9;
+    --ok:           #3F6238;
+    --warn:         #8A5612;
+    --warn-soft:    #F3E7D2;
+    --no:           #96382C;
+    --no-soft:      #F5DED9;
 
-    --serif: "Iowan Old Style", "Charter", "Bitstream Charter", Georgia, "Times New Roman", serif;
-    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Liberation Mono", monospace;
+    --serif: "Iowan Old Style", Charter, "Bitstream Charter", "Source Serif 4", Cambria, Georgia, serif;
 
+    --page: 1180px;
+    --measure: 70ch;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #16131A;
+      --paper-sunk:  #1D1922;
+      --paper-raised:#1B1721;
+      --ink:         #EDE7F0;
+      --ink-2:       #B5ACBB;
+      --ink-3:       #8B8291;
+      --rule:        #322B39;
+      --rule-soft:   #26212C;
+      --accent:      #CB8CBA;
+      --accent-soft: #2A1E2A;
+      --ok:          #93BC82;
+      --warn:        #D9A44F;
+      --warn-soft:   #32250F;
+      --no:          #E2897A;
+      --no-soft:     #331B18;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#16131A; --paper-sunk:#1D1922; --paper-raised:#1B1721;
+    --ink:#EDE7F0; --ink-2:#B5ACBB; --ink-3:#8B8291;
+    --rule:#322B39; --rule-soft:#26212C;
+    --accent:#CB8CBA; --accent-soft:#2A1E2A;
+    --ok:#93BC82; --warn:#D9A44F; --warn-soft:#32250F; --no:#E2897A; --no-soft:#331B18;
     color-scheme: dark;
   }
+  :root[data-theme="light"] {
+    --paper:#F5F2F6; --paper-sunk:#EDE8EF; --paper-raised:#FCFAFD;
+    --ink:#1D181F; --ink-2:#4A4350; --ink-3:#6E6574;
+    --rule:#DBD3DF; --rule-soft:#E6E0EA;
+    --accent:#6B2E5B; --accent-soft:#EBDDE9;
+    --ok:#3F6238; --warn:#8A5612; --warn-soft:#F3E7D2; --no:#96382C; --no-soft:#F5DED9;
+    color-scheme: light;
+  }
 
-  * { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: border-box; }
+  h1,h2,h3,h4,h5,p,ul,ol,table,figure,blockquote,dl,dd { margin: 0; padding-left: 0; }
+  ul, ol { list-style: none; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
 
   body {
-    margin: 0;
-    background: var(--ground);
+    background: var(--paper);
     color: var(--ink);
     font-family: var(--serif);
-    font-size: 1.0625rem;
-    line-height: 1.62;
+    font-size: 16.5px;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  .page {
-    max-width: 74rem;
-    margin: 0 auto;
-    padding: clamp(1.75rem, 5vw, 4rem) clamp(1.1rem, 4vw, 3rem) 5rem;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(2.75rem, 5vw, 4.25rem);
-  }
-
-  a { color: var(--accent); text-underline-offset: 0.18em; }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
-
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.17em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
     margin: 0;
+    padding-left: 14rem;
   }
 
-  /* ---------- masthead ---------- */
+  .wrap { width: 100%; max-width: var(--page); margin-inline: auto; padding-inline: clamp(1.1rem, 4vw, 2.5rem); }
+  .prose { max-width: var(--measure); }
 
-  .masthead { display: grid; gap: 1.5rem; border-bottom: 2px solid var(--ink); padding-bottom: 1.6rem; }
-  .masthead h1 {
-    font-size: clamp(2.5rem, 7vw, 4.4rem);
-    line-height: 0.95;
-    letter-spacing: -0.035em;
-    font-weight: 600;
-    margin: 0;
-    text-wrap: balance;
+  /* ── site sidebar ───────────────────────────────── */
+  .sidenav {
+    position: fixed; inset: 0 auto 0 0; width: 14rem; z-index: 40;
+    background: var(--paper-sunk);
+    border-right: 1px solid var(--rule);
+    padding: 1.6rem 1.1rem;
+    display: flex; flex-direction: column; gap: 1.9rem;
+    overflow-y: auto;
   }
-  .masthead h1 em { font-style: normal; color: var(--ink-faint); }
-  .masthead-grid { display: grid; gap: clamp(1.25rem, 4vw, 3rem); grid-template-columns: 1fr; }
-  @media (min-width: 56rem) { .masthead-grid { grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); align-items: end; } }
-  .lede { font-size: clamp(1.05rem, 1.7vw, 1.24rem); line-height: 1.52; color: var(--ink-soft); max-width: 44ch; margin: 0; }
-  .colophon { display: grid; gap: 0.55rem; font-family: var(--mono); font-size: 0.76rem; line-height: 1.5; color: var(--ink-soft); }
-  .colophon div { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.75rem; }
-  .colophon .k { color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.66rem; padding-top: 0.15em; }
+  .sidenav-brand { text-decoration: none; color: var(--ink); line-height: 1.1; }
+  .sidenav-brand b { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; }
+  .sidenav-brand span {
+    display: block; font-family: var(--mono); font-size: .58rem;
+    letter-spacing: .17em; text-transform: uppercase; color: var(--ink-3); margin-top: .4rem;
+  }
+  .sidenav-list { display: flex; flex-direction: column; gap: .15rem; }
+  .sidenav-list a {
+    display: flex; gap: .6rem; align-items: baseline;
+    font-family: var(--mono); font-size: .71rem; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-2); text-decoration: none;
+    padding: .55rem .6rem;
+    border-left: 2px solid transparent;
+  }
+  .sidenav-list a:hover { background: var(--paper-raised); color: var(--ink); }
+  .sidenav-list a[aria-current="page"] { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+  .sidenav-list a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .sidenav-list .n { color: var(--ink-3); font-size: .64rem; flex: none; }
+  .sidenav-sub { display: flex; flex-direction: column; gap: .1rem; border-top: 1px solid var(--rule); padding-top: .9rem; }
+  .sidenav-sub b { font-family: var(--mono); font-size: .58rem; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3); padding: 0 .6rem .35rem; }
+  .sidenav-sub a { font-family: var(--mono); font-size: .66rem; color: var(--ink-2); text-decoration: none; padding: .35rem .6rem; }
+  .sidenav-sub a:hover { color: var(--accent); }
+  .sidenav-foot { margin-top: auto; font-family: var(--mono); font-size: .6rem; line-height: 1.7; color: var(--ink-3); }
 
-  nav.toc { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-family: var(--mono); font-size: 0.76rem; }
-  nav.toc span { color: var(--ink-faint); }
+  @media (max-width: 62rem) {
+    body { padding-left: 0; }
+    .sidenav {
+      position: static; width: auto; flex-direction: row; align-items: center;
+      gap: 1rem; padding: .7rem 1rem; border-right: 0; border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+    }
+    .sidenav-list { flex-direction: row; gap: .3rem; }
+    .sidenav-list a { border-left: 0; border-bottom: 2px solid transparent; padding: .4rem .5rem; }
+    .sidenav-list a[aria-current="page"] { border-left: 0; border-bottom-color: var(--accent); }
+    .sidenav-sub, .sidenav-foot, .sidenav-brand span { display: none; }
+  }
 
-  /* ---------- sections ---------- */
+  /* ── type roles ─────────────────────────────────── */
+  .eyebrow { font-family: var(--mono); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
 
-  .sec { display: grid; gap: 1.5rem; }
-  .sec-head { display: grid; gap: 0.4rem; border-bottom: 1px solid var(--ink); padding-bottom: 0.65rem; }
-  .sec-head h2 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.05rem); letter-spacing: -0.022em; font-weight: 600; text-wrap: balance; }
-  .sec-head p { margin: 0; color: var(--ink-soft); max-width: 64ch; font-size: 0.98rem; }
-  .sec > p { margin: 0; color: var(--ink-soft); max-width: 70ch; }
-  .sec > p b, .sec-head p b { color: var(--ink); }
+  .masthead { padding-block: clamp(2.5rem, 6vw, 4.5rem) 2rem; display: flex; flex-direction: column; gap: 1.1rem; border-bottom: 1px solid var(--ink); }
+  .masthead h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); line-height: 1.03; letter-spacing: -.025em; font-weight: 400; text-wrap: balance; max-width: 20ch; }
+  .deck { font-size: clamp(1.05rem, 2vw, 1.22rem); color: var(--ink-2); max-width: 54ch; text-wrap: pretty; }
+  .meta { display: flex; flex-wrap: wrap; gap: .4rem 1.75rem; font-family: var(--mono); font-size: .7rem; color: var(--ink-3); padding-top: .4rem; }
+  .meta b { color: var(--ink-2); font-weight: 500; }
 
-  /* ---------- tree ---------- */
+  section.band { padding-block: clamp(2.25rem, 5vw, 3.5rem); }
+  section.band + section.band { border-top: 1px solid var(--rule-soft); }
+  .sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .75rem; border-bottom: 1px solid var(--rule); padding-bottom: .6rem; margin-bottom: 1.5rem; }
+  .sec-head h2 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); font-weight: 400; letter-spacing: -.015em; }
+  .sec-head .eyebrow { flex: none; }
 
-  .tree-scroll { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  p + p { margin-top: .85rem; }
+  .prose p { text-wrap: pretty; color: var(--ink-2); }
+  .prose strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); }
+
+  .caveat { background: var(--warn-soft); border-left: 3px solid var(--warn); padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: .7rem; max-width: 66ch; }
+  .caveat p { color: var(--ink-2); text-wrap: pretty; }
+  .caveat .eyebrow { color: var(--warn); }
+  .caveat strong { color: var(--ink); font-weight: 600; }
+
+  .grouphead { font-family: var(--mono); font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule-soft); padding-bottom: .45rem; margin: 2rem 0 1.25rem; }
+
+  /* ── tree ───────────────────────────────────────── */
+  .tree-scroll { overflow-x: auto; border: 1px solid var(--rule); background: var(--paper-raised); }
   pre.tree {
-    font-family: var(--mono);
-    font-size: 0.76rem;
-    line-height: 1.8;
-    margin: 0;
-    padding: 1.25rem 1.4rem;
-    color: var(--ink-faint);
-    white-space: pre;
-    min-width: 42rem;
+    font-family: var(--mono); font-size: .72rem; line-height: 1.85;
+    margin: 0; padding: 1.25rem 1.4rem; color: var(--ink-3);
+    white-space: pre; min-width: 44rem;
   }
-  pre.tree b { color: var(--ink); font-weight: 600; letter-spacing: 0.03em; }
+  pre.tree b { color: var(--ink); font-weight: 600; letter-spacing: .03em; }
   pre.tree i { color: var(--accent); font-style: normal; }
-  pre.tree u { color: var(--flag); text-decoration: none; font-weight: 600; }
-  pre.tree s { color: var(--ink-soft); text-decoration: none; }
+  pre.tree u { color: var(--no); text-decoration: none; font-weight: 600; }
+  pre.tree s { color: var(--ink-2); text-decoration: none; }
 
-  /* ---------- nav bar ---------- */
-
-  .navbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .navbar > div { background: var(--accent-soft); padding: 0.9rem 1rem 1rem; display: grid; gap: 0.3rem; align-content: start; }
-  .navbar > div.aside { background: var(--surface); }
-  .navbar .t { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.012em; }
-  .navbar .j { font-family: var(--mono); font-size: 0.68rem; color: var(--accent); letter-spacing: 0.06em; }
-  .navbar > div.aside .j { color: var(--ink-faint); }
-  .navbar .w { font-size: 0.85rem; color: var(--ink-soft); line-height: 1.4; }
-  .loop { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); text-align: center; margin: 0.2rem 0 0; }
+  /* ── doors ──────────────────────────────────────── */
+  .doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem,1fr)); gap: 1rem; }
+  .door { background: var(--paper-raised); border: 1px solid var(--rule); border-top: 3px solid var(--accent); padding: 1rem 1.1rem 1.15rem; display: flex; flex-direction: column; gap: .45rem; }
+  .door--aside { border-top-color: var(--no); }
+  .door .t { font-size: 1.08rem; font-weight: 600; letter-spacing: -.01em; }
+  .door .j { font-family: var(--mono); font-size: .66rem; letter-spacing: .08em; color: var(--accent); }
+  .door--aside .j { color: var(--no); }
+  .door .w { font-size: .89rem; color: var(--ink-2); text-wrap: pretty; }
+  .loop { font-family: var(--mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); text-align: center; margin-top: 1rem; }
   .loop b { color: var(--ink); font-weight: 600; }
 
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11.5rem,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-  .stat { background: var(--surface); padding: 1.05rem 1.15rem 1.15rem; display: grid; gap: 0.35rem; align-content: start; }
-  .stat .n { font-family: var(--mono); font-size: 2.1rem; font-weight: 600; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-  .stat .lab { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-faint); }
-  .stat .sub { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.45; }
-  .stat--warn .n { color: var(--query); }
+  .dens { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem,1fr)); gap: .9rem; margin-top: 1.5rem; }
+  .dcard { border: 1px solid var(--rule); background: var(--paper-raised); padding: .9rem 1rem; display: flex; flex-direction: column; gap: .45rem; }
+  .dcard--worst { border-color: var(--warn); background: var(--warn-soft); }
+  .dcard .num { font-family: var(--mono); font-size: 1.7rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .dcard--worst .num { color: var(--warn); }
+  .dcard .lbl { font-family: var(--mono); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .dcard .note { font-size: .85rem; color: var(--ink-2); text-wrap: pretty; }
 
-  /* ---------- flows ---------- */
-
-  .flow-block { display: grid; gap: 1rem; padding: 1.6rem 0; border-bottom: 1px solid var(--rule-soft); }
-  .flow-block:last-of-type { border-bottom: none; }
-  .flow-block > h3 { margin: 0; font-size: 1.28rem; font-weight: 600; letter-spacing: -0.015em; }
-  .flow-job { margin: 0; border-left: 2px solid var(--accent); padding: 0.5rem 0.9rem; font-size: 0.97rem; line-height: 1.5; color: var(--ink-soft); max-width: 72ch; }
-  .flow-job b { color: var(--ink); font-weight: 600; }
+  /* ── flows ──────────────────────────────────────── */
+  .flow { display: flex; flex-direction: column; gap: .9rem; padding-block: 1.75rem; border-bottom: 1px solid var(--rule-soft); }
+  .flow:last-of-type { border-bottom: 0; padding-bottom: 0; }
+  .flow h3 { font-size: 1.12rem; font-weight: 600; letter-spacing: -.01em; }
+  .flow h3 .jid { font-family: var(--mono); color: var(--accent); margin-right: .5rem; font-weight: 400; }
+  .stmt { background: var(--paper-raised); border: 1px solid var(--rule-soft); border-left: 2px solid var(--accent); padding: .9rem 1.05rem; max-width: 72ch; font-size: 1rem; line-height: 1.5; color: var(--ink); text-wrap: pretty; }
+  .cl { font-family: var(--mono); font-size: .61rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-right: .4rem; }
   .diagram {
-    overflow: auto;
-    max-height: clamp(28rem, 78vh, 46rem);
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    padding: 1rem;
-    resize: vertical;
+    overflow: auto; max-height: clamp(26rem, 74vh, 44rem); resize: vertical;
+    background: var(--paper-raised); border: 1px solid var(--rule); padding: 1rem;
   }
   .diagram .mermaid { margin: 0; }
   .diagram .mermaid svg { max-width: none; height: auto; display: block; margin: 0 auto; }
-  .scroll-hint {
-    font-family: var(--mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin: 0;
-  }
-  .ends { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
-  @media (min-width: 46rem) { .ends { grid-template-columns: repeat(auto-fit, minmax(16rem,1fr)); } }
-  .endcard { border: 1px solid var(--rule); border-left: 3px solid var(--accent); background: var(--surface); padding: 0.7rem 0.9rem; font-size: 0.89rem; line-height: 1.45; color: var(--ink-soft); }
-  .endcard.bad { border-left-color: var(--flag); border-left-style: dashed; }
-  .endcard b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 0.15rem; }
+  .hint { font-family: var(--mono); font-size: .62rem; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-3); }
+  .ends { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem,1fr)); gap: .8rem; }
+  .end { border: 1px solid var(--rule); border-left: 3px solid var(--ok); background: var(--paper-raised); padding: .75rem .9rem; font-size: .87rem; line-height: 1.45; color: var(--ink-2); text-wrap: pretty; }
+  .end.bad { border-left-color: var(--no); border-left-style: dashed; }
+  .end b { display: block; color: var(--ink); font-weight: 600; margin-bottom: .15rem; }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; font-family: var(--mono); font-size: 0.73rem; color: var(--ink-soft); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 0.75rem 0; }
-  .legend span { display: inline-flex; align-items: baseline; gap: 0.45rem; }
-  .swatch { width: 1.5rem; height: 0.16rem; display: inline-block; transform: translateY(-3px); }
-  .sw-g { background: var(--green); }
-  .sw-r { background: var(--red); }
-  .sw-a { background: var(--accent); }
+  .legend { display: flex; flex-wrap: wrap; gap: .55rem 1.6rem; font-family: var(--mono); font-size: .68rem; color: var(--ink-2); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding-block: .7rem; }
+  .legend span { display: inline-flex; align-items: center; gap: .45rem; }
+  .sw { width: 1.4rem; height: 2px; display: inline-block; }
+  .sw-y { background: var(--ok); }
+  .sw-n { background: var(--no); }
+  .sw-o { background: var(--ink-3); }
 
-  /* ---------- tables ---------- */
+  /* ── matrix ─────────────────────────────────────── */
+  .mscroll { overflow-x: auto; }
+  table.matrix { border-collapse: collapse; font-size: .86rem; min-width: 46rem; }
+  table.matrix th, table.matrix td { border: 1px solid var(--rule-soft); padding: .4rem .55rem; }
+  table.matrix thead th { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: 400; text-align: center; border-bottom-color: var(--ink-2); }
+  table.matrix thead th:first-child { text-align: left; }
+  table.matrix tbody th { text-align: left; font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+  table.matrix tbody th b { color: var(--accent); font-weight: 400; font-family: var(--mono); font-size: .74rem; margin-right: .35rem; }
+  table.matrix td { text-align: center; color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+  table.matrix td.n { font-family: var(--mono); color: var(--ink-3); font-size: .74rem; font-weight: 400; }
+  table.matrix .zc { background: var(--no-soft); }
+  table.matrix tr.zero th, table.matrix tr.zero td { background: var(--no-soft); }
+  table.matrix tr.zero th b, table.matrix tr.zero td.n { color: var(--no); }
+  table.matrix tfoot th, table.matrix tfoot td { font-family: var(--mono); font-size: .7rem; color: var(--ink-3); font-weight: 600; border-top-color: var(--rule); }
+  table.matrix tfoot td.zc { color: var(--no); }
+  .key { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); line-height: 1.75; margin-top: .6rem; }
+  .key b { color: var(--ink-2); font-weight: 500; }
 
-  .table-scroll { overflow-x: auto; }
-  .ledger { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
-  .ledger th, .ledger td { text-align: left; padding: 0.6rem 0.9rem 0.6rem 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
-  .ledger th { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-faint); font-weight: 400; border-bottom-color: var(--rule); }
-  .ledger td:first-child { color: var(--ink); }
-  .ledger td { color: var(--ink-soft); }
-  .ledger b { color: var(--ink); font-weight: 600; }
+  .verdicts { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem,1fr)); gap: 1rem; margin-top: 1.5rem; }
+  .verdict { background: var(--paper-raised); border: 1px solid var(--rule); border-top: 3px solid var(--no); padding: 1rem 1.1rem 1.15rem; display: flex; flex-direction: column; gap: .5rem; }
+  .verdict .card-id { font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; color: var(--no); }
+  .verdict h3 { font-size: 1.02rem; font-weight: 600; line-height: 1.3; text-wrap: balance; }
+  .verdict p { font-size: .88rem; color: var(--ink-2); text-wrap: pretty; }
+  .verdict .metric { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); border-top: 1px solid var(--rule-soft); padding-top: .5rem; margin-top: auto; }
 
-  .matrix { border-collapse: collapse; font-size: 0.85rem; min-width: 44rem; }
-  .matrix th, .matrix td { border: 1px solid var(--rule-soft); padding: 0.4rem 0.55rem; }
-  .matrix thead th { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); font-weight: 400; text-align: center; border-bottom-color: var(--rule); }
-  .matrix thead th:first-child { text-align: left; }
-  .matrix tbody th { text-align: left; font-weight: 400; color: var(--ink-soft); white-space: nowrap; }
-  .matrix tbody th b { color: var(--ink); font-weight: 600; font-family: var(--mono); font-size: 0.78rem; }
-  .matrix td { text-align: center; color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
-  .matrix td.n { font-family: var(--mono); color: var(--ink-faint); font-size: 0.76rem; }
-  .matrix .zc { background: var(--flag-soft); }
-  .matrix tr.zero th, .matrix tr.zero td { background: var(--flag-soft); }
-  .matrix tr.zero th b, .matrix tr.zero td.n { color: var(--flag); }
-  .matrix tfoot th, .matrix tfoot td { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); font-weight: 600; border-top-color: var(--rule); }
-  .matrix tfoot td.zc { color: var(--flag); }
-  .key { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); line-height: 1.7; margin: 0.5rem 0 0; }
-  .key b { color: var(--ink-soft); font-weight: 600; }
+  /* ── states table ───────────────────────────────── */
+  table.states { width: 100%; border-collapse: collapse; font-size: .89rem; min-width: 42rem; }
+  table.states th, table.states td { text-align: left; vertical-align: top; padding: .6rem .8rem .6rem 0; border-bottom: 1px solid var(--rule-soft); }
+  table.states thead th { font-family: var(--mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); font-weight: 400; border-bottom-color: var(--rule); }
+  table.states td { color: var(--ink-2); text-wrap: pretty; }
+  table.states td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  table.states b { color: var(--ink); font-weight: 600; }
 
-  .note { margin: 0; border-left: 2px solid var(--query); background: var(--query-soft); padding: 0.65rem 0.9rem; font-size: 0.92rem; line-height: 1.5; color: var(--ink-soft); max-width: 74ch; }
-  .note b { color: var(--ink); }
-  .note--cut { border-left-color: var(--flag); background: var(--flag-soft); }
-
-  footer.foot { border-top: 2px solid var(--ink); padding-top: 1.1rem; font-family: var(--mono); font-size: 0.74rem; color: var(--ink-faint); line-height: 1.6; display: grid; gap: 0.4rem; }
-  footer.foot b { color: var(--ink-soft); font-weight: 400; }
-
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  footer.colophon { border-top: 1px solid var(--rule); padding-block: 1.5rem 3rem; font-family: var(--mono); font-size: .68rem; line-height: 1.7; color: var(--ink-3); display: flex; flex-direction: column; gap: .35rem; }
+  footer.colophon b { color: var(--ink-2); font-weight: 500; }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <header class="masthead">
-    <p class="eyebrow">Cooksy · design phase · 03 — information architecture</p>
-    <div class="masthead-grid">
-      <div style="display:grid; gap:1.1rem;">
-        <h1>Information<br>architecture<br><em>objects before screens</em></h1>
-        <p class="lede">Twelve objects, nine screens, four doors, four flows drawn to their dead ends — and a matrix that counts what all of it actually covers.</p>
-      </div>
-      <div class="colophon">
-        <div><span class="k">Method</span><span>objects from jobs · screens from objects · navigation from frequency — never from a competitor's menu</span></div>
-        <div><span class="k">Sources</span><span><a href="sitemap.md">sitemap.md</a> · <a href="flows.md">flows.md</a></span></div>
-        <div><span class="k">Main job</span><span>J-0 — get everything into the house in one go</span></div>
-        <div><span class="k">Date</span><span>5 August 2026</span></div>
-      </div>
-    </div>
-    <nav class="toc">
-      <a href="#tree">Sitemap</a><span>·</span>
-      <a href="#nav">Navigation</a><span>·</span>
-      <a href="#flows">Flows</a><span>·</span>
-      <a href="#matrix">Coverage</a><span>·</span>
-      <a href="research.html">Research</a><span>·</span>
-      <a href="personas.html">Personas</a><span>·</span>
-      <a href="jtbd.html">JTBD</a>
-    </nav>
-  </header>
+<aside class="sidenav">
+  <a class="sidenav-brand" href="index.html"><b>Cooksy</b><span>Design phase</span></a>
+  <nav class="sidenav-list">
+    <a href="research.html"><span class="n">01</span>Research</a>
+    <a href="jtbd.html"><span class="n">02</span>JTBD</a>
+    <a href="ia.html" aria-current="page"><span class="n">03</span>IA</a>
+  </nav>
+  <div class="sidenav-sub">
+    <b>On this page</b>
+    <a href="#tree">The sitemap</a>
+    <a href="#doors">Four doors</a>
+    <a href="#flows">Four flows</a>
+    <a href="#matrix">Coverage</a>
+    <a href="#states">Screen states</a>
+  </div>
+  <div class="sidenav-foot">
+    Source of truth<br>sitemap.md<br>flows.md
+  </div>
+</aside>
 
-  <!-- ============ SITEMAP ============ -->
-  <section class="sec" id="tree">
-    <div class="sec-head">
-      <h2>The sitemap</h2>
-      <p>Derived from the twelve objects and what a person is trying to do. The five lines at the top level are <b>intentions, not tabs</b>. Every screen carries the job it closes; one carries none and says so.</p>
-    </div>
+<main>
+<header class="masthead wrap" id="top">
+  <span class="eyebrow">Information architecture · 5 August 2026</span>
+  <h1>Objects before screens</h1>
+  <p class="deck">Twelve objects, nine screens, four doors and four flows drawn to their dead ends — every one of them derived from a job somebody has, and none of it from a competitor's menu.</p>
+  <div class="meta">
+    <span><b>12</b> objects · <b>9</b> screens · <b>4</b> doors</span>
+    <span><b>1</b> tap of navigation to the main job</span>
+    <span>Coverage · <b>8/12</b> jobs · <b>8/9</b> screens</span>
+    <span>Main job · <b>J-0</b></span>
+  </div>
+</header>
 
-    <div class="tree-scroll">
+<section class="band wrap">
+  <div class="caveat">
+    <span class="eyebrow">Read this before using any of it</span>
+    <p>The jobs behind this architecture rest on a corpus with <strong>no interviews, no teardowns and no user reviews.</strong> Every job is inferred, so every object and every screen resting on one is inferred too.</p>
+    <p><strong>And this page supersedes parts of the brief.</strong> Seven things changed on 5 August that <a href="https://github.com/Valentin17151/cooksy/blob/main/CLAUDE.md">CLAUDE.md</a> still describes in full: the pantry, the household, URL import, the seven-day planner grid and full library export are gone; parsing is now done by a model; ingredient substitution was added. Where the brief and this page disagree, this page is current.</p>
+  </div>
+</section>
+
+<!-- ══════════ SITEMAP ══════════ -->
+<section class="band wrap" id="tree">
+  <div class="sec-head">
+    <h2>The sitemap</h2>
+    <span class="eyebrow">Nine screens · five intentions</span>
+  </div>
+
+  <div class="prose" style="margin-bottom:1.5rem;">
+    <p>Objects were derived from the jobs, screens from the objects. <strong>The five lines at the top level are intentions, not tabs</strong> — which of them become navigation is a separate argument, decided on frequency of use further down. Every screen carries the job it closes; one carries none and says so.</p>
+  </div>
+
+  <div class="tree-scroll">
 <pre class="tree">COOKSY
 │
 ├─ <s>Getting a recipe in</s> ─────────────────────────────── <i>J-1</i>
@@ -279,73 +351,90 @@
    <b>▸</b>  a screen
    <b>·</b>  part of the screen above it — a state, a control or a section
 </pre>
+  </div>
+
+  <div class="prose" style="margin-top:1.25rem;">
+    <p><strong>Nine screens, and nothing left over.</strong> Every candidate either became a screen or found a home inside one — which is the rule this pass kept arriving at: <strong>a thing that is the same object in a different state belongs on the same screen.</strong> A past grocery list is a grocery list. A past cook list is a cook list. A recipe somebody sent you is a recipe.</p>
+  </div>
+</section>
+
+<!-- ══════════ DOORS ══════════ -->
+<section class="band wrap" id="doors">
+  <div class="sec-head">
+    <h2>Four doors</h2>
+    <span class="eyebrow">Frequency of use, not feature count</span>
+  </div>
+
+  <div class="doors">
+    <div class="door">
+      <span class="t">Library</span>
+      <span class="j">J-2 · J-6 · J-1</span>
+      <span class="w">Two of the three daily things happen here, and capture is a box on this screen rather than a place of its own.</span>
     </div>
-
-    <p><b>Nine screens, and nothing left over.</b> Every candidate either became a screen or found a home inside one — which is the rule this pass kept arriving at: <b>a thing that is the same object in a different state belongs on the same screen.</b> A past grocery list is a grocery list. A past cook list is a cook list. A recipe somebody sent you is a recipe.</p>
-  </section>
-
-  <!-- ============ NAVIGATION ============ -->
-  <section class="sec" id="nav">
-    <div class="sec-head">
-      <h2>Four doors</h2>
-      <p>The rule is <b>frequency of use, not feature count</b>. Three carry the loop; the fourth carries the person and does not pretend to be part of it.</p>
+    <div class="door">
+      <span class="t">Cook list</span>
+      <span class="j">J-0 · J-3</span>
+      <span class="w">The decision half of the main job — and where changing the count changes what you buy.</span>
     </div>
-
-    <div class="navbar">
-      <div>
-        <span class="t">Library</span>
-        <span class="j">J-2 · J-6 · J-1</span>
-        <span class="w">Two of the three daily things happen here, and capture is a box on this screen rather than a place of its own.</span>
-      </div>
-      <div>
-        <span class="t">Cook list</span>
-        <span class="j">J-0 · J-3</span>
-        <span class="w">The decision half of the main job — and where changing the count changes what you buy.</span>
-      </div>
-      <div>
-        <span class="t">Grocery list</span>
-        <span class="j">J-4 · J-0 · S-2</span>
-        <span class="w">The payoff half, and the only screen used <em>in a shop</em> — trolley in one hand, bad light, no signal.</span>
-      </div>
-      <div class="aside">
-        <span class="t">Account</span>
-        <span class="j">no job — architecture only</span>
-        <span class="w">Sign-in, who you are, this device's sync state, and the door to <em>My ingredients</em>.</span>
-      </div>
+    <div class="door">
+      <span class="t">Grocery list</span>
+      <span class="j">J-4 · J-0 · S-2</span>
+      <span class="w">The payoff half, and the only screen used <em>in a shop</em> — trolley in one hand, bad light, no signal.</span>
     </div>
-    <p class="loop">keep &nbsp;→&nbsp; decide &nbsp;→&nbsp; buy &nbsp;&nbsp;·&nbsp;&nbsp; <b>the first three are the product's one sentence, left to right</b></p>
-
-    <div class="stats">
-      <div class="stat"><span class="lab">To the job's surface</span><span class="n">1</span><span class="sub">The list, in the shop, ready to tick</span></div>
-      <div class="stat"><span class="lab">To the decision point</span><span class="n">1</span><span class="sub">The cook list, to say what we're eating</span></div>
-      <div class="stat stat--warn"><span class="lab">Whole loop, cold, one recipe</span><span class="n">5</span><span class="sub">Of which <b>one</b> is navigation — the other four are the job</span></div>
+    <div class="door door--aside">
+      <span class="t">Account</span>
+      <span class="j">no job · architecture only</span>
+      <span class="w">Sign-in, who you are, this device's sync state, and the door to <em>My ingredients</em>. Not part of the loop, and it should not pretend to be.</span>
     </div>
+  </div>
+  <p class="loop">keep &nbsp;→&nbsp; decide &nbsp;→&nbsp; buy &nbsp;&nbsp;·&nbsp;&nbsp; <b>the first three are the product's one sentence, left to right</b></p>
 
-    <p class="note"><b>Navigation depth is 1. The other four taps are the job, not the route to it.</b> Asking for the portion count is not overhead to be optimised away — it is the single decision that makes every downstream number correct, and removing it would mean guessing. <b>Nothing in the product sits deeper than two.</b></p>
-  </section>
-
-  <!-- ============ FLOWS ============ -->
-  <section class="sec" id="flows">
-    <div class="sec-head">
-      <h2>Four flows, drawn to the dead ends</h2>
-      <p>The main job end to end, and three of the related ones. Every rectangle is a screen from the tree above — nothing was invented to make a flow work.</p>
+  <div class="dens">
+    <div class="dcard">
+      <span class="lbl">To the job's surface</span>
+      <span class="num">1</span>
+      <span class="note">The list, in the shop, ready to tick.</span>
     </div>
-
-    <div class="legend">
-      <span><i class="swatch sw-g"></i> a branch labelled <b>yes</b></span>
-      <span><i class="swatch sw-r"></i> a branch labelled <b>no</b></span>
-      <span><i class="swatch sw-a"></i> everything else — two right answers, not a right and a wrong one</span>
-      <span>dashed node = a dead end</span>
+    <div class="dcard">
+      <span class="lbl">To the decision point</span>
+      <span class="num">1</span>
+      <span class="note">The cook list, to say what we're eating.</span>
     </div>
+    <div class="dcard dcard--worst">
+      <span class="lbl">Whole loop, cold, one recipe</span>
+      <span class="num">5</span>
+      <span class="note">Of which <b>one</b> is navigation — the other four are the job.</span>
+    </div>
+  </div>
 
-    <p class="note"><b>Green does not mean good.</b> The colour marks which answer was given, not whether the outcome is desirable — <em>"any flagged rows? — yes"</em> is green and is bad news.</p>
-    <p class="note"><b>On loading states:</b> Cooksy reads from the device, so most of it has none, and inventing them would misrepresent the product. Two are honest — the first sync onto a new device, and the model formatting a pasted recipe.</p>
+  <div class="prose" style="margin-top:1.5rem;">
+    <p><strong>Navigation depth is 1, and nothing in the product sits deeper than two.</strong> The other four taps are the job, not the route to it: asking for the portion count is the single decision that makes every downstream number correct, and removing it would mean guessing.</p>
+  </div>
+</section>
 
-    <div class="flow-block">
-      <h3>J-0 · the main job — everything into the house in one go</h3>
-      <p class="flow-job"><b>When</b> I have decided what we are eating over the next few days, <b>I want</b> to get everything into the house in one go, without doing the arithmetic or the remembering myself, <b>so that</b> the week I planned is the week we actually cook.</p>
-      <div class="diagram">
-<pre class="mermaid">
+<!-- ══════════ FLOWS ══════════ -->
+<section class="band wrap" id="flows">
+  <div class="sec-head">
+    <h2>Four flows, drawn to the dead ends</h2>
+    <span class="eyebrow">Main job + three related</span>
+  </div>
+
+  <div class="legend">
+    <span><i class="sw sw-y"></i> a branch labelled <b>yes</b></span>
+    <span><i class="sw sw-n"></i> a branch labelled <b>no</b></span>
+    <span><i class="sw sw-o"></i> everything else — two right answers, not a right and a wrong one</span>
+    <span>dashed node = a dead end</span>
+  </div>
+
+  <div class="prose" style="margin-block:1.25rem;">
+    <p><strong>Green does not mean good.</strong> The colour marks which answer was given, not whether the outcome is desirable — <em>"any flagged rows? — yes"</em> is green and is bad news.</p>
+    <p><strong>On loading states:</strong> Cooksy reads from the device, so most of it has none, and inventing them would misrepresent the product. Two are honest — the first sync onto a new device, and the model formatting a pasted recipe.</p>
+  </div>
+
+  <article class="flow">
+    <h3><span class="jid">J-0</span>The main job — everything into the house in one go</h3>
+    <p class="stmt"><span class="cl">When</span>I have decided what we are eating over the next few days, <span class="cl">I want</span>to get everything into the house in one go, without doing the arithmetic or the remembering myself, <span class="cl">so that</span>the week I planned is the week we actually cook.</p>
+    <div class="diagram"><pre class="mermaid">
 flowchart TD
     begin(["I have decided what we are eating"]) --> lib["Library"]
     lib --> qSync{"Is my library on this device?"}
@@ -418,21 +507,19 @@ flowchart TD
     class win good
     linkStyle 6,7,10,13,15,26,30,37,39,43,49,53 stroke:#2F9E44,stroke-width:2px
     linkStyle 4,8,11,16,27,33,40,42,46,48,52 stroke:#E03131,stroke-width:2px
-</pre>
-      </div>
-      <p class="scroll-hint">Scroll inside the frame · drag its lower edge to resize</p>
-      <div class="ends">
-        <div class="endcard"><b>Success</b>Everything is in the house, in one pass, at the amounts the plan asked for.</div>
-        <div class="endcard"><b>No longer a dead end — a new device with no signal</b>The editor works offline. Nothing can be planned until the library arrives, but recipes can be written while it does.</div>
-        <div class="endcard bad"><b>Dead end — bought twice</b>The only one left here. The pantry was cut, so nothing checks the cupboard.</div>
-      </div>
+</pre></div>
+    <p class="hint">Scroll inside the frame · drag its lower edge to resize</p>
+    <div class="ends">
+      <div class="end"><b>Success</b>Everything is in the house, in one pass, at the amounts the plan asked for.</div>
+      <div class="end"><b>No longer a dead end — a new device with no signal</b>The editor works offline. Nothing can be planned until the library arrives, but recipes can be written while it does.</div>
+      <div class="end bad"><b>Dead end — bought twice</b>The only one left here. The pantry was cut, so nothing checks the cupboard.</div>
     </div>
+  </article>
 
-    <div class="flow-block">
-      <h3>J-1 · keeping what I find</h3>
-      <p class="flow-job"><b>When</b> something I want to cook goes past me, <b>I want</b> to keep it in the seconds before it is gone, in a form that still makes sense three weeks later.</p>
-      <div class="diagram">
-<pre class="mermaid">
+  <article class="flow">
+    <h3><span class="jid">J-1</span>Keeping what I find</h3>
+    <p class="stmt"><span class="cl">When</span>something I want to cook goes past me, <span class="cl">I want</span>to keep it in the seconds before it is gone, in a form that still makes sense three weeks later.</p>
+    <div class="diagram"><pre class="mermaid">
 flowchart TD
     seen(["Something I want to cook goes past me"]) --> lib["Library"]
     lib --> editor["Recipe editor"]
@@ -491,21 +578,19 @@ flowchart TD
     class win good
     linkStyle 4,9,17,19,25,26,28,31,35,36 stroke:#2F9E44,stroke-width:2px
     linkStyle 5,8,15,18,21,23,30,32,37 stroke:#E03131,stroke-width:2px
-</pre>
-      </div>
-      <p class="scroll-hint">Scroll inside the frame · drag its lower edge to resize</p>
-      <div class="ends">
-        <div class="endcard"><b>Success</b>It is mine, and finding it again in three weeks is not harder than finding it the first time.</div>
-        <div class="endcard"><b>No longer a dead end — no rows came back</b>It stays a draft. Nothing is lost, nothing is shoppable, and typing the rows later is one tap away.</div>
-        <div class="endcard bad"><b>Dead end — I closed the app mid-correction</b>The drawn cost of deciding nothing is stored before you save. It is why <em>save now, fix later</em> exists at all.</div>
-      </div>
+</pre></div>
+    <p class="hint">Scroll inside the frame · drag its lower edge to resize</p>
+    <div class="ends">
+      <div class="end"><b>Success</b>It is mine, and finding it again in three weeks is not harder than finding it the first time.</div>
+      <div class="end"><b>No longer a dead end — no rows came back</b>It stays a draft. Nothing is lost, nothing is shoppable, and typing the rows later is one tap away.</div>
+      <div class="end bad"><b>Dead end — I closed the app mid-correction</b>The drawn cost of deciding nothing is stored before you save. It is why <em>save now, fix later</em> exists at all.</div>
     </div>
+  </article>
 
-    <div class="flow-block">
-      <h3>J-2 · getting something out of what I already have</h3>
-      <p class="flow-job"><b>When</b> something in the fridge turns tomorrow and I cannot remember what I made with it last time, <b>I want</b> to get back to the dish I already know works, <b>so that</b> it ends up in a pan rather than a bin.</p>
-      <div class="diagram">
-<pre class="mermaid">
+  <article class="flow">
+    <h3><span class="jid">J-2</span>Getting something out of what I already have</h3>
+    <p class="stmt"><span class="cl">When</span>something in the fridge turns tomorrow and I cannot remember what I made with it last time, <span class="cl">I want</span>to get back to the dish I already know works, <span class="cl">so that</span>it ends up in a pan rather than a bin.</p>
+    <div class="diagram"><pre class="mermaid">
 flowchart TD
     fridge(["Something in the fridge turns tomorrow"]) --> lib["Library"]
     lib --> qEmpty{"Is there anything in the library?"}
@@ -535,21 +620,19 @@ flowchart TD
     class win1,win2 good
     linkStyle 4,16 stroke:#2F9E44,stroke-width:2px
     linkStyle 2,15 stroke:#E03131,stroke-width:2px
-</pre>
-      </div>
-      <p class="scroll-hint">Scroll inside the frame · drag its lower edge to resize</p>
-      <div class="ends">
-        <div class="endcard"><b>Success, twice</b>It ends up in a pan — tonight, or on Thursday by way of the cook list.</div>
-        <div class="endcard"><b>No dead ends left</b>An empty library and an empty result end in the same button: <em>create this recipe</em>. For a library of your own making, "I could not find it" and "I do not have it" are the same sentence.</div>
-        <div class="endcard"><b>And it no longer editorialises</b>The screen does not tell you whether you have ever cooked something. What it still refuses to do is suggest recipes you do not own.</div>
-      </div>
+</pre></div>
+    <p class="hint">Scroll inside the frame · drag its lower edge to resize</p>
+    <div class="ends">
+      <div class="end"><b>Success, twice</b>It ends up in a pan — tonight, or on Thursday by way of the cook list.</div>
+      <div class="end"><b>No dead ends left</b>An empty library and an empty result end in the same button: <em>create this recipe</em>. For a library of your own making, "I could not find it" and "I do not have it" are the same sentence.</div>
+      <div class="end"><b>And it no longer editorialises</b>The screen does not tell you whether you have ever cooked something. What it still refuses to do is suggest recipes you do not own.</div>
     </div>
+  </article>
 
-    <div class="flow-block">
-      <h3>J-3 · cooking for the number of people actually eating</h3>
-      <p class="flow-job"><b>When</b> there are six of us at the table and the dish was written for four, <b>I want</b> the amounts to already be right without me doing sums in my head, <b>so that</b> I neither run short nor throw half of it away.</p>
-      <div class="diagram">
-<pre class="mermaid">
+  <article class="flow">
+    <h3><span class="jid">J-3</span>Cooking for the number of people actually eating</h3>
+    <p class="stmt"><span class="cl">When</span>there are six of us at the table and the dish was written for four, <span class="cl">I want</span>the amounts to already be right without me doing sums in my head, <span class="cl">so that</span>I neither run short nor throw half of it away.</p>
+    <div class="diagram"><pre class="mermaid">
 flowchart TD
     six(["Six at the table; the dish was written for four"]) --> qMode{"Am I reading, or planning?"}
 
@@ -591,102 +674,177 @@ flowchart TD
     class win1,win2 good
     linkStyle 5,8,20,25,28 stroke:#2F9E44,stroke-width:2px
     linkStyle 6,9,18,29 stroke:#E03131,stroke-width:2px
-</pre>
-      </div>
-      <p class="scroll-hint">Scroll inside the frame · drag its lower edge to resize</p>
-      <div class="ends">
-        <div class="endcard"><b>Success — on the counter</b>The amounts are right, with no sums done in anyone's head. Not everything has to reach a shop.</div>
-        <div class="endcard"><b>Success — in the shop</b>The change reaches the shopping, visibly, with the ticks handled honestly in both directions.</div>
-        <div class="endcard"><b>No longer a dead end — shopped for four, cooking for six</b>A completed list is still a record and still is not rewritten. But there is an exit: generate a second list for the difference.</div>
-      </div>
+</pre></div>
+    <p class="hint">Scroll inside the frame · drag its lower edge to resize</p>
+    <div class="ends">
+      <div class="end"><b>Success — on the counter</b>The amounts are right, with no sums done in anyone's head. Not everything has to reach a shop.</div>
+      <div class="end"><b>Success — in the shop</b>The change reaches the shopping, visibly, with the ticks handled honestly in both directions.</div>
+      <div class="end"><b>No longer a dead end — shopped for four, cooking for six</b>A completed list is still a record and still is not rewritten. But there is an exit: generate a second list for the difference.</div>
     </div>
-  </section>
+  </article>
+</section>
 
-  <!-- ============ MATRIX ============ -->
-  <section class="sec" id="matrix">
-    <div class="sec-head">
-      <h2>What actually covers what</h2>
-      <p>Every job in the research against every screen in the map. <b>A tick means the screen genuinely takes part in closing the job</b>, not that it sits on the route. Being strict is the point: a generous matrix hides exactly the defects this is for.</p>
+<!-- ══════════ MATRIX ══════════ -->
+<section class="band wrap" id="matrix">
+  <div class="sec-head">
+    <h2>What actually covers what</h2>
+    <span class="eyebrow">12 jobs × 9 screens · 28 ticks</span>
+  </div>
+
+  <div class="prose" style="margin-bottom:1.5rem;">
+    <p><strong>A tick means the screen genuinely takes part in closing the job</strong>, not that it sits on the route — the Library is on the way to almost everything and is ticked only where retrieval is the job itself. Being strict is the point: a generous matrix hides exactly the defects this is for.</p>
+  </div>
+
+  <div class="mscroll">
+    <table class="matrix">
+      <thead>
+        <tr><th>Job</th><th>LIB</th><th>EDIT</th><th>FIX</th><th>REC</th><th>SWAP</th><th>COOK</th><th>SHOP</th><th>ING</th><th class="zc">ACC</th><th>Σ</th></tr>
+      </thead>
+      <tbody>
+        <tr><th><b>J-0</b>everything into the house in one go</th><td>✓</td><td></td><td></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td class="zc"></td><td class="n">5</td></tr>
+        <tr><th><b>J-1</b>keeping what I find</th><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td></td><td></td><td></td><td class="zc"></td><td class="n">4</td></tr>
+        <tr><th><b>J-2</b>using what I already have</th><td>✓</td><td></td><td></td><td>✓</td><td></td><td></td><td></td><td></td><td class="zc"></td><td class="n">2</td></tr>
+        <tr><th><b>J-3</b>amounts for the people eating</th><td></td><td>✓</td><td>✓</td><td>✓</td><td></td><td>✓</td><td>✓</td><td>✓</td><td class="zc"></td><td class="n">6</td></tr>
+        <tr><th><b>J-4</b>one trip, not three laps</th><td></td><td></td><td>✓</td><td></td><td></td><td>✓</td><td>✓</td><td></td><td class="zc"></td><td class="n">3</td></tr>
+        <tr class="zero"><th><b>J-5</b>a household without collisions</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
+        <tr><th><b>J-6</b>the good version outlasting memory</th><td>✓</td><td>✓</td><td></td><td>✓</td><td>✓</td><td></td><td></td><td></td><td class="zc"></td><td class="n">4</td></tr>
+        <tr class="zero"><th><b>E-1</b>committing without being trapped</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
+        <tr><th><b>E-2</b>careful without being technical</th><td></td><td>✓</td><td>✓</td><td></td><td></td><td></td><td></td><td>✓</td><td class="zc"></td><td class="n">3</td></tr>
+        <tr class="zero"><th><b>E-3</b>it stays what I chose</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
+        <tr class="zero"><th><b>S-1</b>legible to the people I share a kitchen with</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
+        <tr><th><b>S-2</b>handing it to someone outside my tools</th><td></td><td></td><td></td><td></td><td></td><td></td><td>✓</td><td></td><td class="zc"></td><td class="n">1</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><th>Jobs per screen</th><td>4</td><td>4</td><td>4</td><td>5</td><td>2</td><td>3</td><td>4</td><td>2</td><td class="zc">0</td><td>28</td></tr>
+      </tfoot>
+    </table>
+  </div>
+  <p class="key"><b>LIB</b> Library · <b>EDIT</b> Recipe editor · <b>FIX</b> Fix ingredient · <b>REC</b> Recipe · <b>SWAP</b> Replace ingredient · <b>COOK</b> Cook list · <b>SHOP</b> Grocery list · <b>ING</b> My ingredients · <b>ACC</b> Account &nbsp;·&nbsp; <span style="color:var(--no)">shaded = no coverage</span></p>
+
+  <p class="grouphead">The five blanks, every one reviewed and accepted</p>
+
+  <div class="verdicts">
+    <div class="verdict">
+      <span class="card-id">Empty column</span>
+      <h3>Account — a screen with no job</h3>
+      <p>Architecturally necessary: an identity has to exist for sync and has to be reachable. <strong>A screen can be required by the architecture and required by no job at the same time</strong> — a real category the matrix cannot express.</p>
+      <span class="metric">Accepted · not a candidate for removal</span>
     </div>
-
-    <div class="table-scroll">
-      <table class="matrix">
-        <thead>
-          <tr><th>Job</th><th>LIB</th><th>EDIT</th><th>FIX</th><th>REC</th><th>SWAP</th><th>COOK</th><th>SHOP</th><th>ING</th><th class="zc">ACC</th><th>Σ</th></tr>
-        </thead>
-        <tbody>
-          <tr><th><b>J-0</b> everything into the house in one go</th><td>✓</td><td></td><td></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td class="zc"></td><td class="n">5</td></tr>
-          <tr><th><b>J-1</b> keeping what I find</th><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td></td><td></td><td></td><td></td><td class="zc"></td><td class="n">4</td></tr>
-          <tr><th><b>J-2</b> using what I already have</th><td>✓</td><td></td><td></td><td>✓</td><td></td><td></td><td></td><td></td><td class="zc"></td><td class="n">2</td></tr>
-          <tr><th><b>J-3</b> amounts for the people eating</th><td></td><td>✓</td><td>✓</td><td>✓</td><td></td><td>✓</td><td>✓</td><td>✓</td><td class="zc"></td><td class="n">6</td></tr>
-          <tr><th><b>J-4</b> one trip, not three laps</th><td></td><td></td><td>✓</td><td></td><td></td><td>✓</td><td>✓</td><td></td><td class="zc"></td><td class="n">3</td></tr>
-          <tr class="zero"><th><b>J-5</b> a household without collisions</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
-          <tr><th><b>J-6</b> the good version outlasting memory</th><td>✓</td><td>✓</td><td></td><td>✓</td><td>✓</td><td></td><td></td><td></td><td class="zc"></td><td class="n">4</td></tr>
-          <tr class="zero"><th><b>E-1</b> committing without being trapped</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
-          <tr><th><b>E-2</b> careful without being technical</th><td></td><td>✓</td><td>✓</td><td></td><td></td><td></td><td></td><td>✓</td><td class="zc"></td><td class="n">3</td></tr>
-          <tr class="zero"><th><b>E-3</b> it stays what I chose</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
-          <tr class="zero"><th><b>S-1</b> legible to the people I share a kitchen with</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">0</td></tr>
-          <tr><th><b>S-2</b> handing it to someone outside my tools</th><td></td><td></td><td></td><td></td><td></td><td></td><td>✓</td><td></td><td class="zc"></td><td class="n">1</td></tr>
-        </tbody>
-        <tfoot>
-          <tr><th>Jobs per screen</th><td>4</td><td>4</td><td>4</td><td>5</td><td>2</td><td>3</td><td>4</td><td>2</td><td class="zc">0</td><td>28</td></tr>
-        </tfoot>
-      </table>
+    <div class="verdict">
+      <span class="card-id">Empty rows · J-5 · S-1</span>
+      <h3>Both went with the household</h3>
+      <p>Closed by objects that no longer exist. The rows are the pause, showing up where they should — and adding a screen would reverse a deliberate decision.</p>
+      <span class="metric">Accepted · household is paused</span>
     </div>
-    <p class="key"><b>LIB</b> Library · <b>EDIT</b> Recipe editor · <b>FIX</b> Fix ingredient · <b>REC</b> Recipe · <b>SWAP</b> Replace ingredient · <b>COOK</b> Cook list · <b>SHOP</b> Grocery list · <b>ING</b> My ingredients · <b>ACC</b> Account &nbsp;·&nbsp; <span style="color:var(--flag)">highlighted = no coverage</span></p>
-
-    <div class="stats">
-      <div class="stat"><span class="lab">Jobs with a screen</span><span class="n">8/12</span><span class="sub">Four rows are empty, and not for the same reason</span></div>
-      <div class="stat"><span class="lab">Screens with a job</span><span class="n">8/9</span><span class="sub">One column is empty: Account</span></div>
-      <div class="stat"><span class="lab">Outstanding defects</span><span class="n">0</span><span class="sub">Every blank has a recorded verdict</span></div>
+    <div class="verdict">
+      <span class="card-id">Empty row · E-3</span>
+      <h3>Not screen-shaped at all</h3>
+      <p>Closed by things <em>not</em> being built: no monetisation, no feed, no AI upsell, no drift to a content platform. A promise kept by refusal is still kept, and no screen was going to hold it.</p>
+      <span class="metric">Accepted · the row stays empty on purpose</span>
     </div>
-
-    <div class="table-scroll">
-      <table class="ledger">
-        <thead><tr><th>Blank</th><th>Verdict</th><th>Reasoning</th></tr></thead>
-        <tbody>
-          <tr><td><b>ACC</b> — a screen with no job</td><td><b>Accepted.</b> Not a candidate for removal</td><td>Architecturally necessary — an identity has to exist for sync and be reachable. <b>A screen can be required by the architecture and required by no job at the same time</b>, and the matrix cannot express that</td></tr>
-          <tr><td><b>J-5</b> household without collisions<br><b>S-1</b> legible to the people I share a kitchen with</td><td><b>Accepted.</b> Household is paused</td><td>The rows are the pause, showing up where they should. Adding a screen would reverse a deliberate decision</td></tr>
-          <tr><td><b>E-3</b> it stays what I chose</td><td><b>Accepted.</b> Not screen-shaped</td><td>Closed by things <em>not</em> being built: no monetisation, no feed, no AI upsell. A promise kept by refusal is still kept</td></tr>
-          <tr><td><b>E-1</b> committing without being trapped</td><td><b>Accepted.</b> Bulk export is not being built</td><td>Not deferred — declined. A grocery list leaves as text and one recipe leaves as a link; <b>the collection as a whole does not leave</b>. The door is narrow rather than shut</td></tr>
-        </tbody>
-      </table>
+    <div class="verdict">
+      <span class="card-id">Empty row · E-1</span>
+      <h3>Bulk export is not being built</h3>
+      <p>Not deferred — declined. A grocery list leaves as text and one recipe leaves as a link; <strong>the collection as a whole does not leave.</strong> The door is narrow rather than shut.</p>
+      <span class="metric">Accepted · scores 3 for P-4, 2 for P-1</span>
     </div>
+  </div>
 
-    <p class="note"><b>The blanks stay in the matrix rather than being tidied away.</b> A coverage table that shows only what is covered is a marketing document. The value of this one is that four jobs and one screen are visibly unaccounted for, on purpose, with a reason attached to each.</p>
-  </section>
+  <div class="prose" style="margin-top:1.5rem;">
+    <p><strong>The blanks stay in the matrix rather than being tidied away.</strong> A coverage table that shows only what is covered is a marketing document. The value of this one is that four jobs and one screen are visibly unaccounted for, on purpose, with a reason attached to each.</p>
+  </div>
+</section>
 
-  <footer class="foot">
-    <div><b>Standing caveat.</b> The corpus behind these jobs holds no interviews, no teardowns and no user reviews. Every job is inferred, so every object and every screen resting on one is inferred too — a reason to keep the map falsifiable, not a reason to discount it.</div>
-    <div><b>Full record.</b> <a href="sitemap.md">sitemap.md</a> — objects, screens, navigation, states, traceability, and the decision register. <a href="flows.md">flows.md</a> — the four flows with their decisions and states written out.</div>
-  </footer>
+<!-- ══════════ STATES ══════════ -->
+<section class="band wrap" id="states">
+  <div class="sec-head">
+    <h2>Every screen's states</h2>
+    <span class="eyebrow">Empty · loading · error</span>
+  </div>
 
-</div>
+  <div class="prose" style="margin-bottom:1.5rem;">
+    <p><em>Every screen has empty, loading and error</em> was true and useless while only four screens had theirs written down — <strong>they were specified where a flow happened to pass and nowhere else.</strong></p>
+    <p><strong>Two rules govern the whole table.</strong> An empty state <strong>names the one thing to do next and offers the control for it</strong> — an empty screen that only apologises is a dead end with better manners. And an error <strong>never blocks what is already on the device</strong>: the network failing is not a reason to stop reading a recipe.</p>
+  </div>
+
+  <div class="mscroll">
+    <table class="states">
+      <thead><tr><th>Screen</th><th>Empty</th><th>Loading</th><th>Error</th><th>Also</th></tr></thead>
+      <tbody>
+        <tr><td>Library</td><td><em>Nothing saved yet</em> → <b>the button is New recipe</b></td><td>First sync onto a new device — once, ever</td><td><b>Sync failed.</b> Everything on the device still reads and edits; a quiet marker, never a modal</td><td><b>Drafts highlighted.</b> A search matching nothing offers <b>create this recipe</b></td></tr>
+        <tr><td>Recipe editor</td><td>A blank recipe, cursor in the name field</td><td><b>The model formatting</b> — the one genuine network wait</td><td><b>Two, read differently.</b> <em>No signal</em> → saved as a draft, formatted when the connection returns. <em>The model failed</em> → retry, or save as a draft and let the queue take it</td><td>Saved-with-doubts, on leaving</td></tr>
+        <tr><td>Fix ingredient</td><td>The picker matches nothing → <b>name it yourself and give the weight</b></td><td>—</td><td>—</td><td>Returns to whichever of its three entry points it came from</td></tr>
+        <tr><td>Recipe</td><td>—</td><td>—</td><td><b>A dead link.</b> The account behind a shared recipe is gone. Say exactly that; offer nothing false</td><td>Draft banner · <em>formatted while you were away</em> · read-only from a link</td></tr>
+        <tr><td>Replace ingredient</td><td>The picker matches nothing → <b>create it</b>, or keep the original</td><td>—</td><td>—</td><td>The scope choice is the last step — nothing changes until it is made</td></tr>
+        <tr><td>Cook list</td><td><em>Nothing planned yet</em> → <b>Go to the library</b></td><td>—</td><td>—</td><td>A draft entry with no rows is <b>marked here, before the list is generated</b></td></tr>
+        <tr><td>Grocery list</td><td><b>Two, and not the same.</b> <em>No list yet</em> → <b>Generate one</b>. Everything ticked → <b>done</b>, with the date</td><td>—</td><td>—</td><td>Offline · changed lines marked · the placeholder line for a draft entry</td></tr>
+        <tr><td>My ingredients</td><td><em>Nothing yet</em> — and it says <b>when this fills</b>. There is nothing to do here yet</td><td>—</td><td>—</td><td>The typical state for months. It should read as normal, not as a gap</td></tr>
+        <tr><td>Account</td><td>—</td><td>Signing in</td><td><b>Sign-in failed</b> — say which part. <b>Offline is not an error:</b> you stay signed in and sync waits</td><td>Sign-in settings · who you are · this device's sync state</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose" style="margin-top:1.25rem;">
+    <p><strong>One state belongs to no single screen:</strong> a queued format waiting for a connection. It lives on the recipe as a draft, it is highlighted in the Library, and it resolves itself without being asked.</p>
+  </div>
+</section>
+
+<footer class="colophon wrap">
+  <div><b>Source of truth</b> · <a href="https://github.com/Valentin17151/cooksy/blob/main/sitemap.md">sitemap.md</a> — objects, screens, navigation, states, traceability and the dated decision register · <a href="https://github.com/Valentin17151/cooksy/blob/main/flows.md">flows.md</a> — the four flows with their decisions and states written out</div>
+  <div><b>Method</b> · objects from jobs · screens from objects · navigation from frequency of use — never from a competitor's menu</div>
+  <div><b>Standing caveat</b> · no interviews, no teardowns, no user reviews sit behind any of it. Every job is inferred, and so is everything resting on one</div>
+</footer>
+</main>
 
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'dark',
-    securityLevel: 'strict',
-    themeVariables: {
-      darkMode: true,
-      background: '#151A25',
-      primaryColor: '#1C2231',
-      primaryTextColor: '#E6E9F2',
-      primaryBorderColor: '#8FAEE4',
-      secondaryColor: '#1A2540',
-      tertiaryColor: '#151A25',
-      lineColor: '#737B90',
-      textColor: '#E6E9F2',
-      mainBkg: '#1C2231',
-      nodeBorder: '#8FAEE4',
-      clusterBkg: '#151A25',
-      fontFamily: 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace',
-      fontSize: '13px'
-    },
-    flowchart: { useMaxWidth: false, htmlLabels: true, padding: 6, nodeSpacing: 28, rankSpacing: 34, diagramPadding: 8 }
-  });
+
+  const blocks = [...document.querySelectorAll('pre.mermaid')];
+  blocks.forEach(b => b.dataset.src = b.textContent);
+
+  // The flow sources ship with neutral yes/no colours; swap them for the
+  // site's own so the diagrams sit in the same palette as everything else.
+  const YES = '#2F9E44', NO = '#E03131';
+  const PALETTE = {
+    light: { yes: '#3F6238', no: '#96382C', vars: {
+      background: '#FCFAFD', primaryColor: '#FCFAFD', primaryTextColor: '#1D181F',
+      primaryBorderColor: '#6B2E5B', secondaryColor: '#EBDDE9', tertiaryColor: '#F5F2F6',
+      lineColor: '#6E6574', textColor: '#1D181F', mainBkg: '#FCFAFD', nodeBorder: '#6B2E5B'
+    }},
+    dark: { yes: '#93BC82', no: '#E2897A', vars: {
+      background: '#1B1721', primaryColor: '#1B1721', primaryTextColor: '#EDE7F0',
+      primaryBorderColor: '#CB8CBA', secondaryColor: '#2A1E2A', tertiaryColor: '#16131A',
+      lineColor: '#8B8291', textColor: '#EDE7F0', mainBkg: '#1B1721', nodeBorder: '#CB8CBA'
+    }}
+  };
+
+  const isDark = () => {
+    const set = document.documentElement.dataset.theme;
+    if (set) return set === 'dark';
+    return matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+
+  async function render() {
+    const p = PALETTE[isDark() ? 'dark' : 'light'];
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'base',
+      securityLevel: 'strict',
+      themeVariables: { ...p.vars, darkMode: isDark(),
+        fontFamily: 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace', fontSize: '13px' },
+      flowchart: { useMaxWidth: false, htmlLabels: true, padding: 6, nodeSpacing: 28, rankSpacing: 34, diagramPadding: 8 }
+    });
+    blocks.forEach(b => {
+      b.removeAttribute('data-processed');
+      b.innerHTML = '';
+      b.textContent = b.dataset.src.replaceAll(YES, p.yes).replaceAll(NO, p.no);
+    });
+    await mermaid.run({ nodes: blocks });
+  }
+
+  await render();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  new MutationObserver(render).observe(document.documentElement, { attributeFilter: ['data-theme'] });
 </script>
 </body>
 </html>
