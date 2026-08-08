@@ -159,6 +159,22 @@
 
   main{padding:16px}
 
+  /* ── Швидка навігація секціями (пункт 5 завдання): екран довгий — сумніви,
+     7 рядків інгредієнтів, теги, кроки — тому якорі одразу під шапкою дають
+     орієнтир, куди можна перескочити, не гортаючи наосліп. Той самий
+     горизонтальний ряд-стрічка, що й .tags на library.html, для візуальної
+     єдності набору, а не новий компонент. ── */
+  nav.quickjump{
+    display:flex;gap:8px;overflow-x:auto;
+    padding:12px 0;margin:0 0 4px;border-bottom:1px solid var(--line);
+  }
+  nav.quickjump a{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:8px 14px;white-space:nowrap;
+    border:1px solid var(--line);background:var(--paper);color:var(--dim);
+    font:inherit;font-size:13px;text-decoration:none;
+  }
+
   /* ── Поля форми, загальні ── */
   .field{margin:0 0 16px}
   .field label{display:block;font-size:13px;color:var(--dim);margin:0 0 4px}
@@ -308,6 +324,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -349,6 +366,25 @@
     як чернетку» — обидва <button type=submit>, з різним formaction, без JS: дія
     (сітemap: «Будь-яка дія... button») і водночас справжній перехід за флоу.
   -->
+  <!--
+    Швидка навігація секціями — пункт 5 завдання: «Плов від мами» тягне за
+    собою 7 рядків інгредієнтів (2 з них — розгорнуті банери сумніву) плюс
+    теги й кроки, тобто цей редактор довший за середню сторінку набору.
+    Якорі на #z-ingredients / #z-tags / #steps — не новий екран і не JS-стан,
+    просто <a href="#…">, як дозволяє _conventions.md §2 («Жодного
+    JavaScript. Стан — це інший файл»: якір — це не стан, а позиція в тому
+    самому файлі). recipe-editor-empty.html і -loading.html/-error.html цієї
+    навігації свідомо не мають: перший — короткий, ще порожній, форма з
+    трьох полів; другий і третій — короткі банери/скелетон без довгого списку
+    рядків. Довгий скрол справді є лише тут, на «успіху» з розгорнутими
+    пропозиціями моделі.
+  -->
+  <nav class="quickjump" aria-label="Перейти до розділу редактора">
+    <a href="#z-ingredients">Інгредієнти</a>
+    <a href="#z-tags">Теги</a>
+    <a href="#steps">Кроки</a>
+  </nav>
+
   <form action="recipe.html" method="get">
 
     <div class="field">
@@ -411,8 +447,24 @@
             </div>
             <div class="field name"><label for="name-2" class="vh">Назва інгредієнта</label><input type="text" id="name-2" name="name-2" value="барбарис"></div>
             <label class="nonscale"><input type="checkbox" id="nonscale-2" name="nonscale-2"> не масштабується</label>
+            <!--
+              ВИПРАВЛЕНО (аудит посилань, друга хвиля): цей рядок раніше ніс
+              «Уточнити» → fix-ingredient.html поряд із чекбоксом «не
+              масштабується» — і це вело на екран не для цієї проблеми.
+              Fix ingredient пише E15 (назва · прохід · ккал/100г · г/шт ·
+              г/мл) — він розвʼязує НЕРОЗПІЗНАНИЙ інгредієнт чи брак густини,
+              і на його формі взагалі немає поля кількості. Сумнів цього
+              рядка — «vague amount» («жменя барбарису»), а CLAUDE.md §5.2
+              і sitemap.md (E2 doubt flag) розвʼязують його рівно тут: людина
+              вписує грами в поле кількості вище або тисне «не масштабується»
+              — обидва контроли вже на рядку. Посилання на Fix ingredient
+              обіцяло розвʼязання, якого там немає, тому прибрано, а не
+              лишено «про всяк випадок». (Той самий патерн — «нечітка
+              кількість» → Уточнити → fix-ingredient.html — є й на
+              recipe-draft.html, рядок «зелень»; це поза моїми файлами,
+              винесено окремо в звіт.)
+            -->
             <div class="row-actions">
-              <a class="btn" href="fix-ingredient.html">Уточнити</a>
               <button type="button" class="btn" aria-label="Видалити рядок «барбарис»">Видалити</button>
             </div>
           </li>
@@ -537,11 +589,8 @@
 <!--
   Нижня панель. Recipe editor — контекстний екран (reached from the Library as a screen
   of its own, sitemap.md), не глобальний таб, тому жоден пункт не aria-current.
-  Усі чотири — <a>, за прямою вказівкою завдання для цієї партії файлів: cook-list.html,
-  grocery-list.html і account.html ще не намальовані іншими агентами на момент цього
-  коміту (у директорії поки лише library.html) — посилання випереджають файли свідомо,
-  інтегратор вирівняє, коли решта екранів з'явиться. Це розходиться з правилом
-  _conventions.md «сторінка, якої ще нема — span.todo», зафіксовано тут навмисно.
+  Усі чотири — <a>: інвентар усіх 28 сторінок закритий інтеграцією 8 серпня
+  (_conventions.md §4), тож кожен пункт панелі веде на реальний, вже намальований екран.
 -->
 <footer>
   <nav aria-label="Головна навігація">

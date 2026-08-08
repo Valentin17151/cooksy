@@ -45,9 +45,50 @@
 
   Дерево .wf-nav скопійовано з library.html дослівно; змінено лише вузли
   «Список готування» → cook-list.html / «порожній» → cook-list-empty.html /
-  «генерація» → cook-list-generate.html. library.html та інші файли НЕ
-  редагувалися — тому їхній span.todo на «Список готування» лишається
-  застарілим до наступного проходу по дереву.
+  «генерація» → cook-list-generate.html.
+
+  ПРАВКА — ДРУГА ХВИЛЯ АУДИТУ, 8 серпня (продакт-ревʼю, пункти 1/2/3).
+  1. Перевірено span.todo/посилання на «Акаунт» і на «Список готування» в
+     деревах library.html і grocery-list.html: обидва вже посилання, не
+     span. Попередній коментар тут стверджував, що library.html лишає
+     span.todo на «Список готування», — це виявилось невірним (файл уже
+     оновлено кимось іншим до посилань по всьому дереву); коментар
+     виправлено, а не сам код чужого файлу.
+  2. Аудит посилань «чернетка → яка картка відкривається» (пункт 3
+     завдання). Усі 5 записів нижче звірені проти власного стану:
+     не-чернетки (Паста, Сирники, Курка) → recipe.html; обидві чернетки
+     (Борщ, Плов) → recipe-draft.html. Відповідність вже коректна на момент
+     цього проходу — конкретні href не змінювались. Лишається один
+     задокументований нюанс: recipe-draft.html — єдиний файл чернетки в
+     закритому інвентарі 28 сторінок (_conventions.md §4), і він показує
+     ПРИЧИНУ 2 за E1 (Борщ: відформатовано, рядки позначені). Плов — це
+     ПРИЧИНА 1 (взагалі не відформатовано, рядків немає), інший сценарій.
+     Посилання Плова на recipe-draft.html — свідомий компроміс вайрфрейму
+     (той самий патерн, що підрецепт на recipe.html, який теж веде на
+     найближчий наявний файл із приміткою): воно виконує вимогу «чернетка
+     відкриває чернетку», але титул і вміст сторінки — Борщеві, не Плову.
+     Новий файл під Плов не додається: інвентар «28 сторінок на 9 екранів»
+     закритий на інтеграції 8 серпня, а створення шостого файлу Recipe
+     вийшло б за межі моїх п'яти файлів і суперечило б цьому правилу.
+     Позначку нижче, біля запису Плова, залишено як явне попередження.
+  3. Кожен запис отримав повноцінний степер (−/число/+), той самий патерн,
+     що на recipe.html: раніше тут було голе число без кнопок — точний тап
+     мокрими руками неможливий (CLAUDE.md §7.4), і sitemap.md прямо каже:
+     «Same control... it now appears in both places the person thinks about
+     portions» — контрол мав виглядати однаково в обох місцях, а не тільки
+     означати одне й те саме.
+  4. Весь рядок запису — тап-ціль (розтягнуте посилання на h3 a, як уже
+     робить library.html для своїх карток), степер підведений над ним через
+     z-index — той самий патерн, що «+» на library.html.
+  5. Додано рядок стану під шапкою: «Список покупок від 8 серпня — у
+     процесі, N з 14 позицій куплено» з посиланням на grocery-list.html.
+     Раніше зв'язок E5↔E7 (sitemap.md) працював лише в один бік —
+     grocery-list.html вже посилається назад на cook-list.html («зі списку
+     готування»), а звідси на список не було жодного шляху, крім повторного
+     запуску генерації. Це і фідбек про стан (пункт 1 завдання — «згенеровано
+     чи ні»), і закриття дірки в навігації (пункт 3/6). Число «N» звірене з
+     grocery-list.html: там позначено «checked» лише 2 рядки (спагеті, рис)
+     з 14 — тому тут «2 з 14», а не довільне число.
 -->
 
 <style>
@@ -161,12 +202,25 @@
 
   main{padding:0 16px}
 
-  /* ── Записи cook list ── */
+  /* ── Рядок стану: чи вже згенеровано список із цього cook list — рішення 5
+     другої хвилі. Той самий патерн, що p.source на grocery-list.html, і
+     завершує зв'язок E5↔E7 в обидва боки. ── */
+  p.status{padding:12px 0;border-bottom:1px solid var(--line);margin:0;font-size:13px;color:var(--dim)}
+  p.status a{color:var(--ink)}
+
+  /*
+    ── Записи cook list. Рішення 4 другої хвилі: увесь рядок — тап-ціль
+    (розтягнуте посилання на назву, той самий патерн, що «+» на
+    library.html), степер підведений над ним через z-index, щоб не
+    перехоплювався розтягнутим посиланням. ──
+  */
   ul.entries{list-style:none;margin:0;padding:0}
   ul.entries>li{border-bottom:1px solid var(--line)}
-  article.entry{display:flex;gap:12px;padding:14px 0;align-items:center}
-  article.entry .body{flex:1 1 auto;min-width:0}
+  article.entry{position:relative;padding:14px 0}
+  article.entry .body{margin:0 0 10px}
+  article.entry h3{margin:0}
   article.entry h3 a{color:inherit;text-decoration:none;display:inline-block;padding:6px 0}
+  article.entry h3 a::after{content:"";position:absolute;inset:0}
 
   /* Субституція «на цей раз» (E6) — не чернетка: без рамки, звичайний другорядний текст. */
   .note{margin:4px 0 0;font-size:13px;color:var(--dim)}
@@ -179,11 +233,24 @@
     font-size:13px;
   }
 
-  /* Порції — змінювані на місці, тап-ціль ≥44px. */
-  .portions{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-  .portions label{font-size:12px;color:var(--dim)}
+  /*
+    Порції — змінювані на місці, повний степер (−/число/+), той самий
+    патерн і ті самі розміри, що на recipe.html (рішення 3 другої хвилі):
+    той самий контрол мав виглядати однаково в обох місцях, де людина думає
+    про порції (sitemap.md), а не лише робити те саме голим полем вводу.
+    position:relative + z-index:1 піднімає контрол над розтягнутим
+    посиланням h3 a::after, щоб кнопки й поле лишались незалежно тапабельні.
+  */
+  .portions{position:relative;z-index:1;display:flex;align-items:center;gap:8px}
+  .portions label{font-size:13px;color:var(--dim);margin-right:auto}
+  .stepper{
+    flex:0 0 44px;width:44px;height:44px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-size:20px;line-height:1;cursor:pointer;
+  }
   .portions input[type=number]{
-    width:72px;min-height:44px;padding:6px 8px;
+    width:56px;min-height:44px;padding:4px;
     border:1px solid var(--line);background:var(--zone);color:var(--ink);
     font:inherit;text-align:center;
   }
@@ -282,6 +349,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -323,6 +391,17 @@
 
   <main>
 
+    <!-- Рішення 5 другої хвилі: зв'язок E5↔E7 в обидва боки (sitemap.md).
+         grocery-list.html уже посилається сюди («зі списку готування»);
+         це — зворотний шлях, і водночас видимий фідбек стану — «список уже
+         згенеровано» замість мовчазного припущення, що «Згенерувати»
+         завжди створює перше. Число звірене з grocery-list.html (checked:
+         спагеті, рис — 2 з 14 позицій). -->
+    <p class="status">
+      Список покупок від 8 серпня — у процесі, 2 з 14 позицій куплено ·
+      <a href="grocery-list.html">переглянути</a>
+    </p>
+
     <section aria-labelledby="z-entries">
       <h2 id="z-entries" class="vh">Заплановані страви</h2>
 
@@ -338,9 +417,11 @@
               <!-- Стрілку-символ прибрано за контрактом (_conventions.md §1: замість іконки — слово). -->
               <p class="note">Заміна цього разу: грецький йогурт замість сметани</p>
             </div>
-            <form class="portions">
+            <form class="portions" aria-label="Порції — Паста з баклажаном">
               <label for="qty-1">Порції</label>
+              <button type="button" class="stepper" aria-label="Зменшити порції — Паста з баклажаном">−</button>
               <input type="number" id="qty-1" name="portions" value="4" min="1" inputmode="numeric">
+              <button type="button" class="stepper" aria-label="Збільшити порції — Паста з баклажаном">+</button>
             </form>
           </article>
         </li>
@@ -350,9 +431,11 @@
             <div class="body">
               <h3><a href="recipe.html">Сирники</a></h3>
             </div>
-            <form class="portions">
+            <form class="portions" aria-label="Порції — Сирники">
               <label for="qty-2">Порції</label>
+              <button type="button" class="stepper" aria-label="Зменшити порції — Сирники">−</button>
               <input type="number" id="qty-2" name="portions" value="2" min="1" inputmode="numeric">
+              <button type="button" class="stepper" aria-label="Збільшити порції — Сирники">+</button>
             </form>
           </article>
         </li>
@@ -362,39 +445,58 @@
             <div class="body">
               <h3><a href="recipe.html">Курка з лимоном і рисом</a></h3>
             </div>
-            <form class="portions">
+            <form class="portions" aria-label="Порції — Курка з лимоном і рисом">
               <label for="qty-3">Порції</label>
+              <button type="button" class="stepper" aria-label="Зменшити порції — Курка з лимоном і рисом">−</button>
               <input type="number" id="qty-3" name="portions" value="4" min="1" inputmode="numeric">
+              <button type="button" class="stepper" aria-label="Збільшити порції — Курка з лимоном і рисом">+</button>
             </form>
           </article>
         </li>
 
-        <!-- Чернетка з рядками, кількості лише не підтверджені — не блокує покупки. -->
+        <!-- Чернетка з рядками, кількості лише не підтверджені — не блокує покупки.
+             Причина 2 з трьох за E1 — той самий текст, що на library.html і на
+             recipe-draft.html. Посилання нижче веде саме на recipe-draft.html:
+             це той самий рецепт, що й показує той файл, тому картка й контент
+             збігаються точно (жодного нюансу — на відміну від Плова нижче). -->
         <li>
           <article class="entry">
             <div class="body">
               <h3><a href="recipe-draft.html">Борщ із квасолею</a></h3>
               <p class="draft">Чернетка — кількості не підтверджені</p>
             </div>
-            <form class="portions">
+            <form class="portions" aria-label="Порції — Борщ із квасолею">
               <label for="qty-4">Порції</label>
+              <button type="button" class="stepper" aria-label="Зменшити порції — Борщ із квасолею">−</button>
               <input type="number" id="qty-4" name="portions" value="6" min="1" inputmode="numeric">
+              <button type="button" class="stepper" aria-label="Збільшити порції — Борщ із квасолею">+</button>
             </form>
           </article>
         </li>
 
         <!-- Чернетка без жодного рядка інгредієнтів — не відформатована. Позначено ТУТ,
              до генерації: найраніше місце, де видно, що страва не потрапить у список
-             (sitemap.md · Cook list · Also; у grocery-list.html це стане placeholder-рядком). -->
+             (sitemap.md · Cook list · Also; у grocery-list.html це стане placeholder-рядком).
+             ПРИМІТКА ДО ПОСИЛАННЯ (аудит, пункт 3 завдання): Плов — причина 1 за E1
+             (ніколи не форматувався, рядків немає), а recipe-draft.html — єдиний
+             файл чернетки в закритому інвентарі 28 сторінок — показує причину 2
+             (Борщ: відформатовано, рядки позначені). Посилання коректно веде на
+             стан «чернетка» (не на recipe.html), але титул і вміст картки, яку
+             людина побачить, — Борщеві, не Плову. Той самий компроміс, що вже
+             приймає підрецептне посилання на recipe.html («Базовий томатний
+             соус» → recipe.html, з приміткою в тому файлі): найближчий наявний
+             файл потрібного стану, а не новий шостий файл поза межами інвентаря. -->
         <li>
           <article class="entry">
             <div class="body">
               <h3><a href="recipe-draft.html">Плов від мами</a></h3>
               <p class="draft">Чернетка — ще не відформатовано, не потрапить у покупки, поки не відформатований</p>
             </div>
-            <form class="portions">
+            <form class="portions" aria-label="Порції — Плов від мами">
               <label for="qty-5">Порції</label>
+              <button type="button" class="stepper" aria-label="Зменшити порції — Плов від мами">−</button>
               <input type="number" id="qty-5" name="portions" value="4" min="1" inputmode="numeric">
+              <button type="button" class="stepper" aria-label="Збільшити порції — Плов від мами">+</button>
             </form>
           </article>
         </li>

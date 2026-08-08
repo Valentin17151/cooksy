@@ -231,6 +231,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -285,8 +286,18 @@
       </li>
       <li>
         <article class="ingredient">
-          <h3><a href="fix-ingredient.html">вершки</a></h3>
-          <p class="meta">1,02 г/мл · за вами</p>
+          <!-- ВИПРАВЛЕНО (той самий аудит посилань, що й replace-ingredient-empty.html):
+               рядок раніше називався «вершки» і вів на fix-ingredient.html — файл,
+               чий вміст жорстко прописаний під «копчена паприка» з «Борщу із
+               квасолею» (див. коментар там і в replace-ingredient-empty.html);
+               перший рядок цього списку вже коректно веде туди. Другий рядок
+               мав показувати ІНШИЙ персональний інгредієнт, а не дублювати
+               перший, тож замість вигаданого третього сценарію тут використано
+               той самий «нджуя», що вже встановлений для «Паста з баклажаном»
+               на fix-ingredient-empty.html і replace-ingredient-empty.html —
+               порожній пікер, де прохід лишився на дефолтному «інше». -->
+          <h3><a href="fix-ingredient-empty.html">нджуя</a></h3>
+          <p class="meta">прохід: інше · додано вами</p>
         </article>
       </li>
     </ul>

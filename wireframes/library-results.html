@@ -38,6 +38,11 @@
   · «+» лишається на кожному рядку обох ярусів: результат пошуку — це й
     досі рядок Library (sitemap.md, «Add to cook list… a Library row or
     a Recipe»), а не новий тип об'єкта.
+  · Стан «додано» (друга хвиля ревʼю, 8 серпня, повне обґрунтування — вгорі
+    library.html): «Паста з баклажаном» і «Борщ із квасолею» вже в
+    cook-list.html, тому обидва рядки з цими стравами (і в СТРАВИ, і в
+    ВИКОРИСТАНО В) показують «У списку» замість «+»; «Базовий томатний
+    соус» лишається звичайним «+», бо його справді нема в списку готування.
 
   МІСЦЕ У ФЛОУ (flows.md · J-2): Library → «Type the ingredient into
   search» → «Results as you type, no spinner, no network» → «Did anything
@@ -190,6 +195,11 @@
     border:1px solid var(--ink);background:var(--paper);color:var(--ink);
     font-size:20px;line-height:1;cursor:pointer;
   }
+  .add.added{
+    flex:0 0 auto;width:auto;height:auto;min-width:44px;min-height:44px;
+    padding:0 12px;font-size:13px;font-weight:600;line-height:1.2;
+    border-color:var(--line);color:var(--dim);cursor:default;
+  }
   .photo{
     flex:0 0 64px;height:64px;
     border:1px solid var(--line);background:var(--zone);
@@ -288,6 +298,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -354,7 +365,7 @@
             <h3><a href="recipe.html">Паста з баклажаном</a></h3>
             <p class="meta">35 хв · ~180 ккал/100 г · вечеря, швидко</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Паста з баклажаном» вже у списку готування">У списку</button>
         </article>
       </li>
     </ul>
@@ -374,7 +385,7 @@
             <h3><a href="recipe.html">Паста з баклажаном</a></h3>
             <p class="match">збіг: баклажан · 2 шт, помідори · 400 г, часник · 2 шт <span class="count">— 3 з 3</span></p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Паста з баклажаном» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -385,7 +396,7 @@
             <h3><a href="recipe.html">Борщ із квасолею</a></h3>
             <p class="match">збіг: помідори · 3 шт, часник · 2 шт <span class="count">— 2 з 3</span></p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Борщ із квасолею» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -396,7 +407,7 @@
             <h3><a href="recipe.html">Базовий томатний соус</a></h3>
             <p class="match">збіг: помідори · 800 г, часник · 3 шт <span class="count">— 2 з 3</span></p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Базовий томатний соус» в список готування">+</button>
         </article>
       </li>
 

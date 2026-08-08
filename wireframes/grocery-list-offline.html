@@ -22,6 +22,24 @@
   той самий набір видів рядків, скорочений до 2 секцій (за вказівкою: одна
   секція зі звичайним/злитим рядком, одна — з уже відміченими, щоб показати,
   що тикання працює і офлайн).
+
+  ПРАВКА 8 СЕРПНЯ — пункт 4 (grocery-list.html): «Розгорнути все» /
+  «Згорнути все» — той самий контрол, що й на базовій сторінці (не другий
+  режим перегляду за рецептом, див. розлогий коментар там). Тут він
+  присутній, бо секція «Овочі та фрукти» нижче несе один <details> (цибуля).
+
+  КУДИ ВЕДЕ ТУТ, і чому це не «оманливе посилання» (пункт 3 аудиту): контрол
+  веде на той самий канонічний grocery-list-expanded.html, що й з базової
+  сторінки, а не на окремий «офлайн-розгорнутий» файл. Розгортання/згортання
+  — суто локальна, безмережева дія (§5.12 CLAUDE.md: розкриття рядка ніколи
+  не чекає на з'єднання), тож сама дія коректна й офлайн. Що дійсно
+  губиться при переході — це сам індикатор офлайн-стану і скорочений набір
+  секцій (обидва — свідоме скорочення ЦЬОГО файлу заради економії вайрфрейму,
+  задокументоване вище як «скорочено до 2 секцій», а не реальна відмінність
+  продукту). Плодити третій повний файл заради одного <details> визнано
+  непропорційним — про це прямо каже завдання: «decide... whether it's worth
+  a dedicated file vs. some lighter treatment». Це — легше трактування,
+  а не мовчазна підміна: рішення пояснене тут, а не приховане.
 -->
 
 <style>
@@ -139,6 +157,14 @@
     border-bottom:1px solid var(--line);
   }
 
+  /* ── «Розгорнути все» — легкий, вторинний контрол над проходами (пункт 4).
+       Не .btn: це не первинна дія екрана, а другорядний спосіб огляду. ── */
+  p.expand-toggle{margin:0;padding:6px 0;border-bottom:1px solid var(--line);text-align:right}
+  p.expand-toggle a{
+    display:inline-flex;align-items:center;min-height:44px;padding:0 2px;
+    color:var(--ink);font-size:13px;text-decoration:underline;
+  }
+
   section.aisle{padding:14px 0;border-bottom:1px solid var(--line)}
   section.aisle h2{margin:0 0 8px}
 
@@ -246,6 +272,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html" aria-current="page">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -269,7 +296,7 @@
 </aside>
 
 <div class="wf-col">
-<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <strong>офлайн</strong> · <a href="grocery-list-done.html">готово</a></p>
+<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <strong>офлайн</strong> · <a href="grocery-list-done.html">готово</a> · <a href="grocery-list-expanded.html">розгорнуто</a></p>
 
 <div class="phone">
 <div class="phone-notch" aria-hidden="true"></div>
@@ -289,6 +316,10 @@
   <p class="source">
     <span class="meta">8 серпня · <a href="cook-list.html">зі списку готування</a></span>
   </p>
+
+  <!-- Пункт 4: той самий легкий контрол, що й на успіху — розгортання є
+       локальною дією і працює однаково офлайн (див. коментар у <head>). -->
+  <p class="expand-toggle"><a href="grocery-list-expanded.html">Розгорнути все</a></p>
 
   <section class="aisle" aria-labelledby="z-veg">
     <h2 id="z-veg">Овочі та фрукти</h2>

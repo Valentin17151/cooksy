@@ -18,6 +18,14 @@
   СТРУКТУРА: header і footer nav ідентичні grocery-list.html
   (_conventions.md §4 — «Відрізняється тільки вміст <main>»). Тут main не має
   дати/джерела списку (списку ще не існує) і жодних секцій-проходів.
+
+  ПРАВКА 8 СЕРПНЯ — пункт 4 (grocery-list.html): додано новий стан
+  grocery-list-expanded.html («Розгорнути все» — усі <details>-розкриття
+  одразу відкриті; не другий режим перегляду за рецептом, див. коментар у
+  grocery-list.html). Тут, у порожньому стані, немає ні рядків, ні <details>,
+  тому в main немає й самого контролу «Розгорнути все» — нічого розгортати.
+  Вузол «розгорнуто» додано лише до риштувань (.wf-states, .wf-nav) нижче,
+  для навігаційної повноти між станами того самого екрана.
 -->
 
 <style>
@@ -213,6 +221,7 @@
             <li><a href="grocery-list-empty.html" aria-current="page">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -236,7 +245,7 @@
 </aside>
 
 <div class="wf-col">
-<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <strong>порожній</strong> · <a href="grocery-list-offline.html">офлайн</a> · <a href="grocery-list-done.html">готово</a></p>
+<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <strong>порожній</strong> · <a href="grocery-list-offline.html">офлайн</a> · <a href="grocery-list-done.html">готово</a> · <a href="grocery-list-expanded.html">розгорнуто</a></p>
 
 <div class="phone">
 <div class="phone-notch" aria-hidden="true"></div>

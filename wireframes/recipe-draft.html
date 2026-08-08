@@ -39,6 +39,17 @@
   «vague amounts» → «нечітка кількість»). Немає рядка підрецепта: борщ у
   наборі даних _conventions.md §3 не посилається на іншу страву — сторонні
   підрецепти не вигадуються.
+
+  ПРАВКА — ДРУГА ХВИЛЯ АУДИТУ, 8 серпня (продакт-ревʼю, пункт 5).
+  Внутрішня навігація — той самий блок, що на recipe.html, тим самим
+  контентом (`#ingredients` / `#steps`): структура екрана не змінюється між
+  станами (_conventions.md §4), тому й навігаційний патерн, який вона несе,
+  не може відрізнятись. Немає третього якоря на банер чернетки — банер лежить
+  над навігацією й контролом порцій, тож він завжди в кадрі першим, ще до
+  першого скролу; окремий якір на нього був би посиланням в нікуди корисне.
+  Позначені рядки (копчена паприка, зелень) уже підняті вгору списку
+  інгредієнтів — перехід за «Інгредієнти» одразу показує їх, без додаткової
+  навігації всередині секції.
 -->
 
 <style>
@@ -190,11 +201,19 @@
     font:inherit;text-align:center;
   }
 
+  /* ── Внутрішня навігація — той самий блок, що на recipe.html ── */
+  .section-nav{display:flex;gap:18px;padding:8px 0;font-size:14px}
+  .section-nav a{
+    display:inline-flex;align-items:center;min-height:44px;
+    color:var(--ink);text-decoration:underline;
+  }
+  #ingredients,#steps{scroll-margin-top:70px}
+
   .meta-row{margin:0;padding:10px 0;color:var(--dim);font-size:13px;border-bottom:1px solid var(--line)}
 
   /* ── Секції: ритм спільний для інгредієнтів, кроків ── */
-  main>section{padding:14px 0;border-bottom:1px solid var(--line)}
-  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px}
+  main>section{padding:18px 0;border-bottom:1px solid var(--line)}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px}
   .section-head .meta{margin:0;font-size:13px;color:var(--dim)}
 
   ul.ingredients{list-style:none;margin:0;padding:0}
@@ -217,8 +236,11 @@
   .ing-flagged.ing{border-top:1px solid var(--ink)} /* межа рамки перекриває загальну рису рядків */
   .ing-flagged .flag{margin:4px 0 0;font-size:13px;color:var(--ink);font-weight:600}
 
-  ol.steps{margin:0;padding-left:20px}
-  ol.steps li{padding:6px 0}
+  /* Та сама верхня межа-роздільник, що й у списку інгредієнтів — один
+     чанкінг на обидва списки. Більше повітря між пунктами. */
+  ol.steps{margin:0;padding-left:22px}
+  ol.steps li{padding:12px 0 12px 6px;border-top:1px solid var(--line)}
+  ol.steps li:first-child{border-top:none;padding-top:0}
 
   /* ── Дії екрана: одна колонка ── */
   .actions{display:flex;flex-direction:column;gap:10px;padding:16px 0 20px;margin:0}
@@ -310,6 +332,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -358,9 +381,16 @@
       <button type="button" class="stepper" aria-label="Збільшити кількість порцій">+</button>
     </form>
 
+    <!-- Внутрішня навігація — той самий блок, що на recipe.html (структура
+         між станами не змінюється, _conventions.md §4). -->
+    <nav class="section-nav" aria-label="У цьому рецепті">
+      <a href="#ingredients">Інгредієнти</a>
+      <a href="#steps">Кроки</a>
+    </nav>
+
     <p class="meta-row">1 год 20 хв · ~70 ккал/100 г · ~280 ккал на порцію (400 г)</p>
 
-    <section aria-labelledby="z-ing">
+    <section id="ingredients" aria-labelledby="z-ing">
       <div class="section-head">
         <h2 id="z-ing">Інгредієнти</h2>
         <p class="meta">на 6 порцій</p>
@@ -373,10 +403,15 @@
           <p class="flag">інгредієнт не розпізнано</p>
           <a class="ing-action" href="fix-ingredient.html">Уточнити</a>
         </li>
+        <!-- «Нечітка кількість» — інший тип сумніву, ніж «не розпізнано» вище:
+             CLAUDE.md §5.2 вирішує його на самому рядку (ввести грами або
+             позначити немасштабованим), а не переходом на інший екран.
+             fix-ingredient.html створює канонічний інгредієнт (назва/прохід/
+             ккал/густина) — тут нема чого уточнювати того роду, тож дії немає,
+             того ж патерну, що немасштабовані рядки нижче (`.note`, без посилання). -->
         <li class="ing ing-flagged">
           <p class="ing-row"><span class="name">зелень</span> <span class="qty">жменя зелені</span></p>
           <p class="flag">нечітка кількість</p>
-          <a class="ing-action" href="fix-ingredient.html">Уточнити</a>
         </li>
 
         <li class="ing">
@@ -408,7 +443,7 @@
          і його відсутність не потребує заглушки (те саме правило, що для
          груп інгредієнтів §5.2.1: з'являється лише там, де справді є). -->
 
-    <section aria-labelledby="z-steps">
+    <section id="steps" aria-labelledby="z-steps">
       <h2 id="z-steps">Кроки</h2>
       <ol class="steps">
         <li>Наріжте буряк, капусту, картоплю й помідори; часник і цибулю дрібно посічіть.</li>

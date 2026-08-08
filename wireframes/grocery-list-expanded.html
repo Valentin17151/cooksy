@@ -3,77 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cooksy — Grocery list · успіх</title>
+<title>Cooksy — Grocery list · розгорнуто</title>
 
 <!--
-  ЕКРАН: Grocery list (Список покупок) · базовий стан — найбагатша сторінка вайрфреймів.
+  ЕКРАН: Grocery list (Список покупок) · стан «розгорнуто».
 
-  МІСЦЕ У ФЛОУ:
-  - J-0 (flows.md), фінал головного циклу: Cook list → «Генерувати список» →
-    (Grocery list) → тик по рядках → «Усе в домі» (див. grocery-list-done.html).
-    Це той самий екран, куди веде і J-3 (зміна кількості порцій розповсюджується сюди).
-  - J-4: єдиний екран, яким користуються ПРЯМО в магазині — прохід за проходом,
-    тому порядок секцій нижче фіксований і не редагується користувачем (§8 брифу).
-  - H-1: «відкрити зведене число і побачити, з чого воно складається» — це
-    <details> на кожному злитому рядку. Найменш підтверджена, але найважливіша
-    гіпотеза продукту (sitemap.md · E8).
-  - S-2: «Експортувати текстом» — віддати список тому, хто не користується Cooksy.
+  ЧОМУ ЦЕЙ ФАЙЛ ІСНУЄ — пункт 4 запиту продукт-овнера (8 серпня): «на списку
+  покупок треба одразу бачити список товарів агрегований по меню, з
+  можливістю дивитись або все одразу, або з розбивкою по товару».
 
-  СПІЛЬНИЙ СЦЕНАРІЙ (8 серпня, узгоджено з cook-list.html):
-    Паста з баклажаном ×4 (заміна: сметана → грецький йогурт) · Сирники ×2 ·
-    Курка з лимоном і рисом ×4 · Борщ із квасолею ×6 (чернетка, є позначені рядки) ·
-    Плов від мами ×4 (чернетка БЕЗ жодного рядка).
-  «Плов від мами» — сьомий пункт понад базовий набір страв _conventions.md.
-  Потрібен окремий рецепт саме для стану «чернетка без рядків» (placeholder-рядок,
-  E8/flows.md·J-0), відмінного від Борщу, який ілюструє «чернетка з позначеними
-  рядками» (частина рядків підтверджена, частина — ні). Один набір даних не мав
-  дублювати цю відмінність, тож дата-сет розширено свідомо, а не помилково.
+  ЦЕ НЕ ДРУГИЙ VIEW MODE — ПРОЧИТАЙТЕ ПЕРШ НІЖ ЗМІНЮВАТИ. sitemap.md,
+  розділ «▸ Grocery list», уже розглянув і свідомо відхилив окремий режим
+  перегляду, що перегруповував би список за рецептом замість проходу:
+  «tapping a line reveals which recipes it came from, and in what amounts...
+  That is the switch from aggregated view to recipe view — one
+  already-specified interaction, not a second mode.» Ця сторінка НЕ регрупує
+  за стравою — проходи магазину (§8 брифу, порядок обходу) лишаються тими
+  самими секціями, у тому самому порядку, що й на grocery-list.html. Єдина
+  різниця: кожен <details> «з яких рецептів» (H-1, sitemap.md · E8) відкритий
+  одразу, замість того щоб тапати кожен окремо — «розбивка по товару», яка й
+  так існує по рядку (§5.2.1 CLAUDE.md: «grouped inside the recipe, flat
+  inside the list» — цей принцип лишається чинним і тут).
 
-  ЗОНИ (structure unchanged across states — _conventions.md §4):
-  header — назва екрана + «Минулі списки» (контрол рівня екрана, завжди присутній,
-    ідентичний на всіх 4 сторінках). Це НЕ окремий екран — sitemap.md: «the past-list
-    switcher is a control in the header» — тому тут <button>, а не <a>.
-  main — дата+джерело списку (посилання на cook-list.html, зв'язок E5↔E7) →
-    п'ять секцій-проходів магазину → рядок-чернетка Плову (поза секціями) →
-    форма «Додати вручну» → дія «Експортувати текстом».
+  МЕХАНІЗМ: без JS одна дія не може розгорнути одразу всі <details> на
+  сторінці (_conventions.md §2: «Жодного JavaScript… Стан — це інший файл, а
+  не поведінка»). Тому це — справжній, другий досяжний стан: та сама
+  сторінка, той самий сценарій (8 серпня), кожен <details> з атрибутом
+  open. Дійшли сюди через легке посилання «Розгорнути все» на
+  grocery-list.html; звідси «Згорнути все» веде назад. Обидва — <a href>
+  (перехід на інший екран, _conventions.md §2), не .btn — вторинний,
+  оглядовий контрол, а не первинна дія екрана.
 
-  ПРОХОДИ — підмножина фіксованого порядку з _conventions.md (10 проходів),
-  відносний порядок збережено, невживані пропущено:
-    овочі та фрукти · м'ясо і риба · молочне та яйця · бакалія · інше.
-
-  РЯДКИ — усі види разом на базовій сторінці (_conventions.md §4, «Одна сторінка —
-  один стан»): звичайний · злиття з розкриттям · несумісні одиниці · заміна,
-  що дійшла до списку · рядок зі збільшеною кількістю (сам знявся) · відмічені,
-  утоплені вниз · рядок із прапорцем у «інше» · placeholder чернетки.
-
-  Число рядків підібрано навмисно: 5+1+3+4+1 = 14 позицій, 5 страв — ті самі
-  цифри, що й на grocery-list-done.html («14 позицій · 5 страв»), для внутрішньої
-  узгодженості сценарію між станами.
-
-  ПРАВКА 8 СЕРПНЯ — пункт 4 запиту продукт-овнера: «на списку покупок треба
-  одразу бачити список товарів агрегований по меню, з можливістю дивитись або
-  все одразу, або з розбивкою по товару».
-
-  ЦЕ НЕ ДРУГИЙ VIEW MODE. sitemap.md, розділ «▸ Grocery list», уже розглянув і
-  свідомо відхилив окремий режим перегляду, що перегруповував би список за
-  рецептом замість проходу: «tapping a line reveals which recipes it came
-  from, and in what amounts... That is the switch from aggregated view to
-  recipe view — one already-specified interaction, not a second mode.» Саме
-  цей механізм тут і є: кожен злитий рядок несе <details> «з яких рецептів»
-  (H-1, sitemap.md · E8) — «розбивка по товару» вже існує, по рядку. Другого
-  повного списку, перегрупованого за стравою, тут навмисно НЕМАЄ — це
-  скасувало б обґрунтоване рішення (CLAUDE.md §5.9: злиття за проходом заради
-  порядку обходу магазину; §7.4/J-4: єдиний екран, яким користуються ПРЯМО в
-  магазині — один прохід, а не по рецептах).
-
-  Що додано — «Розгорнути все» / «Згорнути все»: полегшення запиту «дивитись
-  усе одразу», щоб не тапати кожен <details> окремо. Без JS одна дія не може
-  розгорнути одразу всі <details> на сторінці, тож, як і кожен інший стан у
-  цьому проєкті («Стан — це інший файл, а не поведінка» — _conventions.md §2),
-  це представлено СПРАВЖНІМ, другим досяжним станом: grocery-list-expanded.html
-  — та сама сторінка, кожен <details open>. Контрол — звичайне посилання
-  (перехід на інший екран → <a href>, _conventions.md §2), легке, без рамки
-  .btn — це вторинний, оглядовий контрол, а не первинна дія екрана.
+  СТРУКТУРА — ідентична grocery-list.html (_conventions.md §4, «Одна
+  сторінка — один стан… структура не змінюється»): той самий header, main,
+  footer, той самий сценарій (14 позицій · 5 страв). Єдина відмінність
+  вмісту — атрибут open на кожному з чотирьох <details>, і напрямок
+  контролу вгорі main.
 -->
 
 <style>
@@ -169,7 +134,7 @@
   h2{font-size:16px;margin:0}
   h3{font-size:15px;margin:0;font-weight:600}
 
-  /* ── Шапка: незмінна на всіх 4 станах — лише h1 + контрол рівня екрана ── */
+  /* ── Шапка: незмінна на всіх станах — лише h1 + контрол рівня екрана ── */
   header{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:12px 16px;border-bottom:1px solid var(--line);
@@ -188,7 +153,7 @@
   p.source{padding:12px 0;border-bottom:1px solid var(--line);margin:0}
   p.source a{color:var(--ink)}
 
-  /* ── «Розгорнути все» — легкий, вторинний контрол над проходами (пункт 4).
+  /* ── «Згорнути все» — легкий, вторинний контрол над проходами (пункт 4).
        Не .btn: це не первинна дія екрана, а другорядний спосіб огляду. ── */
   p.expand-toggle{margin:0;padding:6px 0;border-bottom:1px solid var(--line);text-align:right}
   p.expand-toggle a{
@@ -213,7 +178,8 @@
 
   li.checked label{color:var(--dim)}
 
-  /* Розкриття зведеного рядка — з яких рецептів і скільки (H-1). */
+  /* Розкриття зведеного рядка — з яких рецептів і скільки (H-1). Тут усі
+     несуть атрибут open — це і є весь сенс цього файлу. */
   details{margin:0 0 10px 30px;font-size:13px}
   details summary{cursor:pointer;color:var(--ink)}
   details summary::marker{color:var(--dim)}
@@ -224,13 +190,6 @@
   p.note,p.flag{margin:0 0 10px 30px;font-size:13px;color:var(--dim)}
   .flagged{padding-bottom:10px}
   .flagged .btn{margin-left:30px}
-
-  /* ── Тихий індикатор офлайн-стану (grocery-list-offline.html) ── */
-  p.sync{
-    margin:0;padding:10px 16px;
-    background:var(--zone);color:var(--dim);font-size:13px;
-    border-bottom:1px solid var(--line);
-  }
 
   /* ── Рядок-чернетка без жодного інгредієнта — поза секціями, без чекбокса ── */
   .draft-box{
@@ -251,10 +210,6 @@
   form.manual-form input[type=text]::placeholder{color:var(--dim)}
 
   section.actions{padding:14px 0}
-
-  /* ── Стан «готово» ── */
-  .done-summary{padding:14px 0}
-  .exits{display:flex;gap:8px;flex-wrap:wrap;padding:14px 0}
 
   footer{
     position:sticky;bottom:0;
@@ -336,12 +291,12 @@
     </li>
     <li>Зібрати все в дім
       <ul>
-        <li><a href="grocery-list.html" aria-current="page">Список покупок</a>
+        <li><a href="grocery-list.html">Список покупок</a>
           <ul>
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
-            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
+            <li><a href="grocery-list-expanded.html" aria-current="page">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -365,7 +320,7 @@
 </aside>
 
 <div class="wf-col">
-<p class="wf-states">Стан: <strong>успіх</strong> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <a href="grocery-list-done.html">готово</a> · <a href="grocery-list-expanded.html">розгорнуто</a></p>
+<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <a href="grocery-list-done.html">готово</a> · <strong>розгорнуто</strong></p>
 
 <!-- ══ Макет екрана ══ -->
 <div class="phone">
@@ -386,12 +341,11 @@
     <span class="meta">8 серпня · <a href="cook-list.html">зі списку готування</a></span>
   </p>
 
-  <!-- Пункт 4: розгорнути/згорнути всі <details>-розкриття одразу — легкий
-       контрол над проходами, а не другий режим перегляду (див. коментар
-       у <head>). Без JS — окремий, справжній стан-сторінка. -->
-  <p class="expand-toggle"><a href="grocery-list-expanded.html">Розгорнути все</a></p>
+  <!-- Пункт 4: назад до згорнутого вигляду. Той самий контрол, зворотний
+       напрямок — див. коментар у <head>. -->
+  <p class="expand-toggle"><a href="grocery-list.html">Згорнути все</a></p>
 
-  <!-- (а) звичайний рядок · (б) злиття з розкриттям · (в) несумісні одиниці -->
+  <!-- (а) звичайний рядок · (б) злиття з розкриттям — тут ВІДКРИТТЯ open -->
   <section class="aisle" aria-labelledby="z-veg">
     <h2 id="z-veg">Овочі та фрукти</h2>
     <ul class="lines">
@@ -404,7 +358,7 @@
       <!-- (б) злиття з розкриттям — аудит H-1: з яких рецептів і скільки -->
       <li>
         <label><input type="checkbox"> цибуля — 3 шт</label>
-        <details>
+        <details open>
           <summary>з 2 рецептів</summary>
           <ul class="breakdown">
             <li>Паста з баклажаном ×4 — 1 шт</li>
@@ -417,7 +371,7 @@
            не зводяться в одне число, показуються поруч. -->
       <li>
         <label><input type="checkbox"> помідори — 800 г + 3 шт</label>
-        <details>
+        <details open>
           <summary>з 2 рецептів</summary>
           <ul class="breakdown">
             <li>Паста з баклажаном ×4 — 800 г</li>
@@ -467,7 +421,7 @@
            that did not reach the list would put the wrong thing in the trolley». -->
       <li>
         <label><input type="checkbox"> грецький йогурт — 100 г</label>
-        <details>
+        <details open>
           <summary>з 1 рецепта</summary>
           <ul class="breakdown">
             <li>Паста з баклажаном ×4 · заміна цього разу (замість сметани)</li>
@@ -525,7 +479,7 @@
            Аудит H-1: зведене число завжди розкривається до своїх доданків. -->
       <li class="flagged">
         <label><input type="checkbox"> копчена паприка — 5 г</label>
-        <details>
+        <details open>
           <summary>з 1 рецепта</summary>
           <ul class="breakdown">
             <li>Борщ із квасолею ×6 — 2 г</li>

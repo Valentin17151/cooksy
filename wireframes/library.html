@@ -31,6 +31,27 @@
   header — назва + «Додати рецепт» · пошук із тегами · колекція · глобальна панель.
   Порядок колекції — за частотою планування, скидається (sitemap · Library).
   Чернетка помітна в списку (Борщ) — межа і підпис, не колір.
+
+  ПРАВКА — стан «додано» на картці (друга хвиля продуктового ревʼю, 8 серпня).
+  Без JS клік по «+» не можна показати як подію в часі; замість опису поведінки
+  в коментарі застосовано той самий патерн, що вже є на grocery-list.html
+  (відмічені/невідмічені рядки поруч на одній базовій сторінці) — дві картки
+  в різних станах бачимо одночасно, як реальні приклади, а не як опис.
+
+  Обрано САМЕ чотири картки — Паста з баклажаном · Сирники · Курка з лимоном
+  і рисом · Борщ із квасолею — не довільно: це рівно ті чотири страви, що вже
+  стоять записами в cook-list.html і, відповідно, у grocery-list.html
+  (спільний сценарій 8 серпня, зафіксований у коментарі вгорі grocery-list.html).
+  Млинці · Млинці дієтичні · Базовий томатний соус лишаються звичайним «+»,
+  бо їх справді нема в списку готування — консистентність між файлами трьох
+  паралельних агентів, а не довільний вибір половини карток.
+
+  ТЕКСТ І СТИЛЬ ДОДАНОГО СТАНУ: слово замість іконки-галочки («У списку» —
+  _conventions.md §1, іконок немає, крім чекбокса). Кнопка лишається справжнім
+  <button>, не disabled — керування не зникає з фокус-порядку та семантики дії,
+  лише виглядає неактивним: рамка --line замість --ink, текст --dim замість
+  --ink, менший кегль без жирного «+» (design principle 4 з CLAUDE.md — тап-ціль
+  ≥44px зберігається через min-width/min-height, попри змінну ширину тексту).
 -->
 
 <style>
@@ -193,6 +214,14 @@
     border:1px solid var(--ink);background:var(--paper);color:var(--ink);
     font-size:20px;line-height:1;cursor:pointer;
   }
+  /* Стан «вже додано» — реальний приклад поруч зі звичайним «+», не опис
+     поведінки. Слово, не галочка-іконка; рамка/текст --dim замість --ink
+     читаються як «неактивне», хоч кнопка лишається справжнім <button>. */
+  .add.added{
+    flex:0 0 auto;width:auto;height:auto;min-width:44px;min-height:44px;
+    padding:0 12px;font-size:13px;font-weight:600;line-height:1.2;
+    border-color:var(--line);color:var(--dim);cursor:default;
+  }
   .photo{
     flex:0 0 64px;height:64px;
     border:1px solid var(--line);background:var(--zone);
@@ -294,6 +323,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -359,7 +389,7 @@
             <h3><a href="recipe.html">Паста з баклажаном</a></h3>
             <p class="meta">35 хв · ~180 ккал/100 г · вечеря, швидко</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Паста з баклажаном» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -370,7 +400,7 @@
             <h3><a href="recipe.html">Сирники</a></h3>
             <p class="meta">25 хв · ~215 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Сирники» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -381,7 +411,7 @@
             <h3><a href="recipe.html">Курка з лимоном і рисом</a></h3>
             <p class="meta">50 хв · ~150 ккал/100 г · вечеря</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Курка з лимоном і рисом» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -394,7 +424,7 @@
             <p class="meta">1 год 20 хв · ~70 ккал/100 г · суп</p>
             <p class="draft">Чернетка — кількості не підтверджені</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Борщ із квасолею» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -405,7 +435,7 @@
             <h3><a href="recipe.html">Млинці</a></h3>
             <p class="meta">30 хв · ~230 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Млинці» в список готування">+</button>
         </article>
       </li>
 
@@ -416,7 +446,7 @@
             <h3><a href="recipe.html">Млинці дієтичні</a></h3>
             <p class="meta">30 хв · ~140 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Млинці дієтичні» в список готування">+</button>
         </article>
       </li>
 
@@ -427,7 +457,7 @@
             <h3><a href="recipe.html">Базовий томатний соус</a></h3>
             <p class="meta">40 хв · ~55 ккал/100 г · база</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Базовий томатний соус» в список готування">+</button>
         </article>
       </li>
 

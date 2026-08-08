@@ -22,6 +22,14 @@
   секції-проходи на один згорнутий підсумок + 2 виходи, обидва на Cook list
   (sitemap.md: «До списку готування» продовжує перегляд плану, «Новий список» —
   дія генерації, яка теж живе на Cook list).
+
+  ПРАВКА 8 СЕРПНЯ — пункт 4 (grocery-list.html): додано новий стан
+  grocery-list-expanded.html («Розгорнути все» — усі <details>-розкриття
+  одразу відкриті; не другий режим перегляду за рецептом, див. коментар у
+  grocery-list.html). Підсумок нижче показує лише прикладові куплені позиції
+  без <details> — тут нема чого розгортати, тому в main немає й самого
+  контролу. Вузол «розгорнуто» додано лише до риштувань (.wf-states,
+  .wf-nav) нижче, для навігаційної повноти між станами того самого екрана.
 -->
 
 <style>
@@ -228,6 +236,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html" aria-current="page">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -251,7 +260,7 @@
 </aside>
 
 <div class="wf-col">
-<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <strong>готово</strong></p>
+<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <strong>готово</strong> · <a href="grocery-list-expanded.html">розгорнуто</a></p>
 
 <div class="phone">
 <div class="phone-notch" aria-hidden="true"></div>

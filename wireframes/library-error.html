@@ -25,6 +25,13 @@
 
   Банер — рамка 1px #222, без заливки кольором (не .zone-тло): це свідомо
   «тонкий маркер», а не попередження-блок, який виглядав би як помилка.
+
+  ПРАВКА — стан «додано» на картці, узгоджений з library.html (друга хвиля
+  ревʼю, 8 серпня). Та сама колекція з тими самими 7 картками, тому та сама
+  четвірка — Паста з баклажаном · Сирники · Курка з лимоном і рисом · Борщ
+  із квасолею — показана вже доданою в список готування (ті самі записи, що
+  в cook-list.html і grocery-list.html); повне обґрунтування й опис стилю —
+  у коментарі вгорі library.html, не повторюється тут.
 -->
 
 <style>
@@ -176,6 +183,11 @@
     border:1px solid var(--ink);background:var(--paper);color:var(--ink);
     font-size:20px;line-height:1;cursor:pointer;
   }
+  .add.added{
+    flex:0 0 auto;width:auto;height:auto;min-width:44px;min-height:44px;
+    padding:0 12px;font-size:13px;font-weight:600;line-height:1.2;
+    border-color:var(--line);color:var(--dim);cursor:default;
+  }
   .photo{
     flex:0 0 64px;height:64px;
     border:1px solid var(--line);background:var(--zone);
@@ -276,6 +288,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -347,7 +360,7 @@
             <h3><a href="recipe.html">Паста з баклажаном</a></h3>
             <p class="meta">35 хв · ~180 ккал/100 г · вечеря, швидко</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Паста з баклажаном» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -358,7 +371,7 @@
             <h3><a href="recipe.html">Сирники</a></h3>
             <p class="meta">25 хв · ~215 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Сирники» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -369,7 +382,7 @@
             <h3><a href="recipe.html">Курка з лимоном і рисом</a></h3>
             <p class="meta">50 хв · ~150 ккал/100 г · вечеря</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Курка з лимоном і рисом» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -381,7 +394,7 @@
             <p class="meta">1 год 20 хв · ~70 ккал/100 г · суп</p>
             <p class="draft">Чернетка — кількості не підтверджені</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add added" aria-label="«Борщ із квасолею» вже у списку готування">У списку</button>
         </article>
       </li>
 
@@ -392,7 +405,7 @@
             <h3><a href="recipe.html">Млинці</a></h3>
             <p class="meta">30 хв · ~230 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Млинці» в список готування">+</button>
         </article>
       </li>
 
@@ -403,7 +416,7 @@
             <h3><a href="recipe.html">Млинці дієтичні</a></h3>
             <p class="meta">30 хв · ~140 ккал/100 г · сніданок</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Млинці дієтичні» в список готування">+</button>
         </article>
       </li>
 
@@ -414,7 +427,7 @@
             <h3><a href="recipe.html">Базовий томатний соус</a></h3>
             <p class="meta">40 хв · ~55 ккал/100 г · база</p>
           </div>
-          <button type="button" class="add" aria-label="Додати в список готування">+</button>
+          <button type="button" class="add" aria-label="Додати «Базовий томатний соус» в список готування">+</button>
         </article>
       </li>
 

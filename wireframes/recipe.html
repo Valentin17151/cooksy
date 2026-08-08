@@ -47,15 +47,44 @@
      sitemap.md «Navigation only: no ingredients, quantities or portions
      cross the link»). Файлу «Базовий томатний соус» ще не намальовано —
      посилання веде на recipe.html же, з приміткою нижче в самому рядку.
-  6. Нижня панель — усі чотири пункти є посиланнями (Рецепти, Список
-     готування, Список покупок), КРІМ Акаунта: сторінка account.html ще не
-     намальована, і _conventions.md §4 велить лишати такий пункт <span>, а не
-     мертким посиланням («те саме правило, що для Акаунта в панелі
-     продукту») — це різниться з формулюванням завдання «усі <a>», і
-     розходження свідоме, на користь контракту. Жоден пункт не aria-current:
-     Recipe — контекстний екран, відкривається не з таба (sitemap.md ▸ Recipe
-     reached «from a link somebody forwarded» чи з Library-рядка, ніколи не
-     з нижньої панелі).
+  6. Нижня панель — усі чотири пункти посилання, включно з Акаунтом
+     (account.html існує з інтеграції 8 серпня — _conventions.md §4: «всі
+     чотири — посилання»). Жоден пункт не aria-current: Recipe — контекстний
+     екран, відкривається не з таба (sitemap.md ▸ Recipe reached «from a link
+     somebody forwarded» чи з Library-рядка, ніколи не з нижньої панелі).
+
+  ПРАВКА — ДРУГА ХВИЛЯ АУДИТУ, 8 серпня (продакт-ревʼю, пункти 1/2/3/5).
+  7. Внутрішня навігація — під контролом порцій, а над «35 хв · ...». Пункт 5
+     ревʼю: одна нескінченна сторінка (фото → порції → інгредієнти → кроки)
+     не давала орієнтації. `<nav aria-label="У цьому рецепті">` — два плоскі
+     якорі, `<a href="#ingredients">` / `<a href="#steps">`, нуль JS — той
+     самий механізм, що вже показує grocery-list.html на `#manual-add`.
+     Підрецепт не отримав власного якоря: це один рядок, а не секція, що
+     потребує орієнтації, і він фізично лежить між двома заякореними
+     секціями — завжди у кадрі під час переходу. `scroll-margin-top` на самих
+     секціях компенсує липкий контрол порцій (top:0, z-index:2), щоб перехід
+     за якорем не ховав заголовок секції під ним.
+  8. Секції інгредієнтів і кроків розведені щільніше, ніж раніше (більше
+     вертикального повітря в `main>section`), а кроки отримали ту саму
+     верхню межу між пунктами, що вже має список інгредієнтів — одна система
+     чанкінгу на обидва списки, а не дві різні.
+  9. Рядок підрецепта («використовує: …») був звичайним інлайн-посиланням у
+     тексті — без заявленої тап-цілі, порушення CLAUDE.md §7.4 (44×44px).
+     Перероблений у власну тап-ціль на всю ширину рядка, того ж патерну, що
+     `.ing-action` нижче — картка-рядок, а не підпис із посиланням всередині.
+
+  ЩО НЕ ЗМІНЕНО, НАВМИСНО (пункт 1 ревʼю — фідбек про live-reflow степера).
+  Кожен масштабований рядок уже стоїть на `<output for="servings">` —
+  це і є структурний доказ «перераховується від контролу» (_conventions.md
+  §2, уточнення до <output>), а не проза в коментарі. Фальшивого «до/після»
+  прямо на сторінці (напр. другого набору цифр поруч) не додано: секція 6
+  _conventions.md забороняє будь-які підписи-риштування — сторінка мусить
+  виглядати як реальний екран, а реальний екран не показує два стани одного
+  числа одночасно. Реальна демонстрація живого перерахунку — на cook-list.html:
+  там зміна порцій на записі змінює вже згенерований список покупок, і це
+  видно як два справжні стани різних файлів (grocery-list.html), а не як
+  анотація. Тут, на Recipe, `<output>` — чесна межа того, що можна показати
+  без JS, не переступаючи власне правило вайрфрейму.
 -->
 
 <style>
@@ -203,11 +232,23 @@
     font:inherit;text-align:center;
   }
 
+  /*
+    ── Внутрішня навігація — рішення 7. Плоскі якорі, нуль JS. scroll-margin
+    компенсує липкий контрол порцій (44px кнопки + 20px padding + межі), щоб
+    перехід за якорем не ховав заголовок секції під ним. ──
+  */
+  .section-nav{display:flex;gap:18px;padding:8px 0;font-size:14px}
+  .section-nav a{
+    display:inline-flex;align-items:center;min-height:44px;
+    color:var(--ink);text-decoration:underline;
+  }
+  #ingredients,#steps{scroll-margin-top:70px}
+
   .meta-row{margin:0;padding:10px 0;color:var(--dim);font-size:13px;border-bottom:1px solid var(--line)}
 
-  /* ── Секції: ритм спільний для інгредієнтів, кроків ── */
-  main>section{padding:14px 0;border-bottom:1px solid var(--line)}
-  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px}
+  /* ── Секції: ритм спільний для інгредієнтів, кроків (рішення 8) ── */
+  main>section{padding:18px 0;border-bottom:1px solid var(--line)}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px}
   .section-head .meta{margin:0;font-size:13px;color:var(--dim)}
 
   ul.ingredients{list-style:none;margin:0;padding:0}
@@ -229,12 +270,24 @@
   .ing-flagged{border:1px solid var(--ink);padding:10px 10px;margin-bottom:8px}
   .ing-flagged .flag{margin:4px 0 0;font-size:13px;color:var(--ink);font-weight:600}
 
-  /* ── Рядок підрецепта: чиста навігація, не секція ── */
-  .subrecipe{margin:0;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--dim)}
-  .subrecipe a{color:var(--ink)}
+  /*
+    ── Рядок підрецепта: чиста навігація, не секція (рішення 9). Раніше —
+    інлайн-посилання в тексті без заявленої тап-цілі; тепер — картка-рядок
+    на всю ширину, ≥44px, того ж патерну, що .ing-action. ──
+  */
+  .subrecipe{margin:0;border-bottom:1px solid var(--line);font-size:14px}
+  .subrecipe-link{
+    display:flex;align-items:center;min-height:44px;padding:10px 0;
+    color:var(--ink);text-decoration:none;
+  }
+  .subrecipe-link:hover{text-decoration:underline}
+  .subrecipe-link .verb{color:var(--dim);margin-right:4px}
 
-  ol.steps{margin:0;padding-left:20px}
-  ol.steps li{padding:6px 0}
+  /* Кроки: та сама верхня межа-роздільник, що й у списку інгредієнтів —
+     один чанкінг на обидва списки (рішення 8). Більше повітря між пунктами. */
+  ol.steps{margin:0;padding-left:22px}
+  ol.steps li{padding:12px 0 12px 6px;border-top:1px solid var(--line)}
+  ol.steps li:first-child{border-top:none;padding-top:0}
 
   /* ── Банер чернетки (лише на recipe-draft.html) ── */
   .draft-banner{
@@ -333,6 +386,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -378,9 +432,19 @@
       <button type="button" class="stepper" aria-label="Збільшити кількість порцій">+</button>
     </form>
 
+    <!-- Внутрішня навігація — рішення 7 (продакт-ревʼю, пункт 5). Плоскі
+         якорі на #ingredients / #steps нижче тим самим документом, зовсім
+         без JS — той самий механізм, що вже показує grocery-list.html на
+         #manual-add. Не таб-режим і не друга сторінка: обидві секції й далі
+         в одному потоці, лише спосіб дістатись до них швидше за скрол. -->
+    <nav class="section-nav" aria-label="У цьому рецепті">
+      <a href="#ingredients">Інгредієнти</a>
+      <a href="#steps">Кроки</a>
+    </nav>
+
     <p class="meta-row">35 хв · ~180 ккал/100 г · ~630 ккал на порцію (350 г)</p>
 
-    <section aria-labelledby="z-ing">
+    <section id="ingredients" aria-labelledby="z-ing">
       <div class="section-head">
         <h2 id="z-ing">Інгредієнти</h2>
         <p class="meta">на 2 порції</p>
@@ -419,10 +483,13 @@
     </section>
 
     <!-- Підрецепт: навігація й нічого більше — §5.2.2. «Базовий томатний соус»
-         ще не намальований як окремий файл, тому посилання веде сюди ж. -->
-    <p class="subrecipe">використовує: <a href="recipe.html">Базовий томатний соус</a></p>
+         ще не намальований як окремий файл, тому посилання веде сюди ж.
+         Тап-ціль на весь рядок (рішення 9), не інлайн-посилання в тексті. -->
+    <p class="subrecipe">
+      <a class="subrecipe-link" href="recipe.html"><span class="verb">використовує:</span> Базовий томатний соус</a>
+    </p>
 
-    <section aria-labelledby="z-steps">
+    <section id="steps" aria-labelledby="z-steps">
       <h2 id="z-steps">Кроки</h2>
       <ol class="steps">
         <li>Наріжте баклажан кубиками, посоліть і залиште на 10 хвилин, щоб пустив сік.</li>

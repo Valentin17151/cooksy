@@ -279,6 +279,7 @@
             <li><a href="grocery-list-empty.html">порожній</a></li>
             <li><a href="grocery-list-offline.html">офлайн</a></li>
             <li><a href="grocery-list-done.html">готово</a></li>
+            <li><a href="grocery-list-expanded.html">розгорнуто</a></li>
           </ul>
         </li>
       </ul>
@@ -411,11 +412,9 @@
 <!-- Нижня панель: жоден пункт не aria-current — Replace ingredient не один
      із чотирьох табів (Library · Cook list · Grocery list · Account), це
      контекстний екран, куди приходять з Recipe (sitemap.md, навігація).
-     Рецепти / Список готування / Список покупок лишаються <a> — вони в
-     інвентарі 17 сторінок _conventions.md і мають куди вести. Акаунт, як і
-     на library.html, лишається <span> без href: сторінка account.html поза
-     інвентарем цього кроку, а посилання на ще ненамальований екран
-     заборонене конвенцією («не мертве посилання», §2). -->
+     Усі чотири пункти — <a>: інвентар усіх 28 сторінок закритий інтеграцією
+     8 серпня (_conventions.md §4), включно з account.html, тож жоден пункт
+     панелі більше не span.todo. -->
 <footer>
   <nav aria-label="Головна навігація">
     <ul>
