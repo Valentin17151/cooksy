@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Recipe editor · помилка</title>
+
+<!--
+  ЕКРАН: Recipe editor (Редактор рецепта) · помилка.
+
+  МІСЦЕ У ФЛОУ (flows.md · J-1). sitemap.md (Every screen's states, «Recipe editor» /
+  «Error») розрізняє ДВІ різні помилки з різним текстом:
+  «Two, and they read differently. No signal → saved as text, formatted when the
+  connection returns. The model failed — timed out, errored, hit a limit → retry, or
+  save as text and let the queue take it».
+  У ПРОДУКТІ показується ОДИН банер за причиною (немає сигналу — одна річ, модель
+  відповіла помилкою за наявного з'єднання — інша). Тут навмисно показано ОБИДВА як два
+  окремі блоки-банери, щоб спроєктувати кожен текст окремо — так, як просить завдання.
+
+  Банер (а) — немає з'єднання. У flows.md це вузол «qNet → no → raw: Saved as a DRAFT».
+  Це НЕ глухий кут: рецепт уже збережено текстом, чернеткою, і чергою (E4: «Queued. When
+  the connection returns the model runs by itself» → «Next time you open — this was
+  processed, check it»). Кнопка веде прямо на recipe-draft.html, не назад у форму.
+
+  Банер (б) — модель не відповіла за наявного з'єднання. У flows.md це вузол
+  «qFail → no → failed: Timed out or errored — retry, or save as a draft» → «qRetry».
+  Дві дії: «Спробувати ще» (qRetry → yes → ai, тобто назад у завантаження) і
+  «Зберегти як чернетку» (qRetry → no → raw, той самий шлях чернетки, що й банер а).
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn.primary{border-width:2px;font-weight:600}
+
+  main{padding:16px}
+
+  /* ── Банер помилки: межа + товстіший лівий край замінюють колір (design principle 3). ── */
+  section.banner{
+    border:1px solid var(--line);border-left:4px solid var(--ink);
+    background:var(--zone);padding:14px 16px;margin:0 0 20px;
+  }
+  section.banner h2{margin:0 0 8px}
+  section.banner p{margin:0 0 14px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html" aria-current="page">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <a href="recipe-editor.html">успіх</a> · <a href="recipe-editor-empty.html">порожній</a> · <a href="recipe-editor-loading.html">завантаження</a> · <strong>помилка</strong></p>
+<div class="device">
+
+<header>
+  <h1>Редактор рецепта</h1>
+</header>
+
+<main>
+
+  <!-- Банер (а) — немає з'єднання. Не глухий кут: рецепт уже збережено чернеткою. -->
+  <section class="banner" aria-labelledby="err-offline">
+    <h2 id="err-offline">Немає з'єднання</h2>
+    <p>Рецепт збережено як текст — модель відформатує його, щойно з'явиться мережа.</p>
+    <a class="btn" href="recipe-draft.html">Гаразд, до рецепта</a>
+  </section>
+
+  <!-- Банер (б) — модель не відповіла, з'єднання є. -->
+  <section class="banner" aria-labelledby="err-model">
+    <h2 id="err-model">Модель не відповіла</h2>
+    <p>З'єднання є. Спробувати ще?</p>
+    <div class="actions">
+      <a class="btn primary" href="recipe-editor-loading.html">Спробувати ще</a>
+      <a class="btn" href="recipe-draft.html">Зберегти як чернетку</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Recipe editor · порожній</title>
+
+<!--
+  ЕКРАН: Recipe editor (Редактор рецепта) · порожній стан.
+
+  МІСЦЕ У ФЛОУ (flows.md · J-1, sitemap.md · Every screen's states):
+  Library «+ Додати рецепт» → сюди. Текст стану, дослівно з таблиці станів sitemap.md
+  («Recipe editor» / «Empty»): «A blank recipe, cursor in the name field». Це вхід №2 з
+  чотирьох, описаних у sitemap.md ▸ Recipe editor: «Nothing was pasted → an empty recipe,
+  typed by hand» — той самий екран, що на recipe-editor.html, лише до того, як щось
+  введено.
+
+  Порядок полів — з sitemap.md, розділ «Getting a recipe in»: 1 назва → 2 фото → 3 текст.
+  Курсор у полі назви — autofocus, тому й немає значення value.
+
+  Дві дії внизу:
+  — «Відформатувати» — надсилає текст моделі; це єдине справжнє мережеве очікування в
+    продукті (flows.md · J-1: «Any signal? → Loading — the model formats it»)
+    → recipe-editor-loading.html.
+  — «Зберегти як є» — офлайн-шлях і водночас чесний вихід із порожнього блоку тексту:
+    E4 у sitemap.md: «With no signal, the name, photos and raw text save as a real recipe
+    with no ingredient rows — a draft». Якщо текст і фото порожні, зберігається сама лише
+    назва — так само чернеткою, без рядків, аж доки хтось не відформатує пізніше
+    → recipe-draft.html.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn.primary{border-width:2px;font-weight:600}
+
+  main{padding:16px}
+
+  .field{margin:0 0 16px}
+  .field label{display:block;font-size:13px;color:var(--dim);margin:0 0 4px}
+  input[type=text],textarea{
+    width:100%;min-height:44px;padding:8px 10px;
+    border:1px solid var(--line);border-radius:0;
+    background:var(--paper);color:var(--ink);font:inherit;
+  }
+  input[type=text]::placeholder,textarea::placeholder{color:var(--dim)}
+  textarea{min-height:220px;resize:vertical}
+
+  .photo-row{display:flex;align-items:center;gap:12px;margin:0 0 20px}
+  .photo-block{
+    flex:0 0 120px;height:90px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);background:var(--zone);color:var(--dim);font-size:13px;
+  }
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 8px}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html" aria-current="page">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <a href="recipe-editor.html">успіх</a> · <strong>порожній</strong> · <a href="recipe-editor-loading.html">завантаження</a> · <a href="recipe-editor-error.html">помилка</a></p>
+<div class="device">
+
+<header>
+  <h1>Редактор рецепта</h1>
+</header>
+
+<main>
+
+  <form action="recipe-editor-loading.html" method="get">
+
+    <div class="field">
+      <label for="title">Назва</label>
+      <input type="text" id="title" name="title" autofocus>
+    </div>
+
+    <div class="photo-row">
+      <span class="photo-block" aria-hidden="true">фото</span>
+      <button type="button" class="btn">Додати фото</button>
+    </div>
+
+    <div class="field">
+      <label for="body">Текст рецепта</label>
+      <textarea id="body" name="body" placeholder="Вставте або наберіть текст рецепта…"></textarea>
+    </div>
+
+    <!--
+      «Відформатувати» — мережевий шлях, крок 4 з sitemap.md («A model formats it»)
+      → recipe-editor-loading.html. «Зберегти як є» — офлайн-шлях: E4, «With no signal…
+      saves as a real recipe with no ingredient rows — a draft» → recipe-draft.html.
+      У ВАЙРФРЕЙМІ обидва — переходи на інший файл (submit форми без JS працює
+      як посилання): стан — це інший файл, а не поведінка (_conventions.md §2).
+      У продукті «Відформатувати» — запит до моделі, а не навігація.
+    -->
+    <div class="actions">
+      <button type="submit" class="btn primary">Відформатувати</button>
+      <button type="submit" class="btn" formaction="recipe-draft.html">Зберегти як є</button>
+    </div>
+
+  </form>
+
+</main>
+
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

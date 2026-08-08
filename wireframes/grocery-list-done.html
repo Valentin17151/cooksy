@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Grocery list · готово</title>
+
+<!--
+  ЕКРАН: Grocery list (Список покупок) · стан «готово».
+
+  МІСЦЕ У ФЛОУ: flows.md · J-0, win-вузол головного циклу — «Everything is in
+  the house» — момент, заради якого існує весь продукт (CLAUDE.md §1: «Save a
+  recipe → set the portions → plan a few meals → get one shopping list»).
+  sitemap.md · «Every screen's states»: «Everything ticked → done, with the
+  date, not an empty screen» — тому нижче не порожній стан, а згорнутий підсумок
+  із датою, а не апологія.
+
+  14 позицій / 5 страв узгоджено з grocery-list.html (5+1+3+4+1 = 14 рядків,
+  5 запланованих страв: Паста, Сирники, Курка, Борщ, Плов).
+
+  СТРУКТУРА: header і footer nav ідентичні іншим станам. main замінює всі
+  секції-проходи на один згорнутий підсумок + 2 виходи, обидва на Cook list
+  (sitemap.md: «До списку готування» продовжує перегляд плану, «Новий список» —
+  дія генерації, яка теж живе на Cook list).
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:#767676}
+  .wf-states a{color:#222}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+
+  main{padding:0 16px}
+  .meta{font-size:13px;color:var(--dim);margin:4px 0 0}
+
+  section.done{padding:16px 0;border-bottom:1px solid var(--line)}
+
+  ul.lines{list-style:none;margin:12px 0 0;padding:0}
+  ul.lines>li{border-bottom:1px solid var(--line)}
+  ul.lines>li:last-child{border-bottom:none}
+  ul.lines label{
+    display:flex;align-items:center;gap:10px;
+    min-height:44px;padding:10px 2px;
+    cursor:pointer;color:var(--dim);
+  }
+  ul.lines input[type=checkbox]{width:20px;height:20px;flex:0 0 20px}
+
+  .exits{display:flex;gap:8px;flex-wrap:wrap;padding:16px 0}
+
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html" aria-current="page">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <a href="grocery-list.html">успіх</a> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <strong>готово</strong></p>
+
+<div class="device">
+
+<header>
+  <h1>Список покупок</h1>
+  <button type="button" class="btn">Минулі списки</button>
+</header>
+
+<main>
+
+  <!-- Win-вузол J-0: «Everything is in the house» — все заплановане фактично
+       в домі, в один прохід, за кількостями, які визначив план. -->
+  <section class="done" aria-labelledby="z-done">
+    <h2 id="z-done">Усе куплено · 8 серпня</h2>
+    <p class="meta">14 позицій · 5 страв</p>
+
+    <ul class="lines">
+      <li><label><input type="checkbox" checked> баклажани — 4 шт</label></li>
+      <li><label><input type="checkbox" checked> курячі стегна — 800 г</label></li>
+      <li><label><input type="checkbox" checked> спагеті — 400 г</label></li>
+      <li><label><input type="checkbox" checked> рис — 400 г</label></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="z-exits">
+    <h2 id="z-exits" class="vh">Далі</h2>
+    <div class="exits">
+      <a class="btn" href="cook-list.html">До списку готування</a>
+      <!-- «Новий список» — генерація для наступного тижня; дія теж на Cook list. -->
+      <a class="btn" href="cook-list.html">Новий список</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html" aria-current="page">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Replace ingredient · успіх</title>
+
+<!--
+  ЕКРАН: Replace ingredient (Замінити інгредієнт) · базовий стан («успіх»).
+
+  МІСЦЕ У ФЛОУ (flows.md · J-0, гілка «Swap an ingredient?», рядки 49–58):
+  Recipe → «Swap an ingredient?» — так → Replace ingredient → «Once, always,
+  or as a copy?» → назад на Recipe, зі своїм наслідком. Контекст тут завжди
+  один рядок одного рецепта (sitemap.md · ▸ Replace ingredient: "Reached
+  from an ingredient row, on the Recipe screen or in the editor").
+  Jobs: J-6 (варіант, який ти виробив — «моя версія, третя спроба») і J-0
+  (список покупок має купити те, що реально готуватимуть).
+
+  ЗВІДКИ ТЕКСТИ:
+  - Контекст рецепта/рядка, три результати пошуку і три радіо scope — з
+    прямого завдання на цей екран (значення й описи задані дослівно).
+  - «Обсяг заміни» стоїть ОСТАННІМ кроком, нижче результатів — sitemap.md
+    · «Every screen's states»: "The scope choice is the last step, never
+    the first — nothing changes until it is made".
+  - Три підписи radio відповідають таблиці "The three scopes of a swap"
+    (flows.md, рядки 119–127) і sitemap.md (рядки 737–741): just this time
+    → cook list entry only, recipe untouched · always → edit to the row ·
+    as a copy → a second, independent recipe (variant, no thread back).
+
+  РІШЕННЯ ЦЬОГО ФАЙЛУ:
+  1. Результат пошуку — <article> усередині <li> з <button> як цілим тап-
+     таргетом (конвенція §2: «результат пошуку → article»; дія вибору —
+     button, не div і не a — конвенція §2, «будь-яка дія → button»).
+  2. «Замінити» і «Скасувати» — кнопки-посилання (<a class="btn">), бо
+     ведуть на інший екран без JS, як «Додати рецепт» на library.html
+     (конвенція §2: «перехід на інший екран → a href»).
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  /*
+    Дерево вайрфрейм-навігації. Риштування, не продукт: стоїть поза макетом,
+    однакове на кожній сторінці. Розділи — п'ять намірів із sitemap.md;
+    екрани і стани — інвентар _conventions.md. Вузол стає посиланням,
+    щойно його сторінка існує; до того — сірий span.
+  */
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}          /* розділ-намір */
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* ── Колонка макета: смужка станів над «пристроєм», обидва — фіксована ширина ── */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  /* Макет екрана — «пристрій» */
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: назва екрана + контекст рецепта/рядка, який заміняємо ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .context{margin:3px 0 0;font-size:13px;color:var(--dim)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink);color:var(--paper);font-weight:600}
+
+  main{padding:0 16px}
+
+  /* ── Пошук: одне поле, як на library.html ── */
+  .search{padding:12px 0;border-bottom:1px solid var(--line)}
+  input[type=search]{
+    width:100%;min-height:44px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:0;
+    background:var(--zone);color:var(--ink);font:inherit;
+  }
+  input[type=search]::placeholder{color:var(--dim)}
+
+  /* ── Знайдено: кожен результат — окрема кнопка-картка, обрана несе рамку ink ── */
+  section.found{padding:14px 0;border-bottom:1px solid var(--line)}
+  ul.results{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  article.result{display:block}
+  ul.results button{
+    width:100%;min-height:44px;padding:10px 12px;
+    display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    font:inherit;text-align:left;cursor:pointer;
+  }
+  ul.results button[aria-pressed=true]{border-color:var(--ink);font-weight:600}
+  .result-name{font-size:15px}
+  .result-meta{font-size:13px;color:var(--dim);font-weight:400}
+
+  /* ── Обсяг заміни: останній крок, три радіо, кожен label ≥44px ── */
+  section.scope-section{padding:14px 0;border-bottom:1px solid var(--line)}
+  ul.scope{list-style:none;margin:10px 0 0;padding:0}
+  ul.scope>li{border-top:1px solid var(--line)}
+  ul.scope>li:first-child{border-top:none}
+  .scope-option{
+    display:flex;gap:12px;align-items:flex-start;
+    min-height:44px;padding:12px 0;cursor:pointer;
+  }
+  .scope-option input[type=radio]{margin-top:3px;flex:0 0 auto;width:18px;height:18px}
+  .scope-body{display:flex;flex-direction:column;gap:2px}
+  .scope-title{font-size:15px;color:var(--ink);font-weight:600}
+  .scope-desc{font-size:13px;color:var(--dim)}
+
+  /* ── Дії: замінити (первинна) / скасувати ── */
+  .actions{display:flex;flex-direction:column;gap:10px;padding:16px 0 20px}
+
+  /* ── Нижня панель: липне до низу в'юпорта, поки макет у кадрі ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html" aria-current="page">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <strong>успіх</strong> · <a href="replace-ingredient-empty.html">порожній</a> · <a href="replace-ingredient-done.html">готово</a></p>
+
+<!-- ══ Макет екрана ══ -->
+<div class="device">
+
+<header>
+  <div>
+    <h1>Замінити інгредієнт</h1>
+    <p class="context">Паста з баклажаном · сметана — 100 г</p>
+  </div>
+</header>
+
+<main>
+
+  <section class="search" aria-labelledby="z-search">
+    <h2 id="z-search" class="vh">Пошук інгредієнта для заміни</h2>
+    <form role="search" action="replace-ingredient.html" method="get">
+      <label for="q" class="vh">Пошук за назвою інгредієнта</label>
+      <input type="search" id="q" name="q" value="йогурт" placeholder="Назва інгредієнта…">
+    </form>
+  </section>
+
+  <!-- Три результати — усе, що знає застосунок про заміну сметани. Обраний
+       (грецький йогурт) несе aria-pressed="true" і рамку ink; тап по будь-
+       якому іншому результату в реальному продукті обрав би його натомість. -->
+  <section class="found" aria-labelledby="z-found">
+    <h2 id="z-found">Знайдено</h2>
+    <ul class="results">
+      <li>
+        <article class="result">
+          <button type="button" aria-pressed="true">
+            <span class="result-name">грецький йогурт</span>
+            <span class="result-meta">~60 ккал/100 г · молочне та яйця</span>
+          </button>
+        </article>
+      </li>
+      <li>
+        <article class="result">
+          <button type="button" aria-pressed="false">
+            <span class="result-name">йогурт натуральний</span>
+            <span class="result-meta">~66 ккал/100 г · молочне та яйця</span>
+          </button>
+        </article>
+      </li>
+      <li>
+        <article class="result">
+          <button type="button" aria-pressed="false">
+            <span class="result-name">кефір</span>
+            <span class="result-meta">~52 ккал/100 г · молочне та яйця</span>
+          </button>
+        </article>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Обсяг — останній крок, під результатами (sitemap.md: «the scope choice
+       is the last step, never the first — nothing changes until it is made»).
+       Три варіанти = три різні об'єкти (flows.md, «The three scopes of a swap»). -->
+  <section class="scope-section" aria-labelledby="z-scope">
+    <h2 id="z-scope">Обсяг заміни</h2>
+    <form>
+      <fieldset style="border:none;margin:0;padding:0">
+        <legend class="vh">Обрати обсяг заміни</legend>
+        <ul class="scope">
+          <li>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="once" checked>
+              <span class="scope-body">
+                <span class="scope-title">Лише цього разу</span>
+                <span class="scope-desc">рецепт не зміниться; список покупок купить йогурт</span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="always">
+              <span class="scope-body">
+                <span class="scope-title">Завжди</span>
+                <span class="scope-desc">рецепт буде відредаговано</span>
+              </span>
+            </label>
+          </li>
+          <li>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="copy">
+              <span class="scope-body">
+                <span class="scope-title">Як копію</span>
+                <span class="scope-desc">з'явиться другий рецепт — наприклад, „Паста з баклажаном (легка)“</span>
+              </span>
+            </label>
+          </li>
+        </ul>
+      </fieldset>
+    </form>
+  </section>
+
+  <section class="actions" aria-labelledby="z-actions">
+    <h2 id="z-actions" class="vh">Дії</h2>
+    <a class="btn btn-primary" href="replace-ingredient-done.html">Замінити</a>
+    <a class="btn" href="recipe.html">Скасувати</a>
+  </section>
+
+</main>
+
+<!-- Нижня панель: жоден пункт не aria-current — Replace ingredient не один
+     із чотирьох табів (Library · Cook list · Grocery list · Account), це
+     контекстний екран, куди приходять з Recipe (sitemap.md, навігація).
+     Рецепти / Список готування / Список покупок лишаються <a> — вони в
+     інвентарі 17 сторінок _conventions.md і мають куди вести. Акаунт, як і
+     на library.html, лишається <span> без href: сторінка account.html поза
+     інвентарем цього кроку, а посилання на ще ненамальований екран
+     заборонене конвенцією («не мертве посилання», §2). -->
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

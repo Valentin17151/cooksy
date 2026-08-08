@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Recipe · чернетка</title>
+
+<!--
+  ЕКРАН: Recipe (Рецепт) · стан чернетки, «Борщ із квасолею».
+  Структура — та сама сторінка, що recipe.html (_conventions.md §4: «Структура
+  між станами не змінюється. Відрізняється тільки вміст <main>»). Різниця:
+  банер чернетки одразу під шапкою, і два позначені рядки інгредієнтів,
+  підняті вгору списку, з рамкою.
+
+  МІСЦЕ У ФЛОУ. Те саме, що на recipe.html (J-0, J-3) — чернетка лишається
+  повністю робочим рецептом: масштабується, читається, готується з нею.
+  Єдине, чого чернетка не дає зробити — «Додати в список готування» без
+  застороги, бо кількості не підтверджені (sitemap.md, рядок «Recipe» у
+  «Every screen's states»: «It cannot be shopped for until it is [formatted]»
+  для варіанту без рядків; тут — м'якший випадок, рядки є, частина позначена).
+
+  ЧОМУ ЧЕРНЕТКА: ТРИ ПРИЧИНИ ЗА E1 (sitemap.md, E1 · Recipe → поле draft),
+  ПОКАЗАНА ДРУГА.
+    1. «Never formatted» — збережено офлайн як текст, без рядків інгредієнтів.
+       Текст на екрані: «Not formatted yet. It cannot be shopped for until it is».
+    2. «Formatted, but rows are flagged» — відформатовано, але частина рядків
+       із сумнівом. Текст: «Some amounts are unconfirmed» → тут перекладено як
+       «Чернетка — деякі кількості не підтверджені». ЦЮ причину показує сторінка.
+    3. «Formatted while you were away» — черга дообробила рецепт без людини.
+       Текст: «This was processed while you were offline. Check it». За умовою
+       завдання цей рядок НЕ виводиться тут — він належить іншому сценарію
+       (рецепт, дописаний офлайн-чергою), а не борщу, чиї рядки просто
+       не пройшли розпізнавання при вставці.
+
+  ДЖЕРЕЛА ТЕКСТУ. Назва, час і ккал/100 г — library.html («Борщ із квасолею
+  · 1 год 20 хв · ~70 ккал/100 г»); ккал/порцію — приклад до формули CLAUDE.md
+  §5.3 при орієнтовній порції 400 г. Інгредієнти й причини позначок — з
+  CLAUDE.md §5.2 («unrecognised ingredients» → «інгредієнт не розпізнано»;
+  «vague amounts» → «нечітка кількість»). Немає рядка підрецепта: борщ у
+  наборі даних _conventions.md §3 не посилається на іншу страву — сторонні
+  підрецепти не вигадуються.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  /*
+    Дерево вайрфрейм-навігації. Риштування, не продукт: стоїть поза макетом,
+    однакове на кожній сторінці. Розділи — п'ять намірів із sitemap.md;
+    екрани і стани — інвентар _conventions.md. Вузол стає посиланням,
+    щойно його сторінка існує; до того — сірий span.
+  */
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}          /* розділ-намір */
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* Колонка стану + макет екрана, поруч із деревом. */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  /* Макет екрана — «пристрій» */
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: лише назва страви — це і є заголовок екрана ── */
+  header{
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+
+  main{padding:0 16px}
+
+  /* ── Банер чернетки: рамка, без кольору (рішення описане в коментарі вище) ── */
+  .draft-banner{
+    margin:14px 0 0;padding:10px 12px;
+    border:1px solid var(--ink);
+    font-size:14px;
+  }
+
+  /* ── Фото страви: підписана заглушка, на всю ширину контенту ── */
+  .hero-photo{
+    width:100%;height:180px;margin-top:14px;
+    border:1px solid var(--line);background:var(--zone);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--dim);font-size:13px;
+  }
+
+  /* ── Порції: єдиний контрол, що не гортається. ── */
+  .portions{
+    position:sticky;top:0;z-index:2;
+    display:flex;align-items:center;gap:10px;
+    margin-top:14px;padding:10px 0;
+    background:var(--paper);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .portions label{font-weight:600;margin-right:auto}
+  .stepper{
+    flex:0 0 44px;width:44px;height:44px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font-size:20px;line-height:1;cursor:pointer;
+  }
+  input[type=number]{
+    width:56px;min-height:44px;padding:4px;
+    border:1px solid var(--line);background:var(--zone);color:var(--ink);
+    font:inherit;text-align:center;
+  }
+
+  .meta-row{margin:0;padding:10px 0;color:var(--dim);font-size:13px;border-bottom:1px solid var(--line)}
+
+  /* ── Секції: ритм спільний для інгредієнтів, кроків ── */
+  main>section{padding:14px 0;border-bottom:1px solid var(--line)}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px}
+  .section-head .meta{margin:0;font-size:13px;color:var(--dim)}
+
+  ul.ingredients{list-style:none;margin:0;padding:0}
+  .ing{padding:10px 0;border-top:1px solid var(--line)}
+  .ing:first-child{border-top:none}
+  .ing-row{margin:0;display:flex;justify-content:space-between;gap:12px}
+  .ing-row .name{color:var(--ink)}
+  .ing-row output,.ing-row .qty{color:var(--ink);white-space:nowrap}
+  .note{margin:4px 0 0;font-size:13px;color:var(--dim)}
+
+  /* Заміна/уточнення — перехід на інший екран, тому <a>, не <button>. */
+  .ing-action{
+    display:inline-flex;align-items:center;
+    min-height:44px;margin-top:2px;
+    color:var(--ink);text-decoration:underline;font-size:14px;
+  }
+
+  /* ── Позначені рядки: рамка, підняті вгору списку (перед звичайними) ── */
+  .ing-flagged{border:1px solid var(--ink);padding:10px 10px;margin-bottom:8px}
+  .ing-flagged.ing{border-top:1px solid var(--ink)} /* межа рамки перекриває загальну рису рядків */
+  .ing-flagged .flag{margin:4px 0 0;font-size:13px;color:var(--ink);font-weight:600}
+
+  ol.steps{margin:0;padding-left:20px}
+  ol.steps li{padding:6px 0}
+
+  /* ── Дії екрана: одна колонка ── */
+  .actions{display:flex;flex-direction:column;gap:10px;padding:16px 0 20px;margin:0}
+  .actions .btn{width:100%}
+
+  /* ── Нижня панель: липне до низу в'юпорта, поки макет у кадрі ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html" aria-current="page">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<!-- ══ Стан + макет екрана ══ -->
+<div class="wf-col">
+  <p class="wf-states">Стан: <a href="recipe.html">успіх</a> · <strong>чернетка</strong></p>
+
+  <div class="device">
+
+  <header>
+    <h1>Борщ із квасолею</h1>
+  </header>
+
+  <main>
+
+    <!-- Причина 2 з трьох за E1 (sitemap.md) — див. коментар угорі файлу. -->
+    <p class="draft-banner">Чернетка — деякі кількості не підтверджені</p>
+
+    <p class="hero-photo">фото страви</p>
+
+    <form class="portions" aria-label="Кількість порцій">
+      <label for="servings">Порції</label>
+      <button type="button" class="stepper" aria-label="Зменшити кількість порцій">−</button>
+      <input type="number" id="servings" name="servings" value="6" min="1" inputmode="numeric">
+      <button type="button" class="stepper" aria-label="Збільшити кількість порцій">+</button>
+    </form>
+
+    <p class="meta-row">1 год 20 хв · ~70 ккал/100 г · ~280 ккал на порцію (400 г)</p>
+
+    <section aria-labelledby="z-ing">
+      <div class="section-head">
+        <h2 id="z-ing">Інгредієнти</h2>
+        <p class="meta">на 6 порцій</p>
+      </div>
+
+      <ul class="ingredients">
+        <!-- Позначені рядки — вгорі списку, з рамкою (_conventions.md §5). -->
+        <li class="ing ing-flagged">
+          <p class="ing-row"><span class="name">копчена паприка</span> <output for="servings">2 г</output></p>
+          <p class="flag">інгредієнт не розпізнано</p>
+          <a class="ing-action" href="fix-ingredient.html">Уточнити</a>
+        </li>
+        <li class="ing ing-flagged">
+          <p class="ing-row"><span class="name">зелень</span> <span class="qty">жменя зелені</span></p>
+          <p class="flag">нечітка кількість</p>
+          <a class="ing-action" href="fix-ingredient.html">Уточнити</a>
+        </li>
+
+        <li class="ing">
+          <p class="ing-row"><span class="name">буряк</span> <output for="servings">3 шт</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">капуста</span> <output for="servings">300 г</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">квасоля</span> <output for="servings">250 г</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">картопля</span> <output for="servings">4 шт</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">помідори</span> <output for="servings">3 шт</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">часник</span> <output for="servings">2 шт</output></p>
+        </li>
+        <li class="ing">
+          <p class="ing-row"><span class="name">цибуля</span> <output for="servings">2 шт</output></p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Немає рядка підрецепта тут: борщ у наборі даних _conventions.md §3
+         не посилається на іншу страву. Посилання — опційне поле (§5.2.2),
+         і його відсутність не потребує заглушки (те саме правило, що для
+         груп інгредієнтів §5.2.1: з'являється лише там, де справді є). -->
+
+    <section aria-labelledby="z-steps">
+      <h2 id="z-steps">Кроки</h2>
+      <ol class="steps">
+        <li>Наріжте буряк, капусту, картоплю й помідори; часник і цибулю дрібно посічіть.</li>
+        <li>Обсмажте цибулю з часником, додайте буряк і томіть до м'якості.</li>
+        <li>Викладіть овочі й квасолю у бульйон, варіть до готовності картоплі.</li>
+        <li>Приправте копченою паприкою, посоліть за смаком і подавайте з зеленню.</li>
+      </ol>
+    </section>
+
+    <p class="actions">
+      <a class="btn" href="cook-list.html">Додати в список готування</a>
+      <button type="button" class="btn">Поділитися</button>
+      <a class="btn" href="recipe-editor.html">Редагувати</a>
+    </p>
+
+  </main>
+
+  <footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+  </div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

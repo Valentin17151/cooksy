@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Replace ingredient · готово</title>
+
+<!--
+  ЕКРАН: Replace ingredient (Замінити інгредієнт) · стан «готово».
+
+  МІСЦЕ У ФЛОУ (flows.md · J-0, рядки 52–58): «Once, always, or as a copy?»
+  → «just this time» → «Carried on the cook list entry only». Це термінальний
+  екран «вийшло» — структурно інший за базову сторінку (_conventions.md §4,
+  «База — це не те саме, що ✓ в колонці «успіх»»), тому h1 тут — не назва
+  екрана, а підтвердження результату.
+
+  ЗВІДКИ ТЕКСТИ:
+  - Наслідок «лише цього разу» — sitemap.md, таблиця «Scope»: "This
+    occasion only → A substitution on the cook list entry. The recipe is
+    untouched; the grocery list buys yoghurt" і flows.md, «The three scopes
+    of a swap»: "Only this occasion → A substitution stored on the cook
+    list entry. The recipe is untouched, and the grocery list buys yoghurt".
+  - Блок «Інші обсяги» — flows.md · States: "Once / always / as a copy.
+    Three visible outcomes, so a swap never quietly does more than asked."
+    Обраний обсяг («лише цього разу») уже показаний вище як факт; тут —
+    два НЕ обраних, сірим, щоб усі три наслідки лишались видимими одразу,
+    а не тільки той, що стався. Формулювання — з тієї ж таблиці: «always
+    → Nothing new — an edit to an ingredient row like any other» і «as a
+    copy → A second recipe. Pancakes, and pancakes the diet way», перенесені
+    на контекст цього рецепта (Паста з баклажаном).
+
+  СТРУКТУРА: header/main/footer>nav і одна <h1> — як на решті сторінок
+  екрана; відрізняється вміст main і сам h1, бо це інший, термінальний стан.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  /*
+    Дерево вайрфрейм-навігації. Риштування, не продукт: стоїть поза макетом,
+    однакове на кожній сторінці. Розділи — п'ять намірів із sitemap.md;
+    екрани і стани — інвентар _conventions.md. Вузол стає посиланням,
+    щойно його сторінка існує; до того — сірий span.
+  */
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}          /* розділ-намір */
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* ── Колонка макета: смужка станів над «пристроєм», обидва — фіксована ширина ── */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  /* Макет екрана — «пристрій» */
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: підтвердження, не назва екрана (термінальний стан) ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .context{margin:3px 0 0;font-size:13px;color:var(--dim)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink);color:var(--paper);font-weight:600}
+
+  main{padding:0 16px}
+
+  /* ── Результат: рядок заміни + пояснення ── */
+  section.result{padding:16px 0;border-bottom:1px solid var(--line)}
+  .swap-line{margin:0 0 8px;font-size:17px;font-weight:600}
+  .swap-explain{margin:0;color:var(--ink);line-height:1.5}
+
+  /* ── Тихий блок «Інші обсяги»: сірим, щоб не змагався з фактом угорі ── */
+  section.other-scopes{
+    margin:14px 0;padding:12px 14px;
+    background:var(--zone);border:1px solid var(--line);
+  }
+  section.other-scopes h2{font-size:13px;color:var(--dim);font-weight:600;margin:0 0 8px}
+  section.other-scopes ul{margin:0;padding-left:18px;color:var(--dim);font-size:13px}
+  section.other-scopes li{margin:6px 0}
+  section.other-scopes strong{color:var(--dim);font-weight:600}
+
+  .actions{display:flex;flex-direction:column;gap:10px;padding:16px 0 20px}
+
+  /* ── Нижня панель: липне до низу в'юпорта, поки макет у кадрі ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html" aria-current="page">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <a href="replace-ingredient.html">успіх</a> · <a href="replace-ingredient-empty.html">порожній</a> · <strong>готово</strong></p>
+
+<!-- ══ Макет екрана ══ -->
+<div class="device">
+
+<header>
+  <div>
+    <h1>Замінено цього разу</h1>
+    <p class="context">Паста з баклажаном</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- Факт, що стався: обраний обсяг був «лише цього разу». -->
+  <section class="result" aria-labelledby="z-result">
+    <h2 id="z-result" class="vh">Що змінилося</h2>
+    <!-- Стрілку-символ прибрано за контрактом (_conventions.md §1: замість іконки — слово). -->
+    <p class="swap-line">грецький йогурт замість сметани</p>
+    <p class="swap-explain">Рецепт не змінено. У списку готування цей запис тепер із йогуртом, і список покупок купить йогурт.</p>
+  </section>
+
+  <!-- Тихий блок: два обсяги, які НЕ обрали, сірим і нижче за факт вгорі.
+       flows.md · States: «three visible outcomes, so a swap never quietly
+       does more than asked» — усі три наслідки видимі одночасно, навіть
+       коли стався лише один із них. -->
+  <section class="other-scopes" aria-labelledby="z-other">
+    <h2 id="z-other">Інші обсяги</h2>
+    <ul>
+      <li><strong>Завжди</strong> — рецепт «Паста з баклажаном» був би відредагований, і сметана зникла б із нього назавжди.</li>
+      <li><strong>Як копію</strong> — з'явився б другий рецепт, наприклад «Паста з баклажаном (легка)», а оригінал лишився б без змін.</li>
+    </ul>
+  </section>
+
+  <section class="actions" aria-labelledby="z-actions">
+    <h2 id="z-actions" class="vh">Дії</h2>
+    <a class="btn btn-primary" href="recipe.html">До рецепта</a>
+    <a class="btn" href="cook-list.html">До списку готування</a>
+  </section>
+
+</main>
+
+<!-- Нижня панель: жоден пункт не aria-current — Replace ingredient не один
+     із чотирьох табів (Library · Cook list · Grocery list · Account), це
+     контекстний екран, куди приходять з Recipe. Рецепти / Список готування
+     / Список покупок лишаються <a>; Акаунт, як і на library.html, лишається
+     <span> без href — account.html поза інвентарем цього кроку. -->
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

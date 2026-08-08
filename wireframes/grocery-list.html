@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Grocery list · успіх</title>
+
+<!--
+  ЕКРАН: Grocery list (Список покупок) · базовий стан — найбагатша сторінка вайрфреймів.
+
+  МІСЦЕ У ФЛОУ:
+  - J-0 (flows.md), фінал головного циклу: Cook list → «Генерувати список» →
+    (Grocery list) → тик по рядках → «Усе в домі» (див. grocery-list-done.html).
+    Це той самий екран, куди веде і J-3 (зміна кількості порцій розповсюджується сюди).
+  - J-4: єдиний екран, яким користуються ПРЯМО в магазині — прохід за проходом,
+    тому порядок секцій нижче фіксований і не редагується користувачем (§8 брифу).
+  - H-1: «відкрити зведене число і побачити, з чого воно складається» — це
+    <details> на кожному злитому рядку. Найменш підтверджена, але найважливіша
+    гіпотеза продукту (sitemap.md · E8).
+  - S-2: «Експортувати текстом» — віддати список тому, хто не користується Cooksy.
+
+  СПІЛЬНИЙ СЦЕНАРІЙ (8 серпня, узгоджено з cook-list.html):
+    Паста з баклажаном ×4 (заміна: сметана → грецький йогурт) · Сирники ×2 ·
+    Курка з лимоном і рисом ×4 · Борщ із квасолею ×6 (чернетка, є позначені рядки) ·
+    Плов від мами ×4 (чернетка БЕЗ жодного рядка).
+  «Плов від мами» — сьомий пункт понад базовий набір страв _conventions.md.
+  Потрібен окремий рецепт саме для стану «чернетка без рядків» (placeholder-рядок,
+  E8/flows.md·J-0), відмінного від Борщу, який ілюструє «чернетка з позначеними
+  рядками» (частина рядків підтверджена, частина — ні). Один набір даних не мав
+  дублювати цю відмінність, тож дата-сет розширено свідомо, а не помилково.
+
+  ЗОНИ (structure unchanged across states — _conventions.md §4):
+  header — назва екрана + «Минулі списки» (контрол рівня екрана, завжди присутній,
+    ідентичний на всіх 4 сторінках). Це НЕ окремий екран — sitemap.md: «the past-list
+    switcher is a control in the header» — тому тут <button>, а не <a>.
+  main — дата+джерело списку (посилання на cook-list.html, зв'язок E5↔E7) →
+    п'ять секцій-проходів магазину → рядок-чернетка Плову (поза секціями) →
+    форма «Додати вручну» → дія «Експортувати текстом».
+
+  ПРОХОДИ — підмножина фіксованого порядку з _conventions.md (10 проходів),
+  відносний порядок збережено, невживані пропущено:
+    овочі та фрукти · м'ясо і риба · молочне та яйця · бакалія · інше.
+
+  РЯДКИ — усі види разом на базовій сторінці (_conventions.md §4, «Одна сторінка —
+  один стан»): звичайний · злиття з розкриттям · несумісні одиниці · заміна,
+  що дійшла до списку · рядок зі збільшеною кількістю (сам знявся) · відмічені,
+  утоплені вниз · рядок із прапорцем у «інше» · placeholder чернетки.
+
+  Число рядків підібрано навмисно: 5+1+3+4+1 = 14 позицій, 5 страв — ті самі
+  цифри, що й на grocery-list-done.html («14 позицій · 5 страв»), для внутрішньої
+  узгодженості сценарію між станами.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* Смужка станів + колонка макета, задані оркестратором. */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:#767676}
+  .wf-states a{color:#222}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: незмінна на всіх 4 станах — лише h1 + контрол рівня екрана ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn-block{width:100%}
+
+  main{padding:0 16px}
+
+  .meta{font-size:13px;color:var(--dim);margin:0}
+  p.source{padding:12px 0;border-bottom:1px solid var(--line);margin:0}
+  p.source a{color:var(--ink)}
+
+  /* ── Секції-проходи ── */
+  section.aisle{padding:14px 0;border-bottom:1px solid var(--line)}
+  section.aisle h2{margin:0 0 8px}
+
+  ul.lines{list-style:none;margin:0;padding:0}
+  ul.lines>li{border-bottom:1px solid var(--line)}
+  ul.lines>li:last-child{border-bottom:none}
+
+  ul.lines label{
+    display:flex;align-items:center;gap:10px;
+    min-height:44px;padding:10px 2px;
+    cursor:pointer;
+  }
+  ul.lines input[type=checkbox]{width:20px;height:20px;flex:0 0 20px}
+
+  li.checked label{color:var(--dim)}
+
+  /* Розкриття зведеного рядка — з яких рецептів і скільки (H-1). */
+  details{margin:0 0 10px 30px;font-size:13px}
+  details summary{cursor:pointer;color:var(--ink)}
+  details summary::marker{color:var(--dim)}
+  ul.breakdown{list-style:none;margin:6px 0 0;padding:0;color:var(--dim)}
+  ul.breakdown li{padding:2px 0}
+
+  /* Позначка «кількість змінилась» і прапорець нерозпізнаного рядка. */
+  p.note,p.flag{margin:0 0 10px 30px;font-size:13px;color:var(--dim)}
+  .flagged{padding-bottom:10px}
+  .flagged .btn{margin-left:30px}
+
+  /* ── Тихий індикатор офлайн-стану (grocery-list-offline.html) ── */
+  p.sync{
+    margin:0;padding:10px 16px;
+    background:var(--zone);color:var(--dim);font-size:13px;
+    border-bottom:1px solid var(--line);
+  }
+
+  /* ── Рядок-чернетка без жодного інгредієнта — поза секціями, без чекбокса ── */
+  .draft-box{
+    margin:16px 0;padding:14px;
+    border:1px solid var(--ink);
+  }
+  .draft-box p{margin:0}
+  .draft-box .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+  /* ── Форма «Додати вручну» ── */
+  section.manual{padding:14px 0;border-bottom:1px solid var(--line)}
+  section.manual h2{margin:0 0 8px}
+  form.manual-form{display:flex;gap:8px}
+  form.manual-form input[type=text]{
+    flex:1 1 auto;min-height:44px;padding:10px 12px;
+    border:1px solid var(--line);background:var(--zone);color:var(--ink);font:inherit;
+  }
+  form.manual-form input[type=text]::placeholder{color:var(--dim)}
+
+  section.actions{padding:14px 0}
+
+  /* ── Стан «готово» ── */
+  .done-summary{padding:14px 0}
+  .exits{display:flex;gap:8px;flex-wrap:wrap;padding:14px 0}
+
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html" aria-current="page">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<div class="wf-col">
+<p class="wf-states">Стан: <strong>успіх</strong> · <a href="grocery-list-empty.html">порожній</a> · <a href="grocery-list-offline.html">офлайн</a> · <a href="grocery-list-done.html">готово</a></p>
+
+<!-- ══ Макет екрана ══ -->
+<div class="device">
+
+<header>
+  <h1>Список покупок</h1>
+  <!-- Не окремий екран: та сама сторінка, перемикач розділу в шапці (sitemap.md · ▸ Grocery list). -->
+  <button type="button" class="btn">Минулі списки</button>
+</header>
+
+<main>
+
+  <!-- Дата й джерело списку. Посилання назад до Cook list — зв'язок E5↔E7
+       у sitemap.md: «from a grocery list you reach the cook list that produced it». -->
+  <p class="source">
+    <span class="meta">8 серпня · <a href="cook-list.html">зі списку готування</a></span>
+  </p>
+
+  <!-- (а) звичайний рядок · (б) злиття з розкриттям · (в) несумісні одиниці -->
+  <section class="aisle" aria-labelledby="z-veg">
+    <h2 id="z-veg">Овочі та фрукти</h2>
+    <ul class="lines">
+
+      <!-- (а) звичайний рядок -->
+      <li>
+        <label><input type="checkbox"> баклажани — 4 шт</label>
+      </li>
+
+      <!-- (б) злиття з розкриттям — аудит H-1: з яких рецептів і скільки -->
+      <li>
+        <label><input type="checkbox"> цибуля — 3 шт</label>
+        <details>
+          <summary>з 2 рецептів</summary>
+          <ul class="breakdown">
+            <li>Паста з баклажаном ×4 — 1 шт</li>
+            <li>Борщ із квасолею ×6 — 2 шт</li>
+          </ul>
+        </details>
+      </li>
+
+      <!-- (в) несумісні одиниці — E8: «200 г tomatoes + 3 pcs tomatoes» ніколи
+           не зводяться в одне число, показуються поруч. -->
+      <li>
+        <label><input type="checkbox"> помідори — 800 г + 3 шт</label>
+        <details>
+          <summary>з 2 рецептів</summary>
+          <ul class="breakdown">
+            <li>Паста з баклажаном ×4 — 800 г</li>
+            <li>Борщ із квасолею ×6 — 3 шт</li>
+          </ul>
+        </details>
+      </li>
+
+      <li>
+        <label><input type="checkbox"> часник — 6 шт</label>
+      </li>
+
+      <li>
+        <label><input type="checkbox"> лимон — 2 шт</label>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- (д) змінений рядок -->
+  <section class="aisle" aria-labelledby="z-meat">
+    <h2 id="z-meat">М'ясо і риба</h2>
+    <ul class="lines">
+
+      <!-- sitemap.md · «What propagates»: кількість на записі cook list зросла →
+           рядок оновлюється І сам знімає позначку — «amount went up unchecks
+           the line, and says why». Було 400 г (×2), стало 800 г (×4). -->
+      <li>
+        <label><input type="checkbox"> курячі стегна — 800 г</label>
+        <p class="note">кількість зросла (було 400 г) — позначку знято · Курка з лимоном і рисом ×4</p>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- (г) заміна, що дійшла до списку -->
+  <section class="aisle" aria-labelledby="z-dairy">
+    <h2 id="z-dairy">Молочне та яйця</h2>
+    <ul class="lines">
+
+      <li>
+        <label><input type="checkbox"> яйця — 6 шт</label>
+      </li>
+
+      <!-- sitemap.md · «What propagates»: заміна на записі cook list (просто
+           цього разу — сметана → грецький йогурт) теж оновлює список: «A swap
+           that did not reach the list would put the wrong thing in the trolley». -->
+      <li>
+        <label><input type="checkbox"> грецький йогурт — 100 г</label>
+        <details>
+          <summary>з 1 рецепта</summary>
+          <ul class="breakdown">
+            <li>Паста з баклажаном ×4 · заміна цього разу (замість сметани)</li>
+          </ul>
+        </details>
+      </li>
+
+      <li>
+        <label><input type="checkbox"> вершки — 200 мл</label>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- (е) відмічені рядки, утоплені вниз секції -->
+  <section class="aisle" aria-labelledby="z-bakalia">
+    <h2 id="z-bakalia">Бакалія</h2>
+    <ul class="lines">
+
+      <li>
+        <label><input type="checkbox"> борошно — 200 г</label>
+      </li>
+
+      <li>
+        <label><input type="checkbox"> олія — 30 мл</label>
+      </li>
+
+      <!-- Відмічені — пригашені (#767676) і в кінці DOM-порядку секції, тобто
+           внизу списку продуктів, що ще лишились. -->
+      <li class="checked">
+        <label><input type="checkbox" checked> спагеті — 400 г</label>
+      </li>
+      <li class="checked">
+        <label><input type="checkbox" checked> рис — 400 г</label>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- (ж) рядок із прапорцем у «інше» -->
+  <section class="aisle" aria-labelledby="z-other">
+    <h2 id="z-other">Інше</h2>
+    <ul class="lines">
+
+      <!-- E8: рядок без канонічного інгредієнта не має ні ідентичності для
+           злиття, ні проходу для сортування — «stands as its own line, in
+           OTHER, carrying its flag forward. It is never dropped and never
+           guessed at.» Купується як текст, навіть нерозпізнаний. -->
+      <!-- ПРО ЧИСЛА (рішення інтеграції 8 серпня): у рецепті й на «Уточнити
+           інгредієнт» паприка — «2 г», бо введені людиною кількості ніколи
+           не округлюються (правило округлення _conventions.md §3 стосується
+           МАСШТАБОВАНИХ значень). Рядок списку покупок — злитий і округлений
+           за величиною (до 100 — кратно 5): тому тут «5 г», а в розкритті
+           нижче видно непідфарбований внесок рецепта — «Борщ ×6 — 2 г».
+           Аудит H-1: зведене число завжди розкривається до своїх доданків. -->
+      <li class="flagged">
+        <label><input type="checkbox"> копчена паприка — 5 г</label>
+        <details>
+          <summary>з 1 рецепта</summary>
+          <ul class="breakdown">
+            <li>Борщ із квасолею ×6 — 2 г</li>
+          </ul>
+        </details>
+        <p class="flag">інгредієнт не розпізнано · Борщ із квасолею ×6</p>
+        <a class="btn" href="fix-ingredient.html">Уточнити</a>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- (з) placeholder чернетки — поза секціями проходів, без чекбокса.
+       E8 / flows.md·J-0: «Contributing nothing must never look like
+       contributing correctly.» Плов від мами — чернетка без жодного рядка:
+       все ще з'являється в списку, але як рядок, який неможливо відмітити. -->
+  <section aria-labelledby="z-draft">
+    <h2 id="z-draft" class="vh">Чернетка без рядків</h2>
+    <div class="draft-box">
+      <p><strong>Плов від мами</strong> — інгредієнти ще невідомі. У покупках його немає.</p>
+      <div class="actions">
+        <a class="btn" href="recipe-editor.html">Відформатувати зараз</a>
+        <!-- «Додати потрібне вручну» веде до форми нижче тим самим екраном —
+             без JS єдиний спосіб це зробити — перехід на якір. -->
+        <a class="btn" href="#manual-add">Додати потрібне вручну</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="manual" aria-labelledby="z-manual">
+    <h2 id="z-manual">Додати вручну</h2>
+    <form class="manual-form" id="manual-add">
+      <label for="manual-item" class="vh">Назва товару</label>
+      <input type="text" id="manual-item" name="item" placeholder="Пакети для сміття, кава…">
+      <button type="button" class="btn">Додати</button>
+    </form>
+  </section>
+
+  <!-- S-2: одна дія, знімок-текст, а не сесія — «the recipient reads it,
+       and nothing they do comes back» (sitemap.md · E7). -->
+  <section class="actions" aria-labelledby="z-actions">
+    <h2 id="z-actions" class="vh">Дії зі списком</h2>
+    <button type="button" class="btn btn-block">Експортувати текстом</button>
+  </section>
+
+</main>
+
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html" aria-current="page">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

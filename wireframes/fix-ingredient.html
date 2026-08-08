@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Fix ingredient · успіх</title>
+
+<!--
+  ЕКРАН: Fix ingredient (Уточнити інгредієнт) · базовий стан = стан «успіх».
+  JOBS (sitemap.md, «▸ Fix ingredient — J-3, E-2 · P-1»):
+    J-3 — готування на точну кількість людей: конвертація мл→г і шт→г не
+      працює без густини / ваги штуки, і рецепт застряє саме там, де цих
+      даних бракує.
+    E-2 — бути уважним щодо їжі без технічності: це рівно той момент, де
+      технічний продукт показав би базу даних, а цей — ставить одне питання.
+
+  МІСЦЕ У ФЛОУ. Reached from three places (sitemap.md, «Every screen's
+  states» · рядок Fix ingredient): флагований рядок у редакторі рецепта,
+  на екрані Рецепт, або рядок списку покупок, що впав у прохід «інше».
+  Ця сторінка симулює третій вхід — flows.md J-0, гілка
+  qFlag «Did a line land in OTHER with a flag?» веде у fix «Fix ingredient».
+  Рядок «копчена паприка — 2 г» з рецепта «Борщ із квасолею» не розпізнався
+  при генерації списку покупок і впав у «інше» з прапорцем.
+  Повертає туди, звідки прийшли (sitemap.md: «it returns to whichever one
+  it came from») — тут це grocery-list.html. Обидві дії, «Зберегти» і
+  «Скасувати», ведуть на grocery-list.html: перша фіксує відповідь, друга
+  лишає рядок як є, з тим самим прапорцем (flows.md J-0: «Buy it anyway,
+  the text is still on the line» — деградує, а не блокує).
+
+  ЩО ПИШЕ ЦЕЙ ЕКРАН (sitemap.md · E15 «Personal ingredient»):
+  Відповідь створює персональний інгредієнт — запис, що або накладається
+  на спільний (E3), або, коли такого запису немає, сам ним стає. Чотири
+  правила E15, застосовані тут:
+    1. Ваше значення завжди перемагає довідник на читанні.
+    2. Відповіли раз — застосовується всюди, наступний рецепт з тим самим
+       інгредієнтом більше не питає.
+    3. Це не покидає пристрій зі спільним рецептом — конвертація вже
+       сталася до цього моменту, спільний рецепт бачить лише грами.
+    4. Без відповіді інгредієнт впав би в прохід «інше» — тому в формі
+       нижче прохід уже переведено на «трави і спеції» свідомо, не
+       лишений на дефолті. Див. коментар біля <select>.
+
+  Контекстний рядок під h1 — застосування E2 («бути уважним без
+  технічності») на цьому екрані: показуємо рядок так, як його написав
+  автор рецепта, — «копчена паприка — 2 г», а не абстрактний ідентифікатор
+  рядка. Людина бачить точно, що саме зараз уточнює.
+
+  НИЖНЯ ПАНЕЛЬ. Усі чотири пункти — <a> (після інтеграції 8 серпня це так
+  на всіх сторінках), і жоден не має aria-current: Fix ingredient — контекстний
+  екран без власного «дому» в панелі (sitemap.md: «There is no path to
+  Fix ingredient that does not start at a row that needs fixing» — і симетрично
+  немає одного шляху звідси, який завжди починається з одного й того ж
+  таба). Панель тут — це рівно чотири виходи назад у продукт, не поточна
+  позиція в ньому.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  /*
+    Дерево вайрфрейм-навігації. Риштування, не продукт: стоїть поза макетом,
+    однакове на кожній сторінці. Розділи — п'ять намірів із sitemap.md;
+    екрани і стани — інвентар _conventions.md. Вузол стає посиланням,
+    щойно його сторінка існує; до того — сірий span.
+  */
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}          /* розділ-намір */
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* ── Колонка макета: підпис стану над «пристроєм» ── */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  /* Макет екрана — «пристрій» */
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: лише назва екрана — керувань рівня екрана тут немає ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn.primary{background:var(--ink);color:var(--paper)}
+
+  main{padding:0 16px}
+
+  /* ── Контекст: рядок, який зараз уточнюємо, показаний як його написали ── */
+  .context{
+    margin:14px 0;padding:12px 14px;
+    background:var(--zone);border:1px solid var(--line);
+    color:var(--ink);
+  }
+
+  /* ── Розбивка секцій усередині main ── */
+  main>section{padding:14px 0;border-bottom:1px solid var(--line)}
+  main>section:last-of-type{border-bottom:0}
+  main>section h2{margin:0 0 10px}
+
+  /* ── Пошук по відомих інгредієнтах ── */
+  .search{padding:12px 0;border-bottom:1px solid var(--line)}
+  input[type=search]{
+    width:100%;min-height:44px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:0;
+    background:var(--zone);color:var(--ink);font:inherit;
+  }
+
+  /* ── «Схоже на» — результати-кнопки, жоден не обраний ── */
+  ul.matches{list-style:none;margin:0;padding:0}
+  ul.matches>li{margin:0 0 8px}
+  ul.matches>li:last-child{margin:0}
+  ul.matches button{
+    width:100%;min-height:44px;padding:10px 12px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    font:inherit;text-align:left;cursor:pointer;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  ul.matches button[aria-pressed=true]{border-color:var(--ink);font-weight:600}
+  ul.matches .meta{color:var(--dim);font-size:13px;font-weight:400}
+
+  p.empty{color:var(--dim);margin:0;padding:6px 0}
+
+  /* ── Розділювач «або» ── */
+  .divider{
+    margin:0;padding:10px 0;text-align:center;
+    color:var(--dim);font-size:13px;
+    border-bottom:1px solid var(--line);
+  }
+
+  /* ── Форма «Це щось нове» ── */
+  main>section form p{margin:0 0 14px}
+  label{display:block;margin:0 0 6px;color:var(--ink);font-weight:600;font-size:14px}
+  input[type=text],input[type=number],select{
+    width:100%;min-height:44px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:0;
+    background:var(--paper);color:var(--ink);font:inherit;
+  }
+  fieldset{border:1px solid var(--line);padding:12px;margin:0 0 14px}
+  legend{padding:0 6px;font-size:13px;color:var(--dim)}
+  fieldset p:last-child{margin:0}
+
+  .hint{color:var(--dim);font-size:13px;margin:0 0 16px}
+
+  .actions{display:flex;gap:10px;margin:0 0 16px}
+  .actions .btn{flex:1 1 0}
+
+  /* ── Нижня панель: липне до низу в'юпорта, поки макет у кадрі ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html" aria-current="page">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<!-- ══ Колонка макета: смужка станів + макет екрана ══ -->
+<div class="wf-col">
+<p class="wf-states">Стан: <strong>успіх</strong> · <a href="fix-ingredient-empty.html">порожній</a></p>
+<div class="device">
+
+<header>
+  <h1>Уточнити інгредієнт</h1>
+</header>
+
+<main>
+
+  <!-- Контекст: рядок показаний так, як його написав автор рецепта (E2). -->
+  <p class="context">З рецепта „Борщ із квасолею”: „копчена паприка — 2 г”</p>
+
+  <section class="search" aria-labelledby="z-search">
+    <h2 id="z-search" class="vh">Пошук за назвою інгредієнта</h2>
+    <form role="search" action="fix-ingredient.html" method="get">
+      <label for="q" class="vh">Пошук по відомих інгредієнтах</label>
+      <input type="search" id="q" name="q" value="паприка">
+    </form>
+  </section>
+
+  <section aria-labelledby="z-matches">
+    <h2 id="z-matches">Схоже на</h2>
+    <ul class="matches">
+      <li>
+        <button type="button" aria-pressed="false">
+          паприка мелена
+          <span class="meta">~280 ккал/100 г · трави і спеції</span>
+        </button>
+      </li>
+      <li>
+        <button type="button" aria-pressed="false">
+          перець болгарський
+          <span class="meta">~30 ккал/100 г · овочі та фрукти</span>
+        </button>
+      </li>
+    </ul>
+  </section>
+
+  <p class="divider"><span>або</span></p>
+
+  <section aria-labelledby="z-new">
+    <h2 id="z-new">Це щось нове</h2>
+
+    <!--
+      «Зберегти» пише персональний інгредієнт (E15) і повертає туди,
+      звідки прийшли — тут grocery-list.html. Дія, що змінює дані →
+      <button type=submit> у формі, а не <a> (_conventions.md §2).
+    -->
+    <form action="grocery-list.html" method="post">
+
+      <p>
+        <label for="name">Назва</label>
+        <input type="text" id="name" name="name" value="копчена паприка">
+      </p>
+
+      <p>
+        <!--
+          Дефолт без відповіді — прохід «інше» (E15, правило 4). Тут людина
+          вже свідомо перевела його на «трави і спеції» — саме це рішення
+          цей екран і фіксує.
+        -->
+        <label for="aisle">Прохід у магазині</label>
+        <select id="aisle" name="aisle">
+          <option>овочі та фрукти</option>
+          <option>м'ясо і риба</option>
+          <option>молочне та яйця</option>
+          <option>випічка</option>
+          <option>бакалія</option>
+          <option>заморожене</option>
+          <option selected>трави і спеції</option>
+          <option>напої</option>
+          <option>господарче</option>
+          <option>інше</option>
+        </select>
+      </p>
+
+      <fieldset>
+        <legend>Необов'язково, для точності</legend>
+        <p>
+          <label for="kcal">ккал/100 г</label>
+          <input type="number" id="kcal" name="kcal" inputmode="decimal">
+        </p>
+        <p>
+          <label for="g-pc">г в 1 шт</label>
+          <input type="number" id="g-pc" name="g-pc" inputmode="decimal">
+        </p>
+        <p>
+          <label for="g-ml">г в 1 мл</label>
+          <input type="number" id="g-ml" name="g-ml" inputmode="decimal">
+        </p>
+      </fieldset>
+
+      <p class="hint">Відповісте раз — застосується всюди. Ваше значення завжди перемагає довідник.</p>
+
+      <p class="actions">
+        <button type="submit" class="btn primary">Зберегти</button>
+        <a class="btn" href="grocery-list.html">Скасувати</a>
+      </p>
+
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

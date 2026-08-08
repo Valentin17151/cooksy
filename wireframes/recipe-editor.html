@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Recipe editor · успіх</title>
+
+<!--
+  ЕКРАН: Recipe editor (Редактор рецепта) · базовий стан = момент ПІСЛЯ форматування.
+
+  МІСЦЕ У ФЛОУ (flows.md · J-1, sitemap.md · ▸ Recipe editor). Це НЕ флоу J-0 (головний
+  цикл "keep → decide → buy") — редактор туди лише передає керування ("editor →|see flow
+  J-1| qHave" у діаграмі; ASCII-стрілку тут не пишемо, бо вона закривала б цей коментар)
+  і повертається. Порядок дій людини тут — з sitemap.md, розділ
+  "Getting a recipe in": 1 назва → 2 фото → 3 текст → 4 модель форматує → 5 редагування
+  пропозицій. Ця сторінка — крок 5: людина вставила текст (мама наговорила плов у
+  месенджер), мережа спрацювала, модель повернула пропозиції, і зараз їх видно й можна
+  правити. У flows.md це вузол "proposed" → "review" (Edit anything: text, tags, rows,
+  the count).
+
+  "ОДИН ЕКРАН, ЧОТИРИ ВХОДИ" (sitemap.md · ▸ Recipe editor): review і edit — той самий
+  екран для всіх чотирьох випадків:
+    1. Текст вставлено → пропозиції моделі, сумніви перші        ← ЦЯ сторінка
+    2. Нічого не вставлено → порожній рецепт, вручну              → recipe-editor-empty.html
+    3. Змінюється збережений рецепт → ті самі рядки, без сумнівів → (стан на потім)
+    4. Виправляється позначений рядок → той самий екран, проскрольований до нього
+  Тому каркас цієї сторінки — той самий, що буде правити і зберігати вже існуючий рецепт;
+  тут показано найскладніший випадок — щойно відформатований текст із двома сумнівами.
+
+  ДАНІ (наскрізна історія для цих чотирьох файлів, за завданням, окрема від спільного
+  набору шести страв у _conventions.md — цей рядок екранів поза J-0 і має власний сюжет):
+  «Плов від мами» — рецепт, наговорений мамою в месенджер, вставлений як вільний текст.
+
+  ПРАВИЛА ЗІ SITEMAP.MD / CLAUDE.MD, застосовані тут:
+  - E4 «Capture»: «what the model proposes — formatted steps · tags · ingredient rows ·
+    an estimated portion count. All four are proposals, all four are editable, and rows
+    can be added or deleted outright».
+  - Порядок рядків інгредієнтів — сумніви зверху (CLAUDE.md §5.2: «Anything low-confidence
+    is visibly flagged and sorted to the top»); тут замість іконки-прапорця — слово
+    «Сумнів:» (_conventions.md §1: «Іконок немає. Замість іконки — слово»).
+  - Doubt flag «inferred conversion» (рис) і «vague amount» (барбарис) — обидва зі
+    словника E2 sitemap.md: «doubt flag: unrecognised ingredient · inferred conversion ·
+    missing density · vague amount · detected heading».
+  - «Уточнити» на нечіткому рядку веде на Fix ingredient — sitemap.md: «Reached from a
+    flagged row — in the editor, on the recipe, or from a grocery line that ended up in
+    other».
+  - Save-now-fix-later: рецепт можна зберегти із сумнівами (E4 transient §, sitemap.md
+    рішення 4 серпня «C»: «You can save it now, flags and all... the doubtful rows stay
+    marked on the recipe until you fix them»). Кнопка «Зберегти» веде прямо на recipe.html,
+    без примусового виправлення.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* ── Колонка стану: смужка станів над макетом, той самий стовпчик 390px ── */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  /* Макет екрана — «пристрій» */
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn.primary{border-width:2px;font-weight:600}
+
+  main{padding:16px}
+
+  /* ── Поля форми, загальні ── */
+  .field{margin:0 0 16px}
+  .field label{display:block;font-size:13px;color:var(--dim);margin:0 0 4px}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;min-height:44px;padding:8px 10px;
+    border:1px solid var(--line);border-radius:0;
+    background:var(--paper);color:var(--ink);font:inherit;
+  }
+  textarea{min-height:120px;resize:vertical}
+  .hint{font-size:13px;color:var(--dim);margin:6px 0 0}
+
+  /* ── Фото: підписана заглушка, не зображення (_conventions.md §1) ── */
+  .photo-row{display:flex;align-items:center;gap:12px;margin:0 0 20px}
+  .photo-block{
+    flex:0 0 120px;height:90px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);background:var(--zone);color:var(--dim);font-size:13px;
+  }
+
+  /* ── Секція пропозицій моделі ── */
+  section.proposed{border-top:1px solid var(--line);padding-top:16px;margin:0 0 20px}
+  section.proposed>h2{margin:0 0 16px}
+  section.proposed h3{margin:0 0 10px}
+  .sub{margin:0 0 22px}
+
+  /* ── Рядки інгредієнтів ── */
+  ul.ingredients{list-style:none;margin:0 0 12px;padding:0}
+  li.ingredient{
+    border:1px solid var(--line);padding:10px;margin:0 0 10px;
+    display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;
+  }
+  li.ingredient.flagged{border-color:var(--ink)}
+  li.ingredient .field{margin:0}
+  li.ingredient .qty{flex:0 0 84px}
+  li.ingredient .unit{flex:0 0 78px}
+  li.ingredient .name{flex:1 1 150px}
+  .flag-note{
+    flex:0 0 100%;display:block;
+    border:1px solid var(--ink);padding:6px 8px;
+    font-size:13px;margin:0 0 4px;
+  }
+  .row-actions{flex:0 0 100%;display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .nonscale{
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;padding:4px 10px;border:1px solid var(--line);cursor:pointer;
+  }
+  .nonscale input{width:20px;height:20px}
+
+  /* ── Теги ── */
+  .tag-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+  .tag-list li{
+    display:flex;align-items:center;gap:2px;
+    border:1px solid var(--line);padding:6px 4px 6px 12px;
+  }
+  .tag-remove{
+    min-width:44px;min-height:44px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    font:inherit;font-size:16px;cursor:pointer;
+  }
+
+  /* ── Дії внизу форми ── */
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 8px}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ── Нижня панель ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html" aria-current="page">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<!-- ══ Колонка стану + макет екрана ══ -->
+<div class="wf-col">
+<p class="wf-states">Стан: <strong>успіх</strong> · <a href="recipe-editor-empty.html">порожній</a> · <a href="recipe-editor-loading.html">завантаження</a> · <a href="recipe-editor-error.html">помилка</a></p>
+<div class="device">
+
+<header>
+  <h1>Редактор рецепта</h1>
+</header>
+
+<main>
+
+  <!--
+    Форма редагування — весь екран є однією формою (_conventions.md: «Пошук, поле
+    кількості порцій, форма редагування — form, поля з label»). «Зберегти» і «Зберегти
+    як чернетку» — обидва <button type=submit>, з різним formaction, без JS: дія
+    (сітemap: «Будь-яка дія... button») і водночас справжній перехід за флоу.
+  -->
+  <form action="recipe.html" method="get">
+
+    <div class="field">
+      <label for="title">Назва</label>
+      <input type="text" id="title" name="title" value="Плов від мами">
+    </div>
+
+    <div class="photo-row">
+      <span class="photo-block" aria-hidden="true">фото</span>
+      <button type="button" class="btn">Додати фото</button>
+    </div>
+
+    <section class="proposed" aria-labelledby="z-proposed">
+      <h2 id="z-proposed">Запропоновано моделлю — усе можна змінити</h2>
+
+      <!--
+        Порції — це АНКОР кількостей (E1 у sitemap.md: «the anchor the person barely
+        meets»), НЕ число для покупок. Те число вводиться окремо, на записі Cook list
+        entry, коли рецепт іде в план (flows.md · J-1 «On that last row, because it looks
+        like a contradiction and is not» + J-3). Тут людина лише підтверджує чи змінює
+        оцінку моделі, до якої прив'язані введені кількості.
+      -->
+      <div class="field sub">
+        <label for="servings">Порції (оцінка моделі)</label>
+        <input type="number" id="servings" name="servings" value="6" min="1">
+        <p class="hint">Модель оцінила з тексту — підтвердьте.</p>
+      </div>
+
+      <section class="sub" aria-labelledby="z-ingredients">
+        <h3 id="z-ingredients">Інгредієнти</h3>
+
+        <!-- Сумніви — першими (CLAUDE.md §5.2: «sorted to top»). -->
+        <ul class="ingredients">
+
+          <li class="ingredient flagged">
+            <p class="flag-note">Сумнів: «рис — 2 склянки» перераховано як 400 г — підтвердьте</p>
+            <div class="field qty"><label for="qty-1" class="vh">Кількість</label><input type="number" id="qty-1" name="qty-1" value="400"></div>
+            <div class="field unit"><label for="unit-1" class="vh">Одиниця</label>
+              <select id="unit-1" name="unit-1">
+                <option value="g" selected>г</option>
+                <option value="ml">мл</option>
+                <option value="pcs">шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-1" class="vh">Назва інгредієнта</label><input type="text" id="name-1" name="name-1" value="рис"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «рис»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient flagged">
+            <p class="flag-note">Сумнів: «жменя барбарису» — нечітка кількість — вкажіть грами або позначте «не масштабується»</p>
+            <div class="field qty"><label for="qty-2" class="vh">Кількість</label><input type="number" id="qty-2" name="qty-2" placeholder="?"></div>
+            <div class="field unit"><label for="unit-2" class="vh">Одиниця</label>
+              <select id="unit-2" name="unit-2">
+                <option value="g" selected>г</option>
+                <option value="ml">мл</option>
+                <option value="pcs">шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-2" class="vh">Назва інгредієнта</label><input type="text" id="name-2" name="name-2" value="барбарис"></div>
+            <label class="nonscale"><input type="checkbox" id="nonscale-2" name="nonscale-2"> не масштабується</label>
+            <div class="row-actions">
+              <a class="btn" href="fix-ingredient.html">Уточнити</a>
+              <button type="button" class="btn" aria-label="Видалити рядок «барбарис»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient">
+            <div class="field qty"><label for="qty-3" class="vh">Кількість</label><input type="number" id="qty-3" name="qty-3" value="600"></div>
+            <div class="field unit"><label for="unit-3" class="vh">Одиниця</label>
+              <select id="unit-3" name="unit-3">
+                <option value="g" selected>г</option>
+                <option value="ml">мл</option>
+                <option value="pcs">шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-3" class="vh">Назва інгредієнта</label><input type="text" id="name-3" name="name-3" value="баранина"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «баранина»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient">
+            <div class="field qty"><label for="qty-4" class="vh">Кількість</label><input type="number" id="qty-4" name="qty-4" value="2"></div>
+            <div class="field unit"><label for="unit-4" class="vh">Одиниця</label>
+              <select id="unit-4" name="unit-4">
+                <option value="g">г</option>
+                <option value="ml">мл</option>
+                <option value="pcs" selected>шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-4" class="vh">Назва інгредієнта</label><input type="text" id="name-4" name="name-4" value="цибуля"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «цибуля»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient">
+            <div class="field qty"><label for="qty-5" class="vh">Кількість</label><input type="number" id="qty-5" name="qty-5" value="300"></div>
+            <div class="field unit"><label for="unit-5" class="vh">Одиниця</label>
+              <select id="unit-5" name="unit-5">
+                <option value="g" selected>г</option>
+                <option value="ml">мл</option>
+                <option value="pcs">шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-5" class="vh">Назва інгредієнта</label><input type="text" id="name-5" name="name-5" value="морква"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «морква»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient">
+            <div class="field qty"><label for="qty-6" class="vh">Кількість</label><input type="number" id="qty-6" name="qty-6" value="4"></div>
+            <div class="field unit"><label for="unit-6" class="vh">Одиниця</label>
+              <select id="unit-6" name="unit-6">
+                <option value="g">г</option>
+                <option value="ml">мл</option>
+                <option value="pcs" selected>шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-6" class="vh">Назва інгредієнта</label><input type="text" id="name-6" name="name-6" value="часник"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «часник»">Видалити</button>
+            </div>
+          </li>
+
+          <li class="ingredient">
+            <div class="field qty"><label for="qty-7" class="vh">Кількість</label><input type="number" id="qty-7" name="qty-7" value="60"></div>
+            <div class="field unit"><label for="unit-7" class="vh">Одиниця</label>
+              <select id="unit-7" name="unit-7">
+                <option value="g">г</option>
+                <option value="ml" selected>мл</option>
+                <option value="pcs">шт</option>
+              </select>
+            </div>
+            <div class="field name"><label for="name-7" class="vh">Назва інгредієнта</label><input type="text" id="name-7" name="name-7" value="олія"></div>
+            <div class="row-actions">
+              <button type="button" class="btn" aria-label="Видалити рядок «олія»">Видалити</button>
+            </div>
+          </li>
+
+        </ul>
+
+        <button type="button" class="btn">Додати рядок</button>
+      </section>
+
+      <section class="sub" aria-labelledby="z-tags">
+        <h3 id="z-tags">Теги</h3>
+        <ul class="tag-list">
+          <li><span>плов</span><button type="button" class="tag-remove" aria-label="Прибрати тег «плов»">×</button></li>
+          <li><span>вечеря</span><button type="button" class="tag-remove" aria-label="Прибрати тег «вечеря»">×</button></li>
+        </ul>
+        <div class="field">
+          <label for="newtag" class="vh">Додати тег</label>
+          <input type="text" id="newtag" name="newtag" placeholder="Додати тег">
+        </div>
+      </section>
+
+      <div class="field">
+        <label for="steps">Кроки</label>
+        <textarea id="steps" name="steps" rows="8">1. Баранину нарізати шматками і обсмажити до рум'яної скоринки.
+2. Додати цибулю й моркву, тушкувати 10 хвилин.
+3. Викласти рис і барбарис, розрівняти й залити гарячою водою.
+4. Накрити кришкою і готувати на слабкому вогні 25 хвилин, до готовності рису.</textarea>
+      </div>
+
+    </section>
+
+    <!--
+      Зберегти можна З сумнівами — save now fix later (E4, sitemap рішення «C»).
+      «Зберегти» веде на recipe.html; «Зберегти як чернетку» — теж на recipe.html за
+      суттю (рецепт і так реальний), але тут за завданням веде на recipe-draft.html,
+      підкреслюючи, що сумніви лишаються видимі на банері чернетки.
+    -->
+    <div class="actions">
+      <button type="submit" class="btn primary">Зберегти</button>
+      <button type="submit" class="btn" formaction="recipe-draft.html">Зберегти як чернетку</button>
+    </div>
+
+  </form>
+
+</main>
+
+<!--
+  Нижня панель. Recipe editor — контекстний екран (reached from the Library as a screen
+  of its own, sitemap.md), не глобальний таб, тому жоден пункт не aria-current.
+  Усі чотири — <a>, за прямою вказівкою завдання для цієї партії файлів: cook-list.html,
+  grocery-list.html і account.html ще не намальовані іншими агентами на момент цього
+  коміту (у директорії поки лише library.html) — посилання випереджають файли свідомо,
+  інтегратор вирівняє, коли решта екранів з'явиться. Це розходиться з правилом
+  _conventions.md «сторінка, якої ще нема — span.todo», зафіксовано тут навмисно.
+-->
+<footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <!-- Контекстний екран — жоден пункт панелі не активний (завдання інтеграції, §2). -->
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+</div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

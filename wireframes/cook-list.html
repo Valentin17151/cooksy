@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Cook list · успіх</title>
+
+<!--
+  ЕКРАН: Cook list (Список готування) · базовий стан = успіх (заповнений список).
+
+  МІСЦЕ У ФЛОУ:
+  · flows.md J-0 — «Another dish this week? — no» → Cook list → єдина дія, що
+    має значення: «Generate grocery list» → cook-list-generate.html.
+  · flows.md J-3 — порції змінюються ТУТ, на записі, «changeable at any time,
+    in place», і зміна ДОСЯГАЄ вже згенерованого списку покупок (E6 → E8,
+    sitemap.md «What propagates into a generated list, and what does not»).
+  · sitemap.md · Entities E5 (Cook list) і E6 (Cook list entry): запис несе
+    рівно три речі — рецепт, порції (типове число, змінюване тут), і
+    субституції «на цей раз». Жодного часу приготування чи ккал — це поля
+    рецепта, не запису; тому рядки нижче їх не дублюють.
+
+  СПІЛЬНИЙ СЦЕНАРІЙ (звіряється зі списком покупок іншого агента) — 5 записів
+  від 8 серпня: Паста з баклажаном (4, заміна на цей раз) · Сирники (2) ·
+  Курка з лимоном і рисом (4) · Борщ із квасолею (6, чернетка — кількості не
+  підтверджені) · Плов від мами (4, чернетка — ще не відформатовано).
+
+  РОЗХОДЖЕННЯ З КАНОНІЧНИМ НАБОРОМ СТРАВ (_conventions.md §3): «Плов від
+  мами» не входить у зафіксовані шість страв. Доданий навмисно — сценарій
+  задачі вимагає саме цю страву як приклад чернетки-без-рядків, і його мають
+  узгоджено показати і цей вайрфрейм, і список покупок іншого агента.
+  Задокументовано тут, а не в _conventions.md.
+
+  ДВА РІЗНІ ДРАФТИ, НАВМИСНЕ РІЗНИЙ ТЕКСТ (sitemap.md · E1 draft, три причини):
+  · Борщ — рецепт відформатовано, але рядки мають прапорці → «кількості не
+    підтверджені» (та сама фраза, що на library.html — той самий об'єкт).
+    Все ще генерує нормальні рядки покупок (можливо, з doubt-прапорцем).
+  · Плов — рецепт узагалі не відформатовано, рядків інгредієнтів немає →
+    «ще не відформатовано». Це _screens.md-кейс «запис-чернетка без рядків
+    маркується вже тут, до генерації — найраніше місце, де проблему видно»:
+    у списку покупок він стане placeholder-рядком, який не можна відмітити.
+
+  «Минулі списки» — button без переходу: у продукті розкриває перелік дат
+  cook list просто на цьому екрані (sitemap.md · Demoted: «Past cook lists —
+  a section of Cook list, same control, same shape», не окрема сторінка).
+
+  Дерево .wf-nav скопійовано з library.html дослівно; змінено лише вузли
+  «Список готування» → cook-list.html / «порожній» → cook-list-empty.html /
+  «генерація» → cook-list-generate.html. library.html та інші файли НЕ
+  редагувалися — тому їхній span.todo на «Список готування» лишається
+  застарілим до наступного проходу по дереву.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  /* ── Розкладка сторінки вайрфрейму: дерево навігації зліва, стан-смужка + макет екрана справа ── */
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  /* ── Колонка стану + пристрій: ширина, яку раніше ніс .device напряму ── */
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+  h3{font-size:15px;margin:0;font-weight:600}
+
+  /* ── Шапка: назва екрана + дата + «Минулі списки» (контрол рівня екрана) ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .heading{display:flex;align-items:baseline;gap:8px}
+  .date{margin:0;font-size:13px;color:var(--dim)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink);color:var(--paper)}
+
+  main{padding:0 16px}
+
+  /* ── Записи cook list ── */
+  ul.entries{list-style:none;margin:0;padding:0}
+  ul.entries>li{border-bottom:1px solid var(--line)}
+  article.entry{display:flex;gap:12px;padding:14px 0;align-items:center}
+  article.entry .body{flex:1 1 auto;min-width:0}
+  article.entry h3 a{color:inherit;text-decoration:none;display:inline-block;padding:6px 0}
+
+  /* Субституція «на цей раз» (E6) — не чернетка: без рамки, звичайний другорядний текст. */
+  .note{margin:4px 0 0;font-size:13px;color:var(--dim)}
+
+  /* Чернетка (E1 draft) — межа, підпис, положення. Без кольору, як і на library.html. */
+  .draft{
+    display:inline-block;
+    border:1px solid var(--ink);
+    padding:2px 6px;margin:6px 0 0;
+    font-size:13px;
+  }
+
+  /* Порції — змінювані на місці, тап-ціль ≥44px. */
+  .portions{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .portions label{font-size:12px;color:var(--dim)}
+  .portions input[type=number]{
+    width:72px;min-height:44px;padding:6px 8px;
+    border:1px solid var(--line);background:var(--zone);color:var(--ink);
+    font:inherit;text-align:center;
+  }
+
+  /* ── Головна дія — липне над нижньою панеллю, поки макет у кадрі ── */
+  .generate-bar{
+    position:sticky;bottom:56px;
+    padding:12px 16px;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  .generate-bar .btn{width:100%}
+
+  /* ── Нижня панель ── */
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html" aria-current="page">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<!-- ══ Стан-смужка + макет екрана ══ -->
+<div class="wf-col">
+  <p class="wf-states">Стан: <strong>успіх</strong> · <a href="cook-list-empty.html">порожній</a> · <a href="cook-list-generate.html">генерація</a></p>
+
+  <div class="device">
+
+  <header>
+    <div class="heading">
+      <h1>Список готування</h1>
+      <p class="date">8 серпня</p>
+    </div>
+    <!-- Немає переходу: у продукті розкриває перелік минулих cook list просто тут (sitemap · Demoted). -->
+    <button type="button" class="btn" aria-expanded="false">Минулі списки</button>
+  </header>
+
+  <main>
+
+    <section aria-labelledby="z-entries">
+      <h2 id="z-entries" class="vh">Заплановані страви</h2>
+
+      <!-- Зміна порцій нижче — не косметика: вона ДОСЯГАЄ вже згенерованого
+           списку покупок (E6 → E8). Змінені рядки там позначаються, поки їх
+           не побачили; кількість, що зросла, знімає власний тік (flows.md · J-3). -->
+      <ul class="entries">
+
+        <li>
+          <article class="entry">
+            <div class="body">
+              <h3><a href="recipe.html">Паста з баклажаном</a></h3>
+              <!-- Стрілку-символ прибрано за контрактом (_conventions.md §1: замість іконки — слово). -->
+              <p class="note">Заміна цього разу: грецький йогурт замість сметани</p>
+            </div>
+            <form class="portions">
+              <label for="qty-1">Порції</label>
+              <input type="number" id="qty-1" name="portions" value="4" min="1" inputmode="numeric">
+            </form>
+          </article>
+        </li>
+
+        <li>
+          <article class="entry">
+            <div class="body">
+              <h3><a href="recipe.html">Сирники</a></h3>
+            </div>
+            <form class="portions">
+              <label for="qty-2">Порції</label>
+              <input type="number" id="qty-2" name="portions" value="2" min="1" inputmode="numeric">
+            </form>
+          </article>
+        </li>
+
+        <li>
+          <article class="entry">
+            <div class="body">
+              <h3><a href="recipe.html">Курка з лимоном і рисом</a></h3>
+            </div>
+            <form class="portions">
+              <label for="qty-3">Порції</label>
+              <input type="number" id="qty-3" name="portions" value="4" min="1" inputmode="numeric">
+            </form>
+          </article>
+        </li>
+
+        <!-- Чернетка з рядками, кількості лише не підтверджені — не блокує покупки. -->
+        <li>
+          <article class="entry">
+            <div class="body">
+              <h3><a href="recipe-draft.html">Борщ із квасолею</a></h3>
+              <p class="draft">Чернетка — кількості не підтверджені</p>
+            </div>
+            <form class="portions">
+              <label for="qty-4">Порції</label>
+              <input type="number" id="qty-4" name="portions" value="6" min="1" inputmode="numeric">
+            </form>
+          </article>
+        </li>
+
+        <!-- Чернетка без жодного рядка інгредієнтів — не відформатована. Позначено ТУТ,
+             до генерації: найраніше місце, де видно, що страва не потрапить у список
+             (sitemap.md · Cook list · Also; у grocery-list.html це стане placeholder-рядком). -->
+        <li>
+          <article class="entry">
+            <div class="body">
+              <h3><a href="recipe-draft.html">Плов від мами</a></h3>
+              <p class="draft">Чернетка — ще не відформатовано, не потрапить у покупки, поки не відформатований</p>
+            </div>
+            <form class="portions">
+              <label for="qty-5">Порції</label>
+              <input type="number" id="qty-5" name="portions" value="4" min="1" inputmode="numeric">
+            </form>
+          </article>
+        </li>
+
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- Єдина дія, що має значення тут (sitemap.md · Cook list). -->
+  <div class="generate-bar">
+    <a class="btn btn-primary" href="cook-list-generate.html">Згенерувати список покупок</a>
+  </div>
+
+  <footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html" aria-current="page">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+  </div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooksy — Cook list · генерація</title>
+
+<!--
+  ЕКРАН: Cook list (Список готування) · стан «генерація».
+
+  У ПРОДУКТІ ЦЕ НЕ ОКРЕМИЙ ЕКРАН, А ШИТ (sheet) поверх Cook list — розвилка
+  зʼявляється відразу після тапу «Згенерувати список покупок», без переходу
+  на нову сторінку. Тут вона намальована як стан-файл, тому що §4
+  _conventions.md вимагає для кожного стану окремий файл і той самий
+  каркас (header/main/footer, той самий <h1>) на кожній сторінці — сторінка
+  показує «що видно, поки шит відкритий», а не заперечує, що це шит.
+
+  МІСЦЕ У ФЛОУ (flows.md · J-0): Cook list → «Generate grocery list» →
+  «Is a list already in progress? — yes» → «Add to it or start a new one?».
+  Обидві відповіді ведуть у grocery-list.html; жодна не позначена як краща
+  — flows.md прямо: «two right answers, so neither arrow is coloured» —
+  тому в цьому вайрфреймі обидві кнопки однакового вигляду й ваги.
+  Третій, тихий вихід — «Скасувати» → назад на cook-list.html, без жодної дії.
+
+  ТЕКСТИ: статус і підписи — зі сценарію задачі й з sitemap.md
+  «Grocery list · Generating never destroys»: «add to it» = перерахунок
+  разом без дублікатів (re-merge); «start a new one» = старий список
+  зберігається і нічим не перезаписується.
+-->
+
+<style>
+  :root{
+    --paper:#fff;
+    --zone:#f4f4f4;
+    --line:#ddd;
+    --dim:#767676;
+    --ink:#222;
+  }
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--zone);
+    color:var(--ink);
+    font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+
+  .wf-page{
+    display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;
+    padding:24px 16px;
+  }
+
+  .wf-nav{
+    flex:0 0 230px;
+    position:sticky;top:24px;
+    font-size:13px;color:var(--dim);
+  }
+  .wf-nav p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+  .wf-nav ul{list-style:none;margin:0;padding:0}
+  .wf-nav ul ul{padding-left:14px}
+  .wf-nav li{margin:2px 0}
+  .wf-nav>ul>li{margin:10px 0 4px}
+  .wf-nav a{color:var(--ink);text-decoration:none;display:inline-block;padding:2px 0}
+  .wf-nav a:hover{text-decoration:underline}
+  .wf-nav a[aria-current=page]{font-weight:700;border-bottom:2px solid var(--ink)}
+  .wf-nav .todo{color:var(--dim)}
+
+  .wf-col{flex:0 0 390px;max-width:390px}
+  .wf-states{margin:0 0 8px;font-size:13px;color:var(--dim)}
+  .wf-states a{color:var(--ink)}
+
+  .device{
+    width:100%;min-height:760px;
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--line);
+  }
+  .device main{flex:1 1 auto}
+
+  h1{font-size:20px;margin:0}
+  h2{font-size:16px;margin:0}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+  }
+  .heading{display:flex;align-items:baseline;gap:8px}
+  .date{margin:0;font-size:13px;color:var(--dim)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);
+    font:inherit;text-decoration:none;cursor:pointer;
+  }
+
+  main{padding:0 16px}
+
+  /* ── Розвилка генерації ── */
+  .gen{padding:20px 0}
+  .gen-status{margin:0 0 20px;color:var(--ink)}
+
+  /* Два РІВНОЦІННІ виходи — однакові кнопки, жодна не виділена (flows.md). */
+  .choices{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:16px}
+  .choice{width:100%}
+  .hint{margin:6px 0 0;font-size:13px;color:var(--dim)}
+
+  /* Третій, тихий вихід — без рамки, без наголосу. */
+  .quiet{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:10px 14px;
+    color:var(--dim);text-decoration:none;
+  }
+  .quiet:hover{text-decoration:underline}
+
+  footer{
+    position:sticky;bottom:0;
+    background:var(--paper);border-top:1px solid var(--line);
+  }
+  nav ul{list-style:none;display:flex;margin:0;padding:0}
+  nav li{flex:1 1 0}
+  nav a,nav span{
+    display:flex;align-items:center;justify-content:center;
+    min-height:56px;padding:4px;text-align:center;font-size:13px;
+    text-decoration:none;color:var(--dim);
+  }
+  nav [aria-current=page]{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--ink)}
+  nav span{color:var(--line)}
+
+  .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="wf-page">
+
+<!-- ══ Дерево вайрфрейм-навігації — риштування поза макетом. Канонічна версія
+     (інтеграція 8 серпня): всі сторінки інвентаря існують, тому всі вузли — посилання;
+     правило span.todo лишається чинним лише для майбутніх сторінок. Блок ідентичний
+     на всіх сторінках; єдина різниця — aria-current="page" на вузлі поточної. ══ -->
+<aside class="wf-nav" aria-label="Вайрфрейми — всі екрани і стани">
+  <p>Cooksy · вайрфрейми</p>
+  <ul>
+    <li>Внести рецепт
+      <ul>
+        <li><a href="recipe-editor.html">Редактор рецепта</a>
+          <ul>
+            <li><a href="recipe-editor-empty.html">порожній</a></li>
+            <li><a href="recipe-editor-loading.html">завантаження</a></li>
+            <li><a href="recipe-editor-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="fix-ingredient.html">Уточнити інгредієнт</a>
+          <ul>
+            <li><a href="fix-ingredient-empty.html">порожній</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Повернутися до збереженого
+      <ul>
+        <li><a href="library.html">Рецепти</a>
+          <ul>
+            <li><a href="library-results.html">результати пошуку</a></li>
+            <li><a href="library-empty.html">порожній</a></li>
+            <li><a href="library-loading.html">завантаження</a></li>
+            <li><a href="library-error.html">помилка</a></li>
+          </ul>
+        </li>
+        <li><a href="recipe.html">Рецепт</a>
+          <ul>
+            <li><a href="recipe-draft.html">чернетка</a></li>
+          </ul>
+        </li>
+        <li><a href="replace-ingredient.html">Замінити інгредієнт</a>
+          <ul>
+            <li><a href="replace-ingredient-empty.html">порожній</a></li>
+            <li><a href="replace-ingredient-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Вирішити, що готувати
+      <ul>
+        <li><a href="cook-list.html">Список готування</a>
+          <ul>
+            <li><a href="cook-list-empty.html">порожній</a></li>
+            <li><a href="cook-list-generate.html" aria-current="page">генерація</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Зібрати все в дім
+      <ul>
+        <li><a href="grocery-list.html">Список покупок</a>
+          <ul>
+            <li><a href="grocery-list-empty.html">порожній</a></li>
+            <li><a href="grocery-list-offline.html">офлайн</a></li>
+            <li><a href="grocery-list-done.html">готово</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Чесна математика
+      <ul>
+        <li><a href="account.html">Акаунт</a>
+          <ul>
+            <li><a href="account-loading.html">завантаження</a></li>
+            <li><a href="account-error.html">помилка</a></li>
+            <li><a href="my-ingredients.html">Мої інгредієнти</a>
+              <ul>
+                <li><a href="my-ingredients-empty.html">порожній</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
+
+<!-- ══ Стан-смужка + макет екрана ══ -->
+<div class="wf-col">
+  <p class="wf-states">Стан: <a href="cook-list.html">успіх</a> · <a href="cook-list-empty.html">порожній</a> · <strong>генерація</strong></p>
+
+  <div class="device">
+
+  <header>
+    <div class="heading">
+      <h1>Список готування</h1>
+      <p class="date">8 серпня</p>
+    </div>
+    <button type="button" class="btn" aria-expanded="false">Минулі списки</button>
+  </header>
+
+  <main>
+
+    <section class="gen" aria-labelledby="z-gen">
+      <h2 id="z-gen" class="vh">Список покупок уже в процесі</h2>
+
+      <p class="gen-status">Список покупок від 8 серпня ще в процесі — 6 з 14 позицій куплено.</p>
+
+      <ul class="choices">
+        <li>
+          <a class="btn choice" href="grocery-list.html">Додати до поточного списку</a>
+          <p class="hint">Кількості буде перераховано разом, без дублікатів</p>
+        </li>
+        <li>
+          <a class="btn choice" href="grocery-list.html">Почати новий список</a>
+          <p class="hint">Поточний збережеться, його ніщо не перезапише</p>
+        </li>
+      </ul>
+
+      <a class="quiet" href="cook-list.html">Скасувати</a>
+    </section>
+
+  </main>
+
+  <footer>
+  <nav aria-label="Головна навігація">
+    <ul>
+      <li><a href="library.html">Рецепти</a></li>
+      <li><a href="cook-list.html" aria-current="page">Список готування</a></li>
+      <li><a href="grocery-list.html">Список покупок</a></li>
+      <li><a href="account.html">Акаунт</a></li>
+    </ul>
+  </nav>
+</footer>
+
+  </div><!-- /.device -->
+</div><!-- /.wf-col -->
+</div><!-- /.wf-page -->
+
+</body>
+</html>
